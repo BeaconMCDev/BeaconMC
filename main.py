@@ -1,0 +1,23 @@
+"""Minecraft server in python 3.11"""
+
+#IMPORTS - LIBRAIRIES
+...
+
+#IMPORTS - LOCAL
+...
+
+#GLOBAL DATAS - VARIABLES
+...
+
+#GLOBAL DATAS - CONSTANTS
+...
+
+#FUNCTIONS
+...
+
+#CLASSES
+...
+
+#MAIN
+if __name__ == "__main__":
+    ...
