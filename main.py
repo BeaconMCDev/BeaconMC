@@ -9,6 +9,8 @@ import tkinter as tk
 from tkinter.simpledialog import *
 import time as tm
 import random as rdm
+import sys
+import os
 
 #IMPORTS - LOCAL
 ...
@@ -19,6 +21,7 @@ blacklist = []
 whitelist = []
 public = True
 users = []
+logfile = ""
 
 #GLOBAL DATAS - CONSTANTS
 SERVER_VERSION = "Alpha-dev"    #Version of the server. For debug
@@ -31,7 +34,40 @@ SALT = "wo6kVAHjxoJcInKx"
 MOTD = "My%20Server"
 
 #FUNCTIONS
-...
+def log(msg:str, type:int=-1):
+    """Types:
+    - 0: info
+    - 1: warning
+    - 2: error
+    - 3: debug
+    - other: unknow"""
+    if type == 0:
+        t = "INFO"
+    elif type == 1:
+        t = "WARN"
+    elif type == 2:
+        t = "ERROR"
+    elif type == 3:
+        t = "DEBUG"
+    else:
+        t = "UNKNOW"
+    time = gettime()
+    text = f"[{time}] [Server/{t}]: {msg}"
+    print(text)
+    with open(logfile, "+a") as file:
+        file.write(text + "\n")
+
+def gettime():
+    return tm.asctime(tm.localtime(tm.time())).split(" ")[-2]
+
+def be_ready_to_log():
+    global logfile
+    nb = 1
+    while os.path.exists(f"logs/log{nb}.log"):
+        nb += 1
+    logfile = f"logs/log{nb}.log"
+    
+    
 
 #CLASSES
 class MCServer(object):
@@ -41,18 +77,24 @@ class MCServer(object):
         self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  #socket creation
         self.socket.bind((IP, PORT))            #bind the socket
 
-        self.misc_skt = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  #socket creation
-        self.misc_skt.connect(("minecraft.net", 80))
-
-
     def start(self):
         """Start the server"""
-        url = "/heartbeat.jsp"
+        log("Starting Minecraft server...", 0)
+        log(f"Server version: {SERVER_VERSION}", 3)
+        log(f"MC version: {CLIENT_VERSION}", 3)
+        log(f"Protocol version: {PROTOCOL_VERSION}", 3)
+        log("Starting hearbeat...", 0)
 
+        url = "/heartbeat.jsp"
         query_parameters = f"port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}"
         request = f"GET {url}?{query_parameters} HTTP/1.0\r\nHost: https://minecraft.net\r\n\r\n"
-        self.misc_skt.sendall(request.encode())
-        print(self.misc_skt.recv(4096))
+        with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
+            s.connect(("minecraft.net", 80))
+            s.sendall(request.encode())
+            resp = s.recv(4096)
+            if resp != IP:
+                log("An issue advent during the heartbeat Mojang server side. See the following response for details : ", 2)
+                log(resp)
         self.socket.listen(MAX_PLAYERS + 1)  #+1 is for the "connexion queue"
 
 
@@ -60,6 +102,10 @@ class MCServer(object):
 class World(object):
     """World class"""
     ...
+
+
+#PRE MAIN INSTRUCTIONS
+be_ready_to_log()
 
 
 #MAIN
