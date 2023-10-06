@@ -124,7 +124,7 @@ class MCServer(object):
         log(resp)
         log("Done !", type=3)
 
-    def check_username(self, username:str, key:str):
+    def is_premium(self, username:str, key:str):
         """Check if the user is a premium user.
         See https://minecraft.fandom.com/wiki/Classic_server_protocol#User_Authentication"""
         if key == hashlib.md5(SALT + username):
@@ -142,12 +142,66 @@ class Client(object):
 
     def worker(self):
         """Per client thread"""
-        request
+        while True:
+            self.request = self.connexion.recv(4096).decode()
+            if self.request[0] == "\x00":
+                self.joining()
+
+    def joining(self):
+        """When the request is a joining request"""
+        self.p_version = self.request[1]
+        self.username = self.request[2]
+        self.key = self.request[3]
+        if self.server.ispremium(self.username, self.key):
+            #User premium
+            if connected_players < MAX_PLAYERS:
+                if self.p_version == PROTOCOL_VERSION:
+                    #co ok !
+                    ...
+                else:
+                    self.disconnect(tr.key("disconnect.bad_protocol"))
+            else:
+                self.disconnect(tr.key("disconnect.server_full"))
+        else:
+            self.disconnect(tr.key("disconnect.not_premium"))
+
+    def disconnect(self, reason=""):
+        """Disconnect the player
+        !!! not disconnectED !!!"""
+        if reason == "":
+            reason = tr.key("disconnect.default")
+        self.connexion.send(f"\x0e{bytes(reason)}".encode())
+
+    def do_spawn(self):
+        """Make THIS CLIENT spawn"""
+        ...
+        #self.connexion.send()
+
 
 
 class World(object):
     """World class"""
     ...
+
+
+class Translation(object):
+    def __init__(self, lang):
+        self.lang = lang
+
+    
+    def en(self, key):
+        dico = {"disconnect.default": "Disconnected", 
+                "disconnect.server_full": "Server full.",
+                "disconnect.not_premium": "Auth failed : user not premium.", 
+                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible."}
+        return dico[key]
+    
+    def key(self, key):
+        if self.lang == "en":
+            return self.en(key)
+        else:
+            log("Lang not found !", 100)
+            exit(-1)
 
 
 #PRE MAIN INSTRUCTIONS
@@ -156,5 +210,6 @@ be_ready_to_log()
 
 #MAIN
 if __name__ == "__main__":
+    tr = Translation("en")
     srv = MCServer()
     srv.start()
