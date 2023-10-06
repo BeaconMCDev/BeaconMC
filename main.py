@@ -9,8 +9,9 @@ import tkinter as tk
 from tkinter.simpledialog import *
 import time as tm
 import random as rdm
-import sys
 import os
+import threading as thread
+import hashlib #for md5 auth system
 
 #IMPORTS - LOCAL
 ...
@@ -30,8 +31,10 @@ PROTOCOL_VERSION = 754          #Protocol version beetween server and client. Se
 PORT = 25565                    #Normal MC port
 IP = skt.gethostname()
 MAX_PLAYERS = 5
-SALT = "wo6kVAHjxoJcInKx"
+SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
+SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
 MOTD = "My%20Server"
+DEBUG = True                    #debug mode enabled
 
 #FUNCTIONS
 def log(msg:str, type:int=-1):
@@ -40,6 +43,7 @@ def log(msg:str, type:int=-1):
     - 1: warning
     - 2: error
     - 3: debug
+    - 100: critical
     - other: unknow"""
     if type == 0:
         t = "INFO"
@@ -49,6 +53,10 @@ def log(msg:str, type:int=-1):
         t = "ERROR"
     elif type == 3:
         t = "DEBUG"
+        if not(DEBUG):
+            return
+    elif type == 100:
+        t = "CRITICAL"
     else:
         t = "UNKNOW"
     time = gettime()
@@ -56,6 +64,8 @@ def log(msg:str, type:int=-1):
     print(text)
     with open(logfile, "+a") as file:
         file.write(text + "\n")
+
+    return
 
 def gettime():
     return tm.asctime(tm.localtime(tm.time())).split(" ")[-2]
@@ -76,6 +86,8 @@ class MCServer(object):
         """Init the server"""
         self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  #socket creation
         self.socket.bind((IP, PORT))            #bind the socket
+        self.list_info = []
+        self.list_clients = []
 
     def start(self):
         """Start the server"""
@@ -83,20 +95,54 @@ class MCServer(object):
         log(f"Server version: {SERVER_VERSION}", 3)
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
-        log("Starting hearbeat...", 0)
+        log("Starting hearbeat...", 3)
+        self.heartbeat()
+        self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
+        self.main()
 
-        url = "/heartbeat.jsp"
-        query_parameters = f"port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}"
-        request = f"GET {url}?{query_parameters} HTTP/1.0\r\nHost: https://minecraft.net\r\n\r\n"
+    def main(self):
+        """Main loop for the server."""
+        while True:
+            client_connection, client_info = self.socket.accept()
+            cl = Client(client_connection, client_info, self)
+            thr = thread.Thread(target=cl.worker)
+            thr.start()
+            tm.sleep(0.1)
+        
+    def heartbeat(self):
+        """Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
+
+        request = f"GET /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
         with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
             s.connect(("minecraft.net", 80))
             s.sendall(request.encode())
             resp = s.recv(4096)
             if resp != IP:
-                log("An issue advent during the heartbeat Mojang server side. See the following response for details : ", 2)
+                log("An issue advent during the heartbeat Mojang server side. See the following response for details : ", 100)
                 log(resp)
-        self.socket.listen(MAX_PLAYERS + 1)  #+1 is for the "connexion queue"
+                exit(-1)
+        log(resp)
+        log("Done !", type=3)
 
+    def check_username(self, username:str, key:str):
+        """Check if the user is a premium user.
+        See https://minecraft.fandom.com/wiki/Classic_server_protocol#User_Authentication"""
+        if key == hashlib.md5(SALT + username):
+            #premium user
+            return True
+        else:
+            #cracked use
+            return False
+
+class Client(object):
+    def __init__(self, connexion, info, server):
+        self.connexion = connexion
+        self.info = info
+        self.server = server
+
+    def worker(self):
+        """Per client thread"""
+        request
 
 
 class World(object):
