@@ -96,9 +96,14 @@ class MCServer(object):
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
         log("Starting hearbeat...", 3)
-        self.heartbeat()
+        #self.heartbeat()
         self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
+        self.load_worlds()
         self.main()
+
+    def load_worlds(self):
+        """Load all of the server's world"""
+        ...
 
     def main(self):
         """Main loop for the server."""
