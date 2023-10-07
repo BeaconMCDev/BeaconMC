@@ -1,0 +1,7 @@
+[14:05:28] [Server/INFO]: Starting Minecraft server...
+[14:05:28] [Server/DEBUG]: Server version: Alpha-dev
+[14:05:28] [Server/DEBUG]: MC version: 1.16.5
+[14:05:28] [Server/DEBUG]: Protocol version: 754
+[14:05:28] [Server/DEBUG]: Starting hearbeat...
+[14:05:28] [Server/CRITICAL]: An issue advent during the heartbeat Mojang server side. See the following response for details : 
+[14:05:28] [Server/UNKNOW]: b'<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n'
