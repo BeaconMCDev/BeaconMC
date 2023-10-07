@@ -116,19 +116,40 @@ class MCServer(object):
             while state == "ON":
                 tm.sleep(0.1)
         except KeyboardInterrupt:
-            log("Stopping the server...", 0)
             self.stop()
             exit(0)
 
-    def stop(self):
+    def stop(self, critical=False, reason=""):
         """stop the server"""
+        if critical:
+            log("Critical server stop trigered !", 100)
+        log("Stopping the server...", 0)
         global state
         state = "OFF"
-        for i in self.list_clients:
-            i.disconnect(reason=tr.key("disconnect.server_closed"))
+        if critical:
+            for i in self.list_clients:
+                i.disconnect(reason=tr.key("disconnect.server_crashed"))
+        else:
+            for i in self.list_clients:
+                i.disconnect(reason=tr.key("disconnect.server_closed"))
         self.socket.close()
         ...
-        log("You can close this frame safely.", 0)
+        if not(critical):
+            exit(0)
+        else:
+            log("Server closed : Critical error.", 100)
+            self.crash(reason)
+
+    def crash(self, reason):
+        """Generate a crash report
+        Arg:
+        - reason: str --> The crash message"""
+        c = 0
+        while os.path.exists("crash_reports/crash{0}".format(c)):
+            c += 1
+        with open("crash_reports/crash{0}".format(c), "w") as crashfile:
+            crashfile.write("""Minecraft server in python 3.11\n______________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\__________________________________________________\n{0}""".format(reason))
+
 
 
     def add_client_thread(self):
@@ -171,6 +192,25 @@ class MCServer(object):
         else:
             #cracked use
             return False
+        
+    def setblock(self, base_request:bytes):
+        """Analyse the setblock request and modify a block"""
+        id = base_request[0]
+        x = base_request[1:2]
+        y = base_request[3:4]
+        z = base_request[5:6]
+        mode = base_request[7]
+        block = base_request[8]
+        #check the request
+        if id != "\0x05":
+            log("A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !", 100)
+            self.stop(critical=True, reason="A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !")
+            raise RequestAnalyseException("Exception on analysing a request : bad method used (setblock andnot unknow).")
+        #TODO: Modify the block in the world
+        ...
+        #TODO: send to every clients the modification
+        ...
+
 
 class Client(object):
     def __init__(self, connexion, info, server):
@@ -178,19 +218,23 @@ class Client(object):
         self.connexion = connexion
         self.info = info
         self.server = server
+        self.is_op = False
 
     def worker(self):
         """Per client thread"""
         while True:
             self.request = self.connexion.recv(4096).decode()
+            log(self.request)
             if self.request[0] == "\0x00":
                 self.joining()
+            elif self.request[0] == "\0x05":
+                self.server.setblock(self.request)
 
     def joining(self):
         """When the request is a joining request"""
         self.p_version = self.request[1]
-        self.username = self.request[2]
-        self.key = self.request[3]
+        self.username = self.request[1:64]
+        self.key = self.request[65:129]
         log(f"Joining request from  {self.username} !", 0)
         if self.server.ispremium(self.username, self.key):
             log(f"{self.username} is premium.", 0)
@@ -215,12 +259,27 @@ class Client(object):
         if reason == "":
             reason = tr.key("disconnect.default")
         self.connexion.send(f"\0x0e{bytes(reason)}".encode())
+        self.server.list_client.remove(self)
 
     def do_spawn(self):
         """Make THIS CLIENT spawn"""
         ...
         #self.connexion.send()
 
+    def identification(self):
+        """Send id packet to the client"""
+        opdico = {True:bytes("\0x64"), False: bytes("\0x00")}
+        self.connexion.send(f"\0x00{bytes(PROTOCOL_VERSION)}{bytes('Python Server 1.16.5')}{bytes(MOTD)}{opdico[self.is_op]}".encode())
+
+    def ping(self):
+        """Ping sent to clients periodically."""
+        self.connexion.send("\0x01".encode())
+
+    def send_msg_to_chat(self, msg:str):
+        """Post a message in the player's chat.
+        Argument:
+        - msg:str --> the message to post on the chat"""
+        self.connexion.send(f"\0x0d\0x00{bytes(msg)}".encode())
 
 
 class World(object):
@@ -234,19 +293,27 @@ class Translation(object):
 
     
     def en(self, key):
+        """English translation"""
         dico = {"disconnect.default": "Disconnected", 
                 "disconnect.server_full": "Server full.",
                 "disconnect.not_premium": "Auth failed : user not premium.", 
                 "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.", 
-                "disconnect.server_closed": "Server closed."}
+                "disconnect.server_closed": "Server closed.", 
+                "disconnect.server_crashed": "Server crashed indeed of a critical error."}
         return dico[key]
     
     def key(self, key):
+        """Auto translate with key"""
         if self.lang == "en":
             return self.en(key)
         else:
             log("Lang not found !", 100)
             exit(-1)
+
+#Exception class
+class RequestAnalyseException(Exception):
+    """Exception when analysing a request"""
+    pass
 
 
 #PRE MAIN INSTRUCTIONS
