@@ -122,20 +122,33 @@ class MCServer(object):
 
     def stop(self):
         """stop the server"""
+        global state
+        state = "OFF"
+        for i in self.list_clients:
+            i.disconnect(reason=tr.key("disconnect.server_closed"))
+        self.socket.close()
         ...
+        log("You can close this frame safely.", 0)
+
 
     def add_client_thread(self):
         """Thread for add clients."""
         global state
         while state == "ON":
-            client_connection, client_info = self.socket.accept()
+            try:
+                client_connection, client_info = self.socket.accept()
+            except OSError:
+                tm.sleep(0.1)
+                continue
             cl = Client(client_connection, client_info, self)
+            self.list_clients.append(cl)
             thr = thread.Thread(target=cl.worker)
             thr.start()
             tm.sleep(0.1)
         
     def heartbeat(self):
-        """Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
+        """# DEPRECATED - DO NOT USE
+        Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
         raise DeprecationWarning("We actually have an issue for this method. It does not work.")
         request = f"GET /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
         with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
@@ -224,7 +237,8 @@ class Translation(object):
         dico = {"disconnect.default": "Disconnected", 
                 "disconnect.server_full": "Server full.",
                 "disconnect.not_premium": "Auth failed : user not premium.", 
-                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible."}
+                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.", 
+                "disconnect.server_closed": "Server closed."}
         return dico[key]
     
     def key(self, key):
