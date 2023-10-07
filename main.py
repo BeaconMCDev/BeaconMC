@@ -23,6 +23,7 @@ whitelist = []
 public = True
 users = []
 logfile = ""
+state = "OFF"
 
 #GLOBAL DATAS - CONSTANTS
 SERVER_VERSION = "Alpha-dev"    #Version of the server. For debug
@@ -90,15 +91,18 @@ class MCServer(object):
         self.list_clients = []
 
     def start(self):
+        global state
         """Start the server"""
         log("Starting Minecraft server...", 0)
+        state = "ON"
         log(f"Server version: {SERVER_VERSION}", 3)
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
-        log("Starting hearbeat...", 3)
         #self.heartbeat()
         self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
         self.load_worlds()
+        self.act = thread.Thread(target=self.add_client_thread)
+        self.act.start()
         self.main()
 
     def load_worlds(self):
@@ -106,8 +110,24 @@ class MCServer(object):
         ...
 
     def main(self):
-        """Main loop for the server."""
-        while True:
+        """Main"""
+        global state
+        try:
+            while state == "ON":
+                tm.sleep(0.1)
+        except KeyboardInterrupt:
+            log("Stopping the server...", 0)
+            self.stop()
+            exit(0)
+
+    def stop(self):
+        """stop the server"""
+        ...
+
+    def add_client_thread(self):
+        """Thread for add clients."""
+        global state
+        while state == "ON":
             client_connection, client_info = self.socket.accept()
             cl = Client(client_connection, client_info, self)
             thr = thread.Thread(target=cl.worker)
@@ -116,7 +136,7 @@ class MCServer(object):
         
     def heartbeat(self):
         """Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
-
+        raise DeprecationWarning("We actually have an issue for this method. It does not work.")
         request = f"GET /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
         with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
             s.connect(("minecraft.net", 80))
@@ -141,6 +161,7 @@ class MCServer(object):
 
 class Client(object):
     def __init__(self, connexion, info, server):
+        log("New client", 3)
         self.connexion = connexion
         self.info = info
         self.server = server
@@ -157,17 +178,22 @@ class Client(object):
         self.p_version = self.request[1]
         self.username = self.request[2]
         self.key = self.request[3]
+        log(f"Joining request from  {self.username} !", 0)
         if self.server.ispremium(self.username, self.key):
-            #User premium
+            log(f"{self.username} is premium.", 0)
             if connected_players < MAX_PLAYERS:
                 if self.p_version == PROTOCOL_VERSION:
+                    log(f"Connexion accepted for {self.username}")
                     #co ok !
                     ...
                 else:
+                    log(f"Failed to connect {self.username} : bad protocol version.", 0)
                     self.disconnect(tr.key("disconnect.bad_protocol"))
             else:
+                log(f"Failed to connect {self.username} : server full.", 1)
                 self.disconnect(tr.key("disconnect.server_full"))
         else:
+            log(f"User {self.username} is not premium ! Access couldn't be gived.", 1)
             self.disconnect(tr.key("disconnect.not_premium"))
 
     def disconnect(self, reason=""):
