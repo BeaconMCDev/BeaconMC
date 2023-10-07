@@ -144,7 +144,7 @@ class Client(object):
         """Per client thread"""
         while True:
             self.request = self.connexion.recv(4096).decode()
-            if self.request[0] == "\x00":
+            if self.request[0] == "\0x00":
                 self.joining()
 
     def joining(self):
@@ -170,7 +170,7 @@ class Client(object):
         !!! not disconnectED !!!"""
         if reason == "":
             reason = tr.key("disconnect.default")
-        self.connexion.send(f"\x0e{bytes(reason)}".encode())
+        self.connexion.send(f"\0x0e{bytes(reason)}".encode())
 
     def do_spawn(self):
         """Make THIS CLIENT spawn"""
