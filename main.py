@@ -98,7 +98,7 @@ class MCServer(object):
         log(f"Server version: {SERVER_VERSION}", 3)
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
-        #self.heartbeat()
+        self.heartbeat()
         self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
         self.load_worlds()
         self.act = thread.Thread(target=self.add_client_thread)
@@ -148,7 +148,7 @@ class MCServer(object):
         while os.path.exists("crash_reports/crash{0}".format(c)):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
-            crashfile.write("""Minecraft server in python 3.11\n______________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\__________________________________________________\n{0}""".format(reason))
+            crashfile.write("""Minecraft server in python 3.11\n________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\n{0}""".format(reason))
 
 
 
@@ -170,8 +170,8 @@ class MCServer(object):
     def heartbeat(self):
         """# DEPRECATED - DO NOT USE
         Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
-        raise DeprecationWarning("We actually have an issue for this method. It does not work.")
-        request = f"GET /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
+        #raise DeprecationWarning("We actually have an issue for this method. It does not work.")
+        request = f"POST /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
         with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
             s.connect(("minecraft.net", 80))
             s.sendall(request.encode())

@@ -1,6 +1,6 @@
-[17:49:08] [Server/INFO]: Starting Minecraft server...
-[17:49:08] [Server/DEBUG]: Server version: Alpha-dev
-[17:49:08] [Server/DEBUG]: MC version: 1.16.5
-[17:49:08] [Server/DEBUG]: Protocol version: 754
-[17:49:11] [Server/INFO]: Stopping the server...
-[17:49:11] [Server/INFO]: You can close this frame safely.
+[10:26:33] [Server/INFO]: Starting Minecraft server...
+[10:26:33] [Server/DEBUG]: Server version: Alpha-dev
+[10:26:33] [Server/DEBUG]: MC version: 1.16.5
+[10:26:33] [Server/DEBUG]: Protocol version: 754
+[10:26:33] [Server/CRITICAL]: An issue advent during the heartbeat Mojang server side. See the following response for details : 
+[10:26:33] [Server/UNKNOW]: b'<html>\r\n<head><title>400 Bad Request</title></head>\r\n<body>\r\n<center><h1>400 Bad Request</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n'
