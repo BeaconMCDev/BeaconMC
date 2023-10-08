@@ -44,6 +44,7 @@ def log(msg:str, type:int=-1):
     - 1: warning
     - 2: error
     - 3: debug
+    - 4: chat
     - 100: critical
     - other: unknow"""
     if type == 0:
@@ -56,6 +57,8 @@ def log(msg:str, type:int=-1):
         t = "DEBUG"
         if not(DEBUG):
             return
+    elif type == 4:
+        t = "CHAT"
     elif type == 100:
         t = "CRITICAL"
     else:
@@ -100,7 +103,7 @@ class MCServer(object):
         log(f"Server version: {SERVER_VERSION}", 3)
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
-        self.heartbeat()
+        #self.heartbeat()
         self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
         self.load_worlds()
         self.act = thread.Thread(target=self.add_client_thread)
@@ -213,6 +216,48 @@ class MCServer(object):
         #TODO: send to every clients the modification
         ...
 
+    def post_to_chat(self, message:str, author:str=""):
+        """Post a message in all player's chat
+        Args:
+        - message: str --> the message to send
+        - author: str --> the author of the message: by default ""."""
+        if author == "":
+            msg = message
+        else:
+            msg = f"{author}: {message}"
+        for p in self.list_clients:
+            p.send_msg_to_chat(msg)
+        log(msg, 4)
+
+    def mp(self, message:str, addressee:str, author:str):
+        """Send a mp to 1 player
+        Args:
+        - message:str --> the message to send in mp
+        - addressee:str --> player that will receive msg
+        - author:str --> the author of the msg: by default ""."""
+        pl = self.find_player_by_username(addressee)
+        msg = f"{author} --> you: {message}"
+        pl.send_msg_to_chat(msg)
+        log(f"{author} --> {pl}: {message}", 4)
+
+    def find_player_by_username(self, username:str):
+        """Find the player socket with the username.
+        Arg:
+        - username:str --> the username of the player.
+        - Returns player socket
+        - return None if no player found
+        - Raise error if more than 1 player is found"""
+        lst = []
+        for p in self.list_clients:
+            if p.username == username:
+                lst.append(p)
+        if len(lst) == 0:
+            return None
+        elif len(lst) == 1:
+            return lst[0]
+        else:
+            raise TwoPlayerWithSameUsernameException(f"2 players with the same username {username} were found.")
+
 
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
@@ -239,6 +284,9 @@ class Client(object):
             elif self.request[0] == "\0x08":
                 #pos message
                 self.update_pos()
+            elif self.request[0] == "\0x0d":
+                #chat message
+                self.server.post_to_chat(author=self.username, message=self.request[1:])
 
     def update_pos(self):
         """update the client pos with the request"""
@@ -381,7 +429,7 @@ class Event(object):
         self.cause_cancelled = True
         ...
 
-    def add_action(self, action:function):
+    def add_action(self, action):
         """Add a function/method to the action list
         Arg:
         - action: the function to use when triggered (function)"""
@@ -408,6 +456,9 @@ class SetBlockEvent(Event):
 class RequestAnalyseException(Exception):
     """Exception when analysing a request"""
     pass
+
+class TwoPlayerWithSameUsernameException(Exception):
+    """Exception when 2 players or more have the same username"""
 
 
 #PRE MAIN INSTRUCTIONS
