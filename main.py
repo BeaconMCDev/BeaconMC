@@ -170,7 +170,7 @@ class MCServer(object):
     def heartbeat(self):
         """# DEPRECATED - DO NOT USE
         Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
-        #raise DeprecationWarning("We actually have an issue for this method. It does not work.")
+        raise DeprecationWarning("We actually have an issue for this method. It does not work.")
         request = f"POST /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={public}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
         with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
             s.connect(("minecraft.net", 80))
