@@ -314,7 +314,7 @@ class Translation(object):
     
     def en(self, key):
         """English translation"""
-        dico = {"disconnect.default": "Disconnected", 
+        dico = {"disconnect.default": "Disconnected.", 
                 "disconnect.server_full": "Server full.",
                 "disconnect.not_premium": "Auth failed : user not premium.", 
                 "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.", 
@@ -322,10 +322,35 @@ class Translation(object):
                 "disconnect.server_crashed": "Server crashed indeed of a critical error."}
         return dico[key]
     
+    def fr(self, key):
+        """French translation"""
+        dico = {"disconnect.default": "Déconnecté", 
+                "disconnect.server_full": "Le serveur est plein.",
+                "disconnect.not_premium": "L'authentification a échouée : utilisateur non premium.", 
+                "disconnect.bad_protocol": "Merci de se connecter avec une autre version : protocole incompatioble.", 
+                "disconnect.server_closed": "Serveur fermé.", 
+                "disconnect.server_crashed": "Le serveur a planté suite à une erreur critique."}
+        return dico[key]
+    
+    def es(self, key):
+        """Espagnol translation"""      #TODO
+        dico = {"disconnect.default": "Disconnected.", 
+                "disconnect.server_full": "Server full.",
+                "disconnect.not_premium": "Auth failed : user not premium.", 
+                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.", 
+                "disconnect.server_closed": "Server closed.", 
+                "disconnect.server_crashed": "Server crashed indeed of a critical error."}
+        return dico[key]
+
     def key(self, key):
         """Auto translate with key"""
         if self.lang == "en":
             return self.en(key)
+        elif self.lang == "fr":
+            return self.fr(key)
+        elif self.lang == "es":
+            log("This lang is not translated !", 1)
+            return self.es(key)
         else:
             log("Lang not found !", 100)
             exit(-1)
