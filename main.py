@@ -351,7 +351,40 @@ class Client(object):
 ########################################################################################################################################################################################################################
 class World(object):
     """World class"""
-    ...
+    def __init__(self, name, level):
+        self.name = name
+        self.level = level
+        self.loaded = False
+        self.generated = None
+        self.BASE = "worlds/"
+
+    def check_generation(self):
+        """Check if the world was generated.
+        Return a boolean"""
+        try:
+            with open(self.BASE + self.name, "r") as test:
+                tst = test.read()
+                if tst != "":
+                    return True
+                else:
+                    return False
+        except FileNotFoundError:
+            return False
+
+    def load(self):
+        """Read a world file and return a World List"""
+        if not(self.check_generation):
+            log("Trying to load an ungenerated world ! Please generate it before loading !\nStarting generation...", 2)
+            self.generate()
+        with open(self.BASE + self.name, "r") as file:
+            data = file.read()
+
+
+    def unload(self):
+        ...
+
+    def generate(self):
+        ...
 
 
 ########################################################################################################################################################################################################################
