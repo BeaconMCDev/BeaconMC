@@ -94,6 +94,20 @@ class MCServer(object):
         self.socket.bind((IP, PORT))            #bind the socket
         self.list_info = []
         self.list_clients = []
+        self.list_worlds = []
+
+    def worlds_analyse(self):
+        """Search for worlds in the worlds folder.
+        Return a list str that are the world name."""
+        log("Analysing worlds...", 3)
+        items_list = os.listdir(f"{os.getcwd()}\\worlds")
+        lst_world = []
+        for item in items_list:
+            name, extention = item.split(".")
+            if extention == ".mcworld":
+                lst_world.append(name)
+        return lst_world
+
 
     def start(self):
         global state
@@ -111,8 +125,13 @@ class MCServer(object):
         self.main()
 
     def load_worlds(self):
-        """Load all of the server's world"""
-        ...
+        """Load all of the server's worlds"""
+        log("Loading worlds...", 0)
+        pre_list_worlds = self.worlds_analyse()
+        for world in pre_list_worlds:
+            w_class = World(world)
+            w_class.load()
+            self.list_worlds.append(w_class)
 
     def main(self):
         """Main"""
@@ -368,7 +387,7 @@ class World(object):
         """Check if the world was generated.
         Return a boolean"""
         try:
-            with open(self.BASE + self.name, "r") as test:
+            with open(self.BASE + self.name + ".mcworld", "r") as test:
                 tst = test.read()
                 if tst != "":
                     return True
@@ -435,7 +454,7 @@ class World(object):
         """Save the world"""
         log(f"Saving world {self.name} (level {self.level})...")
         dt = self.encode(self.data)
-        with open(self.BASE + self.name, "w") as file:
+        with open(self.BASE + self.name + ".mcworld", "w") as file:
             file.write(dt)
         log("Saved !")
 
