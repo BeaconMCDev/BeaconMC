@@ -433,7 +433,35 @@ class World(object):
     
     def save(self):
         """Save the world"""
-        ...
+        log(f"Saving world {self.name} (level {self.level})...")
+        dt = self.encode(self.data)
+        with open(self.BASE + self.name, "w") as file:
+            file.write(dt)
+        log("Saved !")
+
+    def encode(self, data:list):
+        """Encode the world that will be saved.
+        Arg:
+        - data: (list) the data to encode.
+        Return the world encoded (str)"""
+        final = f"{self.name}::::{self.level}====="
+
+        for chunk in data:
+            coord_dico = chunk[0]
+            final += f"{coord_dico['x']};{coord_dico['y']};{coord_dico['e']}|"
+
+            list_blocks = chunk[1]
+            for block in list_blocks:
+                b_type = block[0]
+                nbt = block[1]
+                final += f"{b_type}>{nbt};"
+            final = final[:-1]
+            final += "<<|<<"
+
+        final = final[:-5]
+        
+        return final
+
 
     def generate(self):
         ...
