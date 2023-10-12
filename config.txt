@@ -1,0 +1,4 @@
+whitelist=true
+max_players=5
+motd=My%20Server
+debug_mode=true

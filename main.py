@@ -3,6 +3,9 @@ Sources for dev :
 - https://minecraft.fandom.com/wiki/Classic_server_protocol
 - https://minecraft.fandom.com/wiki/Protocol_version?so=search"""
 
+print("_________________________________________________________\nStarting Minecraft server in Python 3.11\n_________________________________________________________")
+
+print("Importing librairies...")
 #IMPORTS - LIBRAIRIES
 import socket as skt
 import tkinter as tk
@@ -13,14 +16,38 @@ import os
 import threading as thread
 import hashlib #for md5 auth system
 
-#IMPORTS - LOCAL
-...
+#CONFIG READING
+print("Reading the config file...")
+with open("config.txt", "r") as config:
+    dt = None
+    while dt != "":
+        dt = config.readline()
+        if dt == "":
+            break
+        dt = dt.split("=")
+        if dt[1][-1] == "\n":
+            arg = dt[1][:-1]
+        else:
+            arg = dt[1]
+        if dt[0] == "whitelist":
+            dico = {"true": True, "false": False}
+            public = dico[arg]
+        elif dt[0] == "max_players":
+            MAX_PLAYERS = int(arg)
+        elif dt[0] == "motd":
+            MOTD = arg
+        elif dt[0] == "debug_mode":
+            dico = {"true": True, "false": False}
+            DEBUG = dico[arg]
+        else:
+            continue
 
+print("Setting up the server...")
 #GLOBAL DATAS - VARIABLES
 connected_players = 0
 blacklist = []
 whitelist = []
-public = True
+#public = True
 users = []
 logfile = ""
 state = "OFF"
@@ -31,11 +58,11 @@ CLIENT_VERSION = "1.16.5"       #Which version the client must have to connect
 PROTOCOL_VERSION = 754          #Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
 PORT = 25565                    #Normal MC port
 IP = skt.gethostname()
-MAX_PLAYERS = 5
+#MAX_PLAYERS = 5
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
-MOTD = "My%20Server"
-DEBUG = True                    #debug mode enabled
+#MOTD = "My%20Server"
+#DEBUG = True                    #debug mode enabled
 
 #FUNCTIONS
 def log(msg:str, type:int=-1):
@@ -80,6 +107,7 @@ def be_ready_to_log():
     while os.path.exists(f"logs/log{nb}.log"):
         nb += 1
     logfile = f"logs/log{nb}.log"
+    print("Log system ready !")
     
     
 ########################################################################################################################################################################################################################
