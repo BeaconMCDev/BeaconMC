@@ -351,12 +351,18 @@ class Client(object):
 ########################################################################################################################################################################################################################
 class World(object):
     """World class"""
-    def __init__(self, name, level):
+    def __init__(self, name, level=-1):
+        """Args:
+        - name: the name of the world (str). Used to load and save worlds.
+        - level: the type of the world (int). Can be 0 (overworld), 1 (nether) or 2 (end). -1 by default. -1 is for unknow level (when loading for example)"""
         self.name = name
+        if level == -1:
+            self.level = None
         self.level = level
         self.loaded = False
         self.generated = None
         self.BASE = "worlds/"
+        self.data = None
 
     def check_generation(self):
         """Check if the world was generated.
@@ -372,15 +378,61 @@ class World(object):
             return False
 
     def load(self):
-        """Read a world file and return a World List"""
+        """Read a world file and return a World List.
+        Return data with the correct python server convention."""
         if not(self.check_generation):
-            log("Trying to load an ungenerated world ! Please generate it before loading !\nStarting generation...", 2)
+            log("Trying to load an ungenerated world ! Please generate it before loading !Starting generation...", 2)
             self.generate()
         with open(self.BASE + self.name, "r") as file:
             data = file.read()
+            self.decode(data)
+            self.data = data
+            return self.data
 
 
-    def unload(self):
+    def decode(self, data:str):
+        """Decode some data.
+        --> Return the world (see world/world_format.md## World format (in running app))"""
+        infos, world = data.split("=====")
+        #treat infos
+        name, level = infos.split("::::")
+        if name != self.name:
+            #something went wrong
+            log("Reading a world name different of the gived name !", 2)
+            self.name = name
+            log("Name modified.", 0)
+        if self.level != level and self.level != None:
+            #something went wrong
+            log("Reading a world level different of the gived level !", 2)
+            self.level = level
+            log("Level modified.", 0)
+        if self.level == None:
+            self.level = level
+        
+        chunks_list = world.split("<<|<<")
+        final = []
+        #treat all chunks
+        for chunk in chunks_list:
+            base_chunk_list = []
+            xyz, blocks_list = chunk.split("|")
+
+            #Treat chunk coords
+            xyz = xyz.split(";")
+            chunk_coord = {"x": xyz[0], "y": xyz[1], "z": xyz[1]}
+            base_chunk_list.append(chunk_coord)
+
+            #Treat blocks
+            lst_blocks = blocks_list.split(";")
+            for block in lst_blocks:
+                b_type, nbt = block.split(">")
+                base_chunk_list.append((b_type, nbt))
+
+            final.append(base_chunk_list)
+
+        return final
+    
+    def save(self):
+        """Save the world"""
         ...
 
     def generate(self):
