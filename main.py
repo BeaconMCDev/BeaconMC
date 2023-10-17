@@ -256,7 +256,7 @@ class MCServer(object):
         mode = base_request[7]
         block = base_request[8]
         #check the request
-        if id != "\0x05":
+        if id != "\x05":
             log("A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !", 100)
             self.stop(critical=True, reason="A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !")
             raise RequestAnalyseException("Exception on analysing a request : bad method used (setblock andnot unknow).")
@@ -379,7 +379,7 @@ class Client(object):
 
     def identification(self):
         """Send id packet to the client"""
-        opdico = {True:bytes("\x64"), False: bytes("\0x00")}
+        opdico = {True:bytes("\x64"), False: bytes("\x00")}
         self.connexion.send(f"\x00{bytes(PROTOCOL_VERSION)}{bytes('Python Server 1.16.5')}{bytes(MOTD)}{opdico[self.is_op]}".encode())
 
     def ping(self):
