@@ -369,7 +369,7 @@ class Client(object):
         !!! not disconnectED !!!"""
         if reason == "":
             reason = tr.key("disconnect.default")
-        self.connexion.send(f"\0x0e{bytes(reason)}".encode())
+        self.connexion.send(f"\x0e{bytes(reason)}".encode())
         self.server.list_client.remove(self)
 
     def do_spawn(self):
@@ -379,18 +379,18 @@ class Client(object):
 
     def identification(self):
         """Send id packet to the client"""
-        opdico = {True:bytes("\0x64"), False: bytes("\0x00")}
-        self.connexion.send(f"\0x00{bytes(PROTOCOL_VERSION)}{bytes('Python Server 1.16.5')}{bytes(MOTD)}{opdico[self.is_op]}".encode())
+        opdico = {True:bytes("\x64"), False: bytes("\0x00")}
+        self.connexion.send(f"\x00{bytes(PROTOCOL_VERSION)}{bytes('Python Server 1.16.5')}{bytes(MOTD)}{opdico[self.is_op]}".encode())
 
     def ping(self):
         """Ping sent to clients periodically."""
-        self.connexion.send("\0x01".encode())
+        self.connexion.send("\x01".encode())
 
     def send_msg_to_chat(self, msg:str):
         """Post a message in the player's chat.
         Argument:
         - msg:str --> the message to post on the chat"""
-        self.connexion.send(f"\0x0d\0x00{bytes(msg)}".encode())
+        self.connexion.send(f"\x0d\x00{bytes(msg)}".encode())
 
 
 ########################################################################################################################################################################################################################
