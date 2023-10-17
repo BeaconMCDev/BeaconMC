@@ -39,6 +39,8 @@ with open("config.txt", "r") as config:
         elif dt[0] == "debug_mode":
             dico = {"true": True, "false": False}
             DEBUG = dico[arg]
+        elif dt[0] == "lang":
+            lang = dt[1]
         else:
             continue
 
