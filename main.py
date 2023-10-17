@@ -324,16 +324,16 @@ class Client(object):
         while True:
             self.request = self.connexion.recv(4096).decode()
             log(self.request)
-            if self.request[0] == "\0x00":
+            if self.request[0] == "\x00":
                 #joining message
                 self.joining()
-            elif self.request[0] == "\0x05":
+            elif self.request[0] == "\x05":
                 #setblock message
                 self.server.setblock(self.request)
-            elif self.request[0] == "\0x08":
+            elif self.request[0] == "\x08":
                 #pos message
                 self.update_pos()
-            elif self.request[0] == "\0x0d":
+            elif self.request[0] == "\x0d":
                 #chat message
                 self.server.post_to_chat(author=self.username, message=self.request[1:])
 
