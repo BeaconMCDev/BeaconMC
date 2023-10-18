@@ -6,7 +6,7 @@ L is the world level
 
 Name::::L=====Xc1;Yc1;Zc1|B>N;B>N;B>N;...;B>N<<|<<Xc2;Yc2;Zc2|B>N;B>N;B>N;...;B>N<<|<<Xc3;Yc3;Zc3|B>N;B>N;B>N;...;B>N...
 
-# World format (in running app)
+# World format (in the running server)
 [[{"x": Xc1, "y": Yc1, "z": Zc1}, (B, N), (B, N), (B, N), (B, N), (B, N)..., (B, N)], 
 [{"x": Xc2, "y": Yc2, "z": Zc2}, (B, N), (B, N), (B, N), (B, N), (B, N)..., (B, N)], 
 [{"x": Xc3, "y": Yc3, "z": Zc3}, (B, N), (B, N), (B, N), (B, N), (B, N)..., (B, N)], ...]
@@ -18,3 +18,6 @@ Name::::L=====Xc1;Yc1;Zc1|B>N;B>N;B>N;...;B>N<<|<<Xc2;Yc2;Zc2|B>N;B>N;B>N;...;B>
 - 1: grass_block
 - 2: dirt
 - 3: stone
+
+# NBT
+NBT are actually str. But not used

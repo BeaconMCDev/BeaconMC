@@ -136,6 +136,7 @@ class MCServer(object):
             name, extention = item.split(".")
             if extention == ".mcworld":
                 lst_world.append(name)
+        log(f"{len(lst_world)} worlds found !", 3)
         return lst_world
 
 
@@ -162,6 +163,7 @@ class MCServer(object):
             w_class = World(world)
             w_class.load()
             self.list_worlds.append(w_class)
+        log("DONE !, 0")
 
     def main(self):
         """Main"""
@@ -412,6 +414,7 @@ class World(object):
         self.generated = None
         self.BASE = "worlds/"
         self.data = None
+        self.spawn_coord = None
 
     def check_generation(self):
         """Check if the world was generated.
@@ -425,6 +428,36 @@ class World(object):
                     return False
         except FileNotFoundError:
             return False
+        
+    def generate(self, level, force=False):
+        """Generate the world.
+        Args:
+        - force: (bool) """
+        if force:
+            ok = True
+        else:
+            if self.data != None:
+                ok = False
+            else:
+                ok = True
+        if ok:
+            c = self._new_chunk(0, 0, 0)
+            self.spawn_coord = {"x": 8, "y": 8, "y": 8}
+            ###todo
+
+    def _new_chunk(self, x:int, y:int, z:int):
+        """Create a new chunk at the specified CHUNKS COORD !
+        - Args:
+            - x (int) the X chunk pos
+            - y (int) the X chunk pos
+            - z (int) the X chunk pos
+        - Return the chunk (lst)"""
+        c = [{"x":x, "y":y, "z":z}]
+        count = 0
+        while count != (16**3):
+            c.append((0, ""))
+        return c
+
 
     def load(self):
         """Read a world file and return a World List.
@@ -631,6 +664,12 @@ be_ready_to_log()
 
 #MAIN
 if __name__ == "__main__":
-    tr = Translation("en")
-    srv = MCServer()
-    srv.start()
+    try:
+        tr = Translation(lang)
+        srv = MCServer()
+        srv.start()
+    except Exception as e:
+        log("FATAL ERROR : An error occured while running the server : uncatched exception.", 100)
+        log(e, 100)
+        srv.crash(e)
+
