@@ -441,9 +441,16 @@ class World(object):
             else:
                 ok = True
         if ok:
-            c = self._new_chunk(0, 0, 0)
+            c1 = self._new_chunk(0, 0, 0)
+            c2 = self._new_chunk(1, 0, 0)
+            c3 = self._new_chunk(0, 0, 1)
+            c4 = self._new_chunk(1, 0, 1)
+            self.data.append(c1)
+            self.data.append(c2)
+            self.data.append(c3)
+            self.data.append(c4)
             self.spawn_coord = {"x": 8, "y": 8, "y": 8}
-            ###todo
+            
 
     def _new_chunk(self, x:int, y:int, z:int):
         """Create a new chunk at the specified CHUNKS COORD !
