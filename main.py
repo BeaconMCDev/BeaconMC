@@ -163,7 +163,7 @@ class MCServer(object):
             w_class = World(world)
             w_class.load()
             self.list_worlds.append(w_class)
-        log("DONE !, 0")
+        log("DONE !", 0)
 
     def main(self):
         """Main"""
@@ -441,6 +441,7 @@ class World(object):
             else:
                 ok = True
         if ok:
+            self.level = level
             c1 = self._new_chunk(0, 0, 0)
             c2 = self._new_chunk(1, 0, 0)
             c3 = self._new_chunk(0, 0, 1)
@@ -450,6 +451,43 @@ class World(object):
             self.data.append(c3)
             self.data.append(c4)
             self.spawn_coord = {"x": 8, "y": 8, "y": 8}
+
+    def setblock(self, x:int, y:int, z:int, id:int, nbt:str=""):
+        """Modify a block into the world.
+        Args:
+        - x (int): the x coordinate of the block
+        - y (int): the y coordinate of the block
+        - z (int): the z coordinate of the block
+        - id (int): the block type (see world_format.md)
+        - nbt (str, "" by default): the nbt data of the block."""
+        block_chunk = self._block_to_chunk_coords(x, y, z)
+        chunk_index = self.data.find_chunk_index(block_chunk["x"], block_chunk["y"], block_chunk["z"], )
+        chunk = self.data[chunk_index]
+
+        bx = x % 16
+        by = y % 16
+        bz = z % 16
+        ...
+
+    def find_chunk_index(self, x, y, z):
+        """Return the chunk Index with the gived coords."""
+        index = None
+        for i, j in enumerate(self.data):
+            if i == 0:
+                continue
+            if i[0]["x"] == x and i[0]["y"] == y and i[0]["z"] == z:
+                index = i
+                break
+        return i
+
+
+    def _block_to_chunk_coords(self, x:int, y:int, z:int):
+        """Convert a block coord to a chunk coord. Args: the coordinates. Return the chunk coords."""
+        nx = x // 16
+        ny = y // 16
+        nz = z // 16
+
+        return {"x": nx, "y": ny, "z": nz}
             
 
     def _new_chunk(self, x:int, y:int, z:int):

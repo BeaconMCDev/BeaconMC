@@ -1,0 +1,2 @@
+[18:17:20] [Server/CRITICAL]: FATAL ERROR : An error occured while running the server : uncatched exception.
+[18:17:20] [Server/CRITICAL]: name 'ff' is not defined
