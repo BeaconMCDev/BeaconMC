@@ -339,7 +339,9 @@ class Client(object):
     def worker(self):
         """Per client thread"""
         while True:
-            self.request = self.connexion.recv(4096)#.decode() raise an error i think. FewerElk.
+            self.request = self.connexion.recv(4096)
+            if self.request == b"":
+                continue
             log(self.request)
             if self.request[0] == "\x00":
                 #joining message
