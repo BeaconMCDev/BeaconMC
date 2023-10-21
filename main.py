@@ -480,7 +480,24 @@ class World(object):
         bx = x % 16
         by = y % 16
         bz = z % 16
-        ...
+        
+        size_x = 16
+        size_y = 16
+        size_z = 16
+        x_coord = bx
+        y_coord = by
+        z_coord = bz
+
+        for x in range(size_x):
+            for y in range(size_y):
+                for z in range(size_z):
+                    index = x + size_x * (y + size_y * z)
+
+                    element = chunk[index]
+
+        index_cible = x_coord + size_x * (y_coord + size_y * z_coord)
+        element_cible = chunk[index_cible]
+
 
     def find_chunk_index(self, x, y, z):
         """Return the chunk Index with the gived coords."""
