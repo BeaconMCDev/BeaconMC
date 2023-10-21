@@ -15,6 +15,7 @@ import random as rdm
 import os
 import threading as thread
 import hashlib #for md5 auth system
+import platform
 
 #CONFIG READING
 print("Reading the config file...")
@@ -45,6 +46,18 @@ with open("config.txt", "r") as config:
             continue
 
 print("Setting up the server...")
+print("OS compatibility checking...")
+COMPATIBLE_OS = ["Windows", "Linux"]
+OS = platform.system()
+if OS in COMPATIBLE_OS:
+    if OS == "Linux":
+        SEP = '/'
+    elif OS == "Windows":
+        SEP = "\\"
+else:
+    raise RuntimeError(f"OS {OS} is not compatible ! Please use Linux or Windows !")
+print(f"OS {OS} is compatible !")
+
 #GLOBAL DATAS - VARIABLES
 connected_players = 0
 blacklist = []
@@ -130,7 +143,7 @@ class MCServer(object):
         """Search for worlds in the worlds folder.
         Return a list str that are the world name."""
         log("Analysing worlds...", 3)
-        items_list = os.listdir(f"{os.getcwd()}\\worlds")
+        items_list = os.listdir(f"{os.getcwd()}{SEP}worlds")
         lst_world = []
         for item in items_list:
             name, extention = item.split(".")
@@ -326,7 +339,7 @@ class Client(object):
     def worker(self):
         """Per client thread"""
         while True:
-            self.request = self.connexion.recv(4096).decode()
+            self.request = self.connexion.recv(4096)#.decode() raise an error i think. FewerElk.
             log(self.request)
             if self.request[0] == "\x00":
                 #joining message
