@@ -339,14 +339,12 @@ class Client(object):
     def worker(self):
         """Per client thread"""
         while True:
-            self.request = self.connexion.recv(4096)
-            if self.request == b"":
+            self.request = self.connexion.recv(4096).decode()
+            if self.request == "":
                 continue
             log(self.request)
-            if self.request[0] == "\x00":
-                #joining message
-                self.joining()
-            elif self.request[0] == "\x05":
+            log(self.request[0])
+            if self.request[0] == "\x05":
                 #setblock message
                 self.server.setblock(self.request)
             elif self.request[0] == "\x08":
@@ -355,6 +353,18 @@ class Client(object):
             elif self.request[0] == "\x0d":
                 #chat message
                 self.server.post_to_chat(author=self.username, message=self.request[1:])
+            elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
+                if self.request[-5:] == "\xd5\x11\x01\x01\x00":
+                    #server list request
+                    ...
+                else:
+                    c = -1
+                    u = ""
+                    while self.request[c] != "\x0f":
+                        u = self.request[c] + u
+                        c -= 1
+                    self.username = u
+                    self.joining()
 
     def update_pos(self):
         """update the client pos with the request"""
