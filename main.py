@@ -354,7 +354,7 @@ class Client(object):
             elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
                 if self.request[-5:] == "\xd5\x11\x01\x01\x00":
                     #server list request
-                    self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"1.19","protocol":759}}'.format(MOTD, MAX_PLAYERS, connected_players)))
+                    self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(MOTD, MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
                 else:
                     c = -1
                     u = ""
