@@ -76,8 +76,6 @@ IP = skt.gethostname()
 #MAX_PLAYERS = 5
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
-#MOTD = "My%20Server"
-#DEBUG = True                    #debug mode enabled
 
 #FUNCTIONS
 def log(msg:str, type:int=-1):
@@ -356,7 +354,7 @@ class Client(object):
             elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
                 if self.request[-5:] == "\xd5\x11\x01\x01\x00":
                     #server list request
-                    ...
+                    self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"1.19","protocol":759}}'.format(MOTD, MAX_PLAYERS, connected_players)))
                 else:
                     c = -1
                     u = ""
