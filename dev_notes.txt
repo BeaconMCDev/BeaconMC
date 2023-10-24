@@ -6,5 +6,5 @@ Requetes serveur --> client:
     #####
     TRES IMPORTANT
     #####
-        - les § (ou les & selon la version) sont codés \xc2\xa7 dans les requetes. Cela donne \xc2\xa7 + code couleur
-            --> \xc2\xa79 par exemple pour §9 ou \u00A7
+        - les § sont codés \xc2\xa7 dans les requetes. Cela donne \xc2\xa7 + code couleur
+            --> \xc2\xa79 par exemple pour §9 ou \u00A79

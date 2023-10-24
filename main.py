@@ -76,6 +76,7 @@ IP = skt.gethostname()
 #MAX_PLAYERS = 5
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
+CONFIG_TO_REQUEST = {"\u00A7": "\xc2\xa7", "§": "\xc2\xa7"}
 
 #FUNCTIONS
 def log(msg:str, type:int=-1):
@@ -222,6 +223,7 @@ class MCServer(object):
     def add_client_thread(self):
         """Thread for add clients."""
         global state
+        self.client_id_count = 0
         while state == "ON":
             try:
                 client_connection, client_info = self.socket.accept()
@@ -230,8 +232,9 @@ class MCServer(object):
                 continue
             cl = Client(client_connection, client_info, self)
             self.list_clients.append(cl)
-            thr = thread.Thread(target=cl.worker)
+            thr = thread.Thread(target=cl.client_thread, args=[self.client_id_count])
             thr.start()
+            self.client_id_count += 1
             tm.sleep(0.1)
         
     def heartbeat(self):
@@ -333,9 +336,13 @@ class Client(object):
         self.info = info
         self.server = server
         self.is_op = False
+        self.x = None
+        self.y = None
+        self.z = None
 
-    def worker(self):
+    def client_thread(self, id):
         """Per client thread"""
+        self.id = id
         while True:
             self.request = self.connexion.recv(4096).decode()
             if self.request == "":
@@ -354,7 +361,7 @@ class Client(object):
             elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
                 if self.request[-5:] == "\xd5\x11\x01\x01\x00":
                     #server list request
-                    self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(MOTD, MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
+                    self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(self.treat(MOTD), MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
                 else:
                     c = -1
                     u = ""
@@ -363,6 +370,16 @@ class Client(object):
                         c -= 1
                     self.username = u
                     self.joining()
+
+    def treat(self, msg):
+        """Check and modify the message gived in argument in the goal of be readable by the client."""
+        final = ""
+        for char in msg:
+            try:
+                final += CONFIG_TO_REQUEST[char]
+            except IndexError:
+                final += char
+        return final
 
     def update_pos(self):
         """update the client pos with the request"""
@@ -382,14 +399,19 @@ class Client(object):
                     #co ok !
                     ...
                 else:
-                    log(f"Failed to connect {self.username} : bad protocol version.", 0)
-                    self.disconnect(tr.key("disconnect.bad_protocol"))
+                    log(f"Failed to connect {self.username} : bad version.", 0)
+                    #self.disconnect(tr.key("disconnect.bad_protocol"))
+                    self.bad_version()
             else:
                 log(f"Failed to connect {self.username} : server full.", 1)
                 self.disconnect(tr.key("disconnect.server_full"))
         else:
             log(f"User {self.username} is not premium ! Access couldn't be gived.", 1)
             self.disconnect(tr.key("disconnect.not_premium"))
+
+    def bad_version(self):              #CHECKED / NOT TESTED
+        """Kick the client wif he has a bad version when connecting."""
+        self.connexion.send(b'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{0}"]}'.format(CLIENT_VERSION))
 
     def disconnect(self, reason=""):
         """Disconnect the player
