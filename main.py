@@ -400,7 +400,7 @@ class Client(object):
                     ...
                 else:
                     log(f"Failed to connect {self.username} : bad version.", 0)
-                    #self.disconnect(tr.key("disconnect.bad_protocol"))
+                    #self.disconnect(tr.key("disconnect.bad_protocol"))   :-(
                     self.bad_version()
             else:
                 log(f"Failed to connect {self.username} : server full.", 1)
