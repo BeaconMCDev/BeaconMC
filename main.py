@@ -339,12 +339,16 @@ class Client(object):
         self.x = None
         self.y = None
         self.z = None
+        self.connected = True
 
     def client_thread(self, id):
         """Per client thread"""
         self.id = id
-        while True:
-            self.request = self.connexion.recv(4096).decode()
+        while self.connected:
+            try:
+                self.request = self.connexion.recv(4096).decode()
+            except:
+                continue
             if self.request == "":
                 continue
             log(self.request)
@@ -370,6 +374,15 @@ class Client(object):
                         c -= 1
                     self.username = u
                     self.joining()
+
+    def bad_version(self):
+        """Called to disconnect the connecting client that has a bad protocol version"""
+        self.connexion.send(b'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{0}"]}'.format(SERVER_VERSION))
+        self.connected = False
+        self.connexion.close()
+        self.server.list_client.remove(self)
+
+        del(self)
 
     def treat(self, msg):
         """Check and modify the message gived in argument in the goal of be readable by the client."""
@@ -409,17 +422,16 @@ class Client(object):
             log(f"User {self.username} is not premium ! Access couldn't be gived.", 1)
             self.disconnect(tr.key("disconnect.not_premium"))
 
-    def bad_version(self):              #CHECKED / NOT TESTED
-        """Kick the client wif he has a bad version when connecting."""
-        self.connexion.send(b'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{0}"]}'.format(CLIENT_VERSION))
-
     def disconnect(self, reason=""):
         """Disconnect the player
         !!! not disconnectED !!!"""
+        self.connected = False
         if reason == "":
             reason = tr.key("disconnect.default")
         self.connexion.send(f"\x0e{bytes(reason)}".encode())
+        self.connexion.close()
         self.server.list_client.remove(self)
+        del(self)
 
     def do_spawn(self):
         """Make THIS CLIENT spawn"""
