@@ -2,4 +2,4 @@ Minecraft server in python 3.11
 ________________________________________________________________________________________________________________
 A critical error advent, that force the server to stop. This crash report contain informations about the crash.
 ________________________________________________________________________________________________________________
-generated for an example crash message
+string argument without an encoding

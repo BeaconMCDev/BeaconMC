@@ -16,6 +16,8 @@ import os
 import threading as thread
 import hashlib #for md5 auth system
 import platform
+import pluginapi
+import json
 
 #CONFIG READING
 print("Reading the config file...")
@@ -72,13 +74,13 @@ SERVER_VERSION = "Alpha-dev"    #Version of the server. For debug
 CLIENT_VERSION = "1.16.5"       #Which version the client must have to connect
 PROTOCOL_VERSION = 754          #Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
 PORT = 25565                    #Normal MC port
-IP = skt.gethostname()
+IP = "0.0.0.0"
 #MAX_PLAYERS = 5
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
 CONFIG_TO_REQUEST = {"\u00A7": "\xc2\xa7", "§": "\xc2\xa7"}
+print("")
 
-#FUNCTIONS
 def log(msg:str, type:int=-1):
     """Types:
     - 0: info
@@ -446,7 +448,26 @@ class Client(object):
     def ping(self):
         """Ping sent to clients periodically."""
         self.connexion.send("\x01".encode())
+    def SLP(self, msg: str):
+        print("Received ping")
+        if msg == "\x01":  # Check for SLP packet ID
+            response = {
+                "version": {"name": f"{SERVER_VERSION}", f"protocol": {PROTOCOL_VERSION}},
+                "players": {"max": 100, "online": 0, "sample": [{"name": "thinkofdeath", "id": "4566e69f-c907-48ee-8d71-d7ba5aa00d20"}]},
+                "description": {"text": "Hello world"},
+                "favicon": "data:image/png;base64,<data>",
+                "enforcesSecureChat": True,
+                "previewsChat": True
+            }
 
+            response_str = json.dumps(response)
+            response_length = str(len(response_str))
+            packet = f"\x01{response_length}{response_str}"
+            self.connexion.send(packet.encode())
+
+
+
+            #self.connexion.send(f'0x01{"version":{"name":"1.19.4","protocol":762},"players":{"max":100,"online":5,"sample":[{"name":"thinkofdeath","id":"4566e69f-c907-48ee-8d71-d7ba5aa00d20"}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,<data>","enforcesSecureChat":true,"previewsChat":true}')
     def send_msg_to_chat(self, msg:str):
         """Post a message in the player's chat.
         Argument:
@@ -784,6 +805,8 @@ be_ready_to_log()
 #MAIN
 if __name__ == "__main__":
     try:
+        #log('Starting Plugin APi',0)
+        pluginapi.init_api()
         tr = Translation(lang)
         srv = MCServer()
         srv.start()
