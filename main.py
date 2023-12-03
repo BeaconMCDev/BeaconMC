@@ -805,7 +805,7 @@ be_ready_to_log()
 #MAIN
 if __name__ == "__main__":
     try:
-        #log('Starting Plugin APi',0)
+        log('Starting Plugin APi', 3)
         pluginapi.init_api()
         tr = Translation(lang)
         srv = MCServer()

@@ -19,9 +19,9 @@ def execute_file(file_path, plugin_directory):
             file_content = file.read()
             exec(file_content, {'__file__': file_path, '__name__': '__main__', 'os': os})
     except FileNotFoundError:
-        print("")
+        print("File not found")
     except Exception as e:
-        print("")
+        print(e)
 
 def process_list_file(yaml_file_path, plugin_directory):
     try:
