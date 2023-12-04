@@ -449,7 +449,7 @@ class Client(object):
         """Ping sent to clients periodically."""
         self.connexion.send("\x01".encode())
     def SLP(self, msg: str):
-        print("Received ping")
+        log("Received ping", 3)
         if msg == "\x01":  # Check for SLP packet ID
             response = {
                 "version": {"name": f"{SERVER_VERSION}", f"protocol": {PROTOCOL_VERSION}},
