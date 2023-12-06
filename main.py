@@ -304,6 +304,7 @@ class MCServer(object):
         - message:str --> the message to send in mp
         - addressee:str --> player that will receive msg
         - author:str --> the author of the msg: by default ""."""
+
         pl = self.find_player_by_username(addressee)
         msg = f"{author} --> you: {message}"
         pl.send_msg_to_chat(msg)
@@ -363,6 +364,9 @@ class Client(object):
                 self.update_pos()
             elif self.request[0] == "\x0d":
                 #chat message
+                if self.request[2] == "/":#surely not that
+                    ... #cmd
+
                 self.server.post_to_chat(author=self.username, message=self.request[1:])
             elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
                 if self.request[-5:] == "\xd5\x11\x01\x01\x00":
@@ -797,6 +801,61 @@ class RequestAnalyseException(Exception):
 class TwoPlayerWithSameUsernameException(Exception):
     """Exception when 2 players or more have the same username"""
 
+class Command(object):
+    def __init__(self, command:str, source:Client, server:MCServer):
+        self.COMMANDS = {"/msg": self.msg, 
+                "/tell": self.msg, 
+                "/stop":self.stop}   #other will be added later
+
+        self.srv = server
+
+        self.command = command
+        self.source = source
+        self.splited = self.command.split(" ")
+        self.base = self.splited[0]
+        self.args = self.splited[1:]
+
+        if self.pre_cmd():
+            self.execute()
+        else:
+            self.__del__()
+
+    def execute(self):
+        cmdf = self.COMMANDS[self.base]
+        if cmdf():
+            ...#ok
+        else:
+            ...#error
+
+
+    def check_perm(self):
+        #if self.base in self.source.perms:
+        #   return True
+        #else:
+        #   return False
+        return True
+
+    def pre_cmd(self):
+        log(f"{self.source.username} used a player command : {self.command}.", 4)
+        if self.check_perm(self.base, self.source):
+            return True
+        else:
+            log(f"Denied acces for the command {self.base} runned by {self.source.username} !", 4)
+            return False
+
+    def msg(self, args):
+        player = args[0]
+        msg = args[1:]
+        self.srv.mp(msg, player, self.source.username)
+        return True
+    
+    def stop(self, args):
+        if len(args) != 0:
+            log("Too much arguments !", 1)
+            self.srv.mp("Too many arguments !", self.source, )
+            return False
+        self.srv.stop()
+        return True
 
 #PRE MAIN INSTRUCTIONS
 be_ready_to_log()
