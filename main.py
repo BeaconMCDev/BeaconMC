@@ -132,6 +132,13 @@ def be_ready_to_log():
 #CLASSES
 class MCServer(object):
     """Minecraft server class"""
+
+    SERVER_VERSION = "Alpha-dev"
+    CLIENT_VERSION = "1.16.5"   
+    PROTOCOL_VERSION = 754      
+    PORT = 25565                
+    IP = "0.0.0.0"
+
     def __init__(self):
         """Init the server"""
         self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  #socket creation
@@ -152,7 +159,10 @@ class MCServer(object):
                 lst_world.append(name)
         log(f"{len(lst_world)} worlds found !", 3)
         return lst_world
-
+    
+    def log(self, msg:str, type:int=-1):
+        """An alternative of main.log(). Don't delete, used by plugins."""
+        log(msg, type)
 
     def start(self):
         global state
@@ -163,11 +173,25 @@ class MCServer(object):
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
         #self.heartbeat()
+
+        self.load_plugins()
+
         self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
         self.load_worlds()
         self.act = thread.Thread(target=self.add_client_thread)
         self.act.start()
         self.main()
+
+    def load_plugins(self):
+        """Load the plugins"""
+        import plugins.modulable_pluginsystem as mplsys
+        self.PLUGIN_ALLOWED = mplsys.ENABLE_PLUGINS
+        self.PLUGIN_LIST = mplsys.PLUGIN_LIST
+
+        for pl in self.PLUGIN_LIST:
+            if pl._on_load():
+                pl.on_load()
+            
 
     def load_worlds(self):
         """Load all of the server's worlds"""
@@ -309,6 +333,8 @@ class MCServer(object):
         msg = f"{author} --> you: {message}"
         pl.send_msg_to_chat(msg)
         log(f"{author} --> {pl}: {message}", 4)
+        for pl in self.PLUGIN_LIST:
+            pl.on_mp(message=message, source=author, addressee=addressee)
 
     def find_player_by_username(self, username:str):
         """Find the player socket with the username.
