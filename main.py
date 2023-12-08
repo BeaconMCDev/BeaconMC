@@ -377,6 +377,7 @@ class Client(object):
         while self.connected:
             try:
                 self.request = self.connexion.recv(4096).decode()
+                log(self.request, 3)  #DEBUG
                 self.connexion.send("""{
     "version": {
         "name": "{0}",
