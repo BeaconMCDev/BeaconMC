@@ -4,7 +4,7 @@ import plugins.example.pluginsystem as plsys
 
 class Plugin(plsys.BeaconMCPlugin):
     def __init__(self, server:object=None):
-          super().__init__(self, name="ExamplePlugin", author="FewerElk", version="1.0", srv_version="Alpha-dev", server=server)
+          super().__init__(name="ExamplePlugin", author="FewerElk", version="1.0", srv_version="Alpha-dev", server=server)
 
     def on_load(self):
          self.server.log(f"Loading {self.name} from {self.author} (v {self.version})... COMPLETE !", 0)
