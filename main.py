@@ -189,6 +189,7 @@ class MCServer(object):
         self.PLUGIN_LIST = mplsys.PLUGIN_LIST
 
         for pl in self.PLUGIN_LIST:
+            pl.set_server(self)
             if pl._on_load():
                 pl.on_load()
             
@@ -376,6 +377,28 @@ class Client(object):
         while self.connected:
             try:
                 self.request = self.connexion.recv(4096).decode()
+                self.connexion.send("""{
+    "version": {
+        "name": "{0}",
+        "protocol": {1}
+    },
+    "players": {
+        "max": {2},
+        "online": 5,
+        "sample": [
+            {
+                "name": "test",
+                "id": "4566e69f-c907-48ee-8d71-d7ba5aa00d20"
+            }
+        ]
+    },
+    "description": {
+        "text": {3}
+    },
+    "favicon": "data:image/png;base64,<data>",
+    "enforcesSecureChat": true,
+    "previewsChat": true
+}""".format(CLIENT_VERSION, PROTOCOL_VERSION, MAX_PLAYERS, MOTD))
             except:
                 continue
             if self.request == "":

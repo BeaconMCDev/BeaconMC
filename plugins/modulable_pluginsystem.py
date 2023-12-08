@@ -13,8 +13,8 @@ ENABLE_PLUGINS = True
 # import example2plugin.main as example2
 # e2 = example2.Plugin
 
-import example.main as ex
-pl = ex.Plugin
+import plugins.example.main as ex
+pl = ex.Plugin()
 
 #Put here the plugin instances
 #

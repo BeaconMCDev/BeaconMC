@@ -2,7 +2,7 @@
 
 #class
 class BeaconMCPlugin(object):
-    def __init__(self, name:str, author:str, server:object, version:str, srv_version:str):
+    def __init__(self, name:str, author:str, version:str, srv_version:str, server:object=None):
         self.name = name
         self.author = author
         self.server = server
@@ -13,6 +13,9 @@ class BeaconMCPlugin(object):
         self.state = 0
 
     # Plugin.on_load() and Plugin.on_unload() are not here, and have to be included in the plugin created by someone
+
+    def set_server(self, srv:object):
+        self.server = srv
 
     def _on_load(self):
         """# DON'T CALL IT FROM THE PLUGIN - FOR SERVER MISC ONLY
