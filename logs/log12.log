@@ -1,0 +1,24 @@
+[14:21:01] [Server/DEBUG]: Starting Plugin APi
+[14:21:01] [Server/INFO]: Plugin API loading...
+[14:21:01] [Server/INFO]: Checking some things...
+[14:21:01] [Server/INFO]: Folder plugin exists!
+[14:21:01] [Server/INFO]: Starting loading : Plugin Demo
+[14:21:01] [Server/INFO]: Loaded !
+[14:21:01] [Server/INFO]: Starting Minecraft server...
+[14:21:01] [Server/DEBUG]: Server version: Alpha-dev
+[14:21:01] [Server/DEBUG]: MC version: 1.16.5
+[14:21:01] [Server/DEBUG]: Protocol version: 754
+[14:21:01] [Server/INFO]: Loading ExamplePlugin from FewerElk (v 1.0)... COMPLETE !
+[14:21:01] [Server/INFO]: Loading worlds...
+[14:21:01] [Server/DEBUG]: Analysing worlds...
+[14:21:01] [Server/DEBUG]: 0 worlds found !
+[14:21:01] [Server/INFO]: DONE !
+[14:21:05] [Server/DEBUG]: New client
+[14:21:05] [Server/DEBUG]: Received ping
+[14:21:18] [Server/DEBUG]: New client
+[14:21:18] [Server/DEBUG]: Received ping
+[14:21:48] [Server/DEBUG]: New client
+[14:21:48] [Server/DEBUG]: Received ping
+[14:23:38] [Server/INFO]: Stopping the server...
+[14:23:38] [Server/CRITICAL]: FATAL ERROR : An error occured while running the server : uncatched exception.
+[14:23:38] [Server/CRITICAL]: string argument without an encoding

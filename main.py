@@ -376,52 +376,20 @@ class Client(object):
         self.id = id
         while self.connected:
             try:
-                self.request = self.connexion.recv(4096).decode()
-                self.connexion.send("""{
-    "version": {
-        "name": "{0}",
-        "protocol": {1}
-    },
-    "players": {
-        "max": {2},
-        "online": 5,
-        "sample": [
-            {
-                "name": "test",
-                "id": "4566e69f-c907-48ee-8d71-d7ba5aa00d20"
-            }
-        ]
-    },
-    "description": {
-        "text": {3}
-    },
-    "favicon": "data:image/png;base64,<data>",
-    "enforcesSecureChat": true,
-    "previewsChat": true
-}""".format(CLIENT_VERSION, PROTOCOL_VERSION, MAX_PLAYERS, MOTD))
+                self.request = self.connexion.recv(4096)
+                self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.16.5","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
+
             except:
                 continue
             if self.request == "":
                 continue
-            log(self.request)
-            log(self.request[0])
-            if self.request[0] == "\x05":
-                #setblock message
-                self.server.setblock(self.request)
-            elif self.request[0] == "\x08":
-                #pos message
-                self.update_pos()
-            elif self.request[0] == "\x0d":
-                #chat message
-                if self.request[2] == "/":#surely not that
-                    ... #cmd
+            log(self.request, 3)
 
-                self.server.post_to_chat(author=self.username, message=self.request[1:])
-            elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
-                if self.request[-5:] == "\xd5\x11\x01\x01\x00":
-                    #server list request
-                    self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(self.treat(MOTD), MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
-                else:
+            if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
+                self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.16.5","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
+            else:
+                    tm.sleep(1)
+                    continue
                     c = -1
                     u = ""
                     while self.request[c] != "\x0f":
@@ -429,6 +397,32 @@ class Client(object):
                         c -= 1
                     self.username = u
                     self.joining()
+
+
+            #if self.request[0] == "\x05":
+            #    #setblock message
+            #    self.server.setblock(self.request)
+            #elif self.request[0] == "\x08":
+            #    #pos message
+            #    self.update_pos()
+            #elif self.request[0] == "\x0d":
+            #    #chat message
+            #    if self.request[2] == "/":#surely not that
+            #        ... #cmd
+#
+            #    self.server.post_to_chat(author=self.username, message=self.request[1:])
+            #elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
+            #    if self.request[-5:] == "\xd5\x11\x01\x01\x00":
+            #        #server list request
+            #        self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(self.treat(MOTD), MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
+            #    else:
+            #        c = -1
+            #        u = ""
+            #        while self.request[c] != "\x0f":
+            #            u = self.request[c] + u
+            #            c -= 1
+            #        self.username = u
+            #        self.joining()
 
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""

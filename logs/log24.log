@@ -1,0 +1,27 @@
+[14:45:34] [Server/DEBUG]: Starting Plugin APi
+[14:45:34] [Server/INFO]: Plugin API loading...
+[14:45:34] [Server/INFO]: Checking some things...
+[14:45:34] [Server/INFO]: Folder plugin exists!
+[14:45:34] [Server/INFO]: Starting loading : Plugin Demo
+[14:45:34] [Server/INFO]: Loaded !
+[14:45:34] [Server/INFO]: Starting Minecraft server...
+[14:45:34] [Server/DEBUG]: Server version: Alpha-dev
+[14:45:34] [Server/DEBUG]: MC version: 1.16.5
+[14:45:34] [Server/DEBUG]: Protocol version: 754
+[14:45:34] [Server/INFO]: Loading ExamplePlugin from FewerElk (v 1.0)... COMPLETE !
+[14:45:34] [Server/INFO]: Loading worlds...
+[14:45:34] [Server/DEBUG]: Analysing worlds...
+[14:45:34] [Server/DEBUG]: 0 worlds found !
+[14:45:34] [Server/INFO]: DONE !
+[14:45:37] [Server/DEBUG]: New client
+[14:45:37] [Server/DEBUG]: b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00'
+[14:45:48] [Server/DEBUG]: b''
+[14:45:48] [Server/DEBUG]: New client
+[14:45:48] [Server/DEBUG]: b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00'
+[14:46:18] [Server/DEBUG]: b''
+[14:46:18] [Server/DEBUG]: New client
+[14:46:18] [Server/DEBUG]: b'\xfe\x01\xfa\x00\x0b\x00M\x00C\x00|\x00P\x00i\x00n\x00g\x00H\x00o\x00s\x00t\x00\x19\x7f\x00\t\x001\x002\x007\x00.\x000\x00.\x000\x00.\x001\x00\x00c\xdd'
+[14:49:08] [Server/DEBUG]: New client
+[14:49:08] [Server/DEBUG]: b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x02'
+[14:49:09] [Server/DEBUG]: b'\x11\x00\x0fFewerElk3623281'
+[14:49:10] [Server/DEBUG]: b''

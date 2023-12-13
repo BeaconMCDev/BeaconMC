@@ -1,0 +1,27 @@
+[14:41:56] [Server/DEBUG]: Starting Plugin APi
+[14:41:56] [Server/INFO]: Plugin API loading...
+[14:41:56] [Server/INFO]: Checking some things...
+[14:41:56] [Server/INFO]: Folder plugin exists!
+[14:41:56] [Server/INFO]: Starting loading : Plugin Demo
+[14:41:56] [Server/INFO]: Loaded !
+[14:41:56] [Server/INFO]: Starting Minecraft server...
+[14:41:56] [Server/DEBUG]: Server version: Alpha-dev
+[14:41:56] [Server/DEBUG]: MC version: 1.16.5
+[14:41:56] [Server/DEBUG]: Protocol version: 754
+[14:41:56] [Server/INFO]: Loading ExamplePlugin from FewerElk (v 1.0)... COMPLETE !
+[14:41:56] [Server/INFO]: Loading worlds...
+[14:41:56] [Server/DEBUG]: Analysing worlds...
+[14:41:56] [Server/DEBUG]: 0 worlds found !
+[14:41:56] [Server/INFO]: DONE !
+[14:42:28] [Server/DEBUG]: New client
+[14:42:28] [Server/DEBUG]: b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01'
+[14:42:28] [Server/DEBUG]: 16
+[14:42:28] [Server/DEBUG]: b'\x01\x00'
+[14:42:28] [Server/DEBUG]: 1
+[14:42:47] [Server/DEBUG]: b''
+[14:42:47] [Server/DEBUG]: New client
+[14:42:47] [Server/DEBUG]: b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00'
+[14:42:47] [Server/DEBUG]: 16
+[14:43:02] [Server/INFO]: Stopping the server...
+[14:43:02] [Server/CRITICAL]: FATAL ERROR : An error occured while running the server : uncatched exception.
+[14:43:02] [Server/CRITICAL]: string argument without an encoding
