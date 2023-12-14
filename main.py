@@ -791,51 +791,6 @@ class Translation(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
-class Event(object):
-    """Event class"""
-    def __init__(self, server, event_type:str):
-        """Init the event
-        Arguments:
-        - server: the main server class
-        - event_type: the type of the event (str)"""
-        self.server = server
-        self.type = event_type
-        self.cancelled = False
-        self.cause_cancelled = False
-        self.actions = []
-
-    def cancel(self):
-        """Cancel the consequence of the event and the event, make it no effect"""
-        self.cancelled = True
-        
-    def cancel_cause(self):
-        """Cancel the cause of the event"""
-        self.cause_cancelled = True
-        ...
-
-    def add_action(self, action):
-        """Add a function/method to the action list
-        Arg:
-        - action: the function to use when triggered (function)"""
-        self.actions.append(action)
-
-    def trigger(self):
-        """Trigger the event"""
-        if not(self.cancelled):
-            for f in self.actions:
-                f(self)
-
-
-class SetBlockEvent(Event):
-    """Event when there is a block modified"""
-    def __init__(self, server, event_type:str):
-        super(SetBlockEvent, self).__init__(server, event_type)
-        self.add_action(server.setblock)    #to check.
-
-
-########################################################################################################################################################################################################################
-########################################################################################################################################################################################################################
-########################################################################################################################################################################################################################
 #Exception class
 class RequestAnalyseException(Exception):
     """Exception when analysing a request"""
