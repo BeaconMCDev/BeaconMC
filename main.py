@@ -19,6 +19,12 @@ import platform
 import pluginapi
 import json
 
+dt_starting_to_start = tm.time()
+
+#BASE ERROR
+class OSNotCompatibleError(OSError):
+    pass
+
 #CONFIG READING
 print("Reading the config file...")
 with open("config.txt", "r") as config:
@@ -35,20 +41,26 @@ with open("config.txt", "r") as config:
         if dt[0] == "whitelist":
             dico = {"true": True, "false": False}
             public = dico[arg]
+            print(f"Whitelist: {arg}")
         elif dt[0] == "max_players":
             MAX_PLAYERS = int(arg)
+            print(f"Max players: {arg}")
         elif dt[0] == "motd":
             MOTD = arg
+            print(f"MOTD: {arg}")
         elif dt[0] == "debug_mode":
             dico = {"true": True, "false": False}
             DEBUG = dico[arg]
+            print(f"Debug mode: {arg}")
         elif dt[0] == "lang":
             lang = dt[1]
+            print(f"Lang: {arg}")
         else:
             continue
 
+print("Done.")
 print("Setting up the server...")
-print("OS compatibility checking...")
+print("Checking OS compatibility...")
 COMPATIBLE_OS = ["Windows", "Linux"]
 OS = platform.system()
 if OS in COMPATIBLE_OS:
@@ -57,7 +69,7 @@ if OS in COMPATIBLE_OS:
     elif OS == "Windows":
         SEP = "\\"
 else:
-    raise RuntimeError(f"OS {OS} is not compatible ! Please use Linux or Windows !")
+    raise OSNotCompatibleError(f"OS {OS} is not compatible ! Please use Linux or Windows !")
 print(f"OS {OS} is compatible !")
 
 #GLOBAL DATAS - VARIABLES
@@ -211,7 +223,7 @@ class MCServer(object):
             w_class = World(world)
             w_class.load()
             self.list_worlds.append(w_class)
-        log("DONE !", 0)
+        log(f"DONE ! Server successfully started on {round(tm.time() - dt_starting_to_start, 2)} seconds.", 0)
 
     def main(self):
         """Main"""
