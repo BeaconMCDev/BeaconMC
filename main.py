@@ -70,9 +70,14 @@ logfile = ""
 state = "OFF"
 
 #GLOBAL DATAS - CONSTANTS
+#################################
+###          READ THIS       ####
+### don't touch this section ####
+#################################
+
 SERVER_VERSION = "Alpha-dev"    #Version of the server. For debug
-CLIENT_VERSION = "1.16.5"       #Which version the client must have to connect
-PROTOCOL_VERSION = 754          #Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
+CLIENT_VERSION = "1.19.4"       #Which version the client must have to connect
+PROTOCOL_VERSION = 762          #Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
 PORT = 25565                    #Normal MC port
 IP = "0.0.0.0"
 #MAX_PLAYERS = 5
@@ -124,6 +129,10 @@ def be_ready_to_log():
         nb += 1
     logfile = f"logs/log{nb}.log"
     print("Log system ready !")
+
+def encode(msg:str):
+    """Convert quickly a string into bytes that will be sended to the client."""
+    return bytes(msg)
     
     
 ########################################################################################################################################################################################################################
@@ -360,7 +369,7 @@ class MCServer(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 class Client(object):
-    def __init__(self, connexion, info, server):
+    def __init__(self, connexion, info, server:MCServer):
         log("New client", 3)
         self.connexion = connexion
         self.info = info
@@ -505,13 +514,16 @@ class Client(object):
                 "favicon": "data:image/png;base64,<data>",
                 "enforcesSecureChat": True,
                 "previewsChat": True
-            }
+            }   #I think that is the older slp ever.
 
             response_str = json.dumps(response)
             response_length = str(len(response_str))
             packet = f"\x01{response_length}{response_str}"
             self.connexion.send(packet.encode())
 
+    def on_SLP(self):
+        log("Event 'on server list ping' triggered !", 3)
+        request = f'\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{MOTD}"},"players":{"max":{MAX_PLAYERS},"online":{len(self.server.list_clients)}},"version":{"name":"1.19","protocol":759}}'
 
 
             #self.connexion.send(f'0x01{"version":{"name":"1.19.4","protocol":762},"players":{"max":100,"online":5,"sample":[{"name":"thinkofdeath","id":"4566e69f-c907-48ee-8d71-d7ba5aa00d20"}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,<data>","enforcesSecureChat":true,"previewsChat":true}')
