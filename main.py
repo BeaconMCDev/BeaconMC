@@ -447,11 +447,12 @@ class Client(object):
 
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""
-        self.connexion.send(b'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{0}"]}'.format(SERVER_VERSION))
+        log("A client used a bad version. Disconnecting this client...", 0)
+        self.connexion.send(encode(f'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{CLIENT_VERSION}"]}'))
         self.connected = False
         self.connexion.close()
         self.server.list_client.remove(self)
-
+        log("Client disconnected: bad Minecraft version", 0)
         del(self)
 
     def treat(self, msg):
@@ -535,8 +536,9 @@ class Client(object):
 
     def on_SLP(self):
         log("Event 'on server list ping' triggered !", 3)
-        request = f'\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{MOTD}"},"players":{"max":{MAX_PLAYERS},"online":{len(self.server.list_clients)}},"version":{"name":"1.19","protocol":759}}'
-
+        request = f'\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{MOTD}"},"players":{"max":{MAX_PLAYERS},"online":{len(self.server.list_clients)}},"version":{"name":"{CLIENT_VERSION}","protocol":{PROTOCOL_VERSION}}}'
+        request = encode(request)
+        self.connexion.send(request, 1024)
 
             #self.connexion.send(f'0x01{"version":{"name":"1.19.4","protocol":762},"players":{"max":100,"online":5,"sample":[{"name":"thinkofdeath","id":"4566e69f-c907-48ee-8d71-d7ba5aa00d20"}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,<data>","enforcesSecureChat":true,"previewsChat":true}')
     def send_msg_to_chat(self, msg:str):
