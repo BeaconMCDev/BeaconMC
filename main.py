@@ -448,7 +448,7 @@ class Client(object):
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""
         log("A client used a bad version. Disconnecting this client...", 0)
-        self.connexion.send(encode(f'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{CLIENT_VERSION}"]}'))
+        self.connexion.send(encode(f'E\x00C\u007b"translate":"multiplayer.disconnect.incompatible","with":["{CLIENT_VERSION}"]\u007d'))
         self.connected = False
         self.connexion.close()
         self.server.list_client.remove(self)
@@ -535,8 +535,10 @@ class Client(object):
             self.connexion.send(packet.encode())
 
     def on_SLP(self):
+        # note for this section : \u007b is the equivalent of { and \u007d for }. Used in f strings to escape.
+
         log("Event 'on server list ping' triggered !", 3)
-        request = f'\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{MOTD}"},"players":{"max":{MAX_PLAYERS},"online":{len(self.server.list_clients)}},"version":{"name":"{CLIENT_VERSION}","protocol":{PROTOCOL_VERSION}}}'
+        request = f'\xca\x01\x00\xc7\x01\u007b"previewsChat":false,"description":\u007b"text":"{MOTD}"\u007d,"players":\u007b"max":{MAX_PLAYERS},"online":{len(self.server.list_clients)}\u007d,"version":\u007b"name":"{CLIENT_VERSION}","protocol":{PROTOCOL_VERSION}\u007d\u007d'
         request = encode(request)
         self.connexion.send(request, 1024)
 
