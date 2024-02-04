@@ -6,7 +6,7 @@
 import requests
 import json
 
-class Accounts:
+class Accounts(object):
     def check(self, username):
         '''Check authenticity of an account'''
         try:

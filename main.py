@@ -303,15 +303,13 @@ class MCServer(object):
         log(resp)
         log("Done !", type=3)
 
-    def is_premium(self, username:str, key:str):
-        """Check if the user is a premium user.
-        See https://minecraft.fandom.com/wiki/Classic_server_protocol#User_Authentication"""
-        if key == hashlib.md5(SALT + username):
-            #premium user
-            return True
-        else:
-            #cracked use
-            return False
+    def is_premium(self, username:str):
+        """Check if the user is a premium user. Return a boolean"""
+        import libs.mojangapi as mojangapi
+
+        accchecker = mojangapi.Accounts()
+        return accchecker.check(self.username)
+
         
     def setblock(self, base_request:bytes):
         """Analyse the setblock request and modify a block"""
