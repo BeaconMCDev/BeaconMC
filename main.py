@@ -284,24 +284,6 @@ class MCServer(object):
             thr.start()
             self.client_id_count += 1
             tm.sleep(0.1)
-        
-    def heartbeat(self):
-        """# DEPRECATED - DO NOT USE
-        Heartbeat to mojangs servers. See https://minecraft.fandom.com/wiki/Classic_server_protocol#Heartbeats for details"""
-        raise DeprecationWarning("We actually have an issue for this method. It does not work.")
-        global public
-        dico = {True: "true", False: "false"}
-        request = f"POST /heartbeat.jsp?port={PORT}&max={MAX_PLAYERS}&name={MOTD}&public={dico[public]}&version={PROTOCOL_VERSION}&salt={SALT}&users={connected_players}\r\n"
-        with skt.socket(skt.AF_INET, skt.SOCK_STREAM) as s:
-            s.connect(("minecraft.net", 80))
-            s.sendall(request.encode())
-            resp = s.recv(4096)
-            if resp != IP:
-                log("An issue advent during the heartbeat Mojang server side. See the following response for details : ", 100)
-                log(resp)
-                exit(-1)
-        log(resp)
-        log("Done !", type=3)
 
     def is_premium(self, username:str):
         """Check if the user is a premium user. Return a boolean"""
@@ -389,6 +371,16 @@ class Client(object):
         self.y = None
         self.z = None
         self.connected = True
+
+    def on_heartbeat(self):
+        """Id of the packet: 0x00"""
+        client_protocol_version = self.request[1:]
+        ...
+
+    def on_login_start(self):
+        """Starting the login in (rq C --> S)"""
+        self.request
+        ...
 
     def client_thread(self, id):
         """Per client thread"""
