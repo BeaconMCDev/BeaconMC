@@ -3,7 +3,7 @@ Sources for dev :
 - https://minecraft.fandom.com/wiki/Classic_server_protocol
 - https://minecraft.fandom.com/wiki/Protocol_version?so=search"""
 
-print("_________________________________________________________\nStarting BeaconMC 1.16.5\n_________________________________________________________")
+print("_________________________________________________________\nStarting BeaconMC 1.19.4\n_________________________________________________________")
 
 print("Importing librairies...")
 #IMPORTS - LIBRAIRIES
@@ -144,8 +144,7 @@ def be_ready_to_log():
 
 def encode(msg:str):
     """Convert quickly a string into bytes that will be sended to the client."""
-    return bytes(msg)
-    
+    return msg.encode()
     
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
@@ -154,11 +153,11 @@ def encode(msg:str):
 class MCServer(object):
     """Minecraft server class"""
 
-    SERVER_VERSION = "Alpha-dev"
-    CLIENT_VERSION = "1.16.5"   
-    PROTOCOL_VERSION = 754      
-    PORT = 25565                
-    IP = "0.0.0.0"
+    SERVER_VERSION = SERVER_VERSION
+    CLIENT_VERSION = CLIENT_VERSION  
+    PROTOCOL_VERSION = PROTOCOL_VERSION
+    PORT = PORT              
+    IP = IP
 
     def __init__(self):
         """Init the server"""
@@ -385,55 +384,58 @@ class Client(object):
     def client_thread(self, id):
         """Per client thread"""
         self.id = id
-        while self.connected:
-            try:
-                self.request = self.connexion.recv(4096)
-                self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.16.5","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
-
-            except:
-                continue
-            if self.request == "":
-                continue
-            log(self.request, 3)
-
-            if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
-                self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.16.5","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
-            else:
-                    tm.sleep(1)
+        try:
+            self.on_SLP()
+            while self.connected:
+                try:
+                    self.request = self.connexion.recv(4096)
+                    #self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
+                except:
                     continue
-                    c = -1
-                    u = ""
-                    while self.request[c] != "\x0f":
-                        u = self.request[c] + u
-                        c -= 1
-                    self.username = u
-                    self.joining()
+                if self.request == "":
+                    continue
+                log(self.request, 3)
+
+                if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
+                    self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
+                else:
+                        tm.sleep(1)
+                        continue
+                        c = -1
+                        u = ""
+                        while self.request[c] != "\x0f":
+                            u = self.request[c] + u
+                            c -= 1
+                        self.username = u
+                        self.joining()
 
 
-            #if self.request[0] == "\x05":
-            #    #setblock message
-            #    self.server.setblock(self.request)
-            #elif self.request[0] == "\x08":
-            #    #pos message
-            #    self.update_pos()
-            #elif self.request[0] == "\x0d":
-            #    #chat message
-            #    if self.request[2] == "/":#surely not that
-            #        ... #cmd
-#
-            #    self.server.post_to_chat(author=self.username, message=self.request[1:])
-            #elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
-            #    if self.request[-5:] == "\xd5\x11\x01\x01\x00":
-            #        #server list request
-            #        self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(self.treat(MOTD), MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
-            #    else:
-            #        c = -1
-            #        u = ""
-            #        while self.request[c] != "\x0f":
-            #            u = self.request[c] + u
-            #            c -= 1
-            #        self.username = u
-            #        self.joining()
+                #if self.request[0] == "\x05":
+                #    #setblock message
+                #    self.server.setblock(self.request)
+                #elif self.request[0] == "\x08":
+                #    #pos message
+                #    self.update_pos()
+                #elif self.request[0] == "\x0d":
+                #    #chat message
+                #    if self.request[2] == "/":#surely not that
+                #        ... #cmd
+#   
+                #    self.server.post_to_chat(author=self.username, message=self.request[1:])
+                #elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
+                #    if self.request[-5:] == "\xd5\x11\x01\x01\x00":
+                #        #server list request
+                #        self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(self.treat(MOTD), MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
+                #    else:
+                #        c = -1
+                #        u = ""
+                #        while self.request[c] != "\x0f":
+                #            u = self.request[c] + u
+                #            c -= 1
+                #        self.username = u
+                #        self.joining()
+        except Exception as e:
+            log(e, 2)
 
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""
@@ -502,7 +504,7 @@ class Client(object):
     def identification(self):
         """Send id packet to the client"""
         opdico = {True:bytes("\x64"), False: bytes("\x00")}
-        self.connexion.send(f"\x00{bytes(PROTOCOL_VERSION)}{bytes('Python Server 1.16.5')}{bytes(MOTD)}{opdico[self.is_op]}".encode())
+        self.connexion.send(f"\x00{bytes(PROTOCOL_VERSION)}{bytes('Python Server 1.19.4')}{bytes(MOTD)}{opdico[self.is_op]}".encode())
 
     def ping(self):
         """Ping sent to clients periodically."""
