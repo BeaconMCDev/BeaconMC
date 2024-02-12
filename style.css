@@ -1,0 +1,182 @@
+body{
+
+    background: linear-gradient(90deg, rgb(220, 231, 67) 0%, rgb(23, 123, 218) 100%);
+    margin-left: 5%;
+    margin-right: 5%;
+h{
+    font-family: 'Black Ops One', system-ui;
+    font-family: 'Poppins', sans-serif;
+
+}
+}
+markthisimportant{
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0)
+    
+
+}
+p{
+    font-family: 'Poppins', sans-serif;
+}
+button{
+    background-image: linear-gradient(to right top, #0066ff, #00a1ff, #00c6eb, #00e087, #a8eb12);
+}
+
+.button-little {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    display: inline-block;
+    border-radius: 30px;
+    background-image: linear-gradient(to right top, #0066ff, #00a1ff, #00c6eb, #00e087, #a8eb12);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 14;
+    padding: 20px;
+    transition: all 0.5s;
+    cursor: pointer;
+    margin: 5px;
+  }
+  
+  .button-little span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+  }
+  
+  .button-little span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+  }
+  
+  .button-little:hover span {
+    padding-right: 25px;
+  }
+  
+  .button-little:hover span:after {
+    opacity: 1;
+    right: 0;
+  }
+
+.button-home {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    display: inline-block;
+    border-radius: 30px;
+    background-image: linear-gradient(to right top, #0066ff, #00a1ff, #00c6eb, #00e087, #a8eb12);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    padding: 20px;
+    transition: all 0.5s;
+    cursor: pointer;
+    margin: 5px;
+  }
+  
+  .button-home span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+  }
+  
+  .button-home span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+  }
+  
+  .button-home:hover span {
+    padding-right: 25px;
+  }
+  
+  .button-home:hover span:after {
+    opacity: 1;
+    right: 0;
+  }
+
+.doclist
+{
+    margin-left: 45%;
+    font-size: 17px;
+}
+
+.nav
+{
+    background-color: #a8eb12;
+    padding: 5px;
+    border-style: double;
+    border-color:rgb(0, 0, 0);
+}
+
+img
+{
+    padding: 5px;
+}
+
+#icon-home-bmc
+{
+    background-color: white;
+    margin-right: 25%;
+}
+
+#github-logo
+{
+    background-color: black;
+}
+
+.button-doc {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    display: block;
+    border-radius: 30px;
+    background-image: linear-gradient(to right top, #0066ff, #00a1ff, #00c6eb, #00e087, #a8eb12);
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    padding: 20px;
+    transition: all 0.5s;
+    cursor: pointer;
+    width: 500px;
+}
+  
+.button-doc span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button-doc span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button-doc:hover span {
+  padding-right: 25px;
+}
+
+.button-doc:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+
+.code
+{
+    background-color: #474e5c;
+    color: white;
+    border-style: solid;
+    border-color:rgb(0, 0, 0);
+    padding: 10px;
+}
