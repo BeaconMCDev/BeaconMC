@@ -54,3 +54,5 @@ def get_info(host='localhost', port=25565):
 
     # Load json and return
     return json.loads(d.decode('utf8'))
+
+print(get_info(host="localhost", port=25565))

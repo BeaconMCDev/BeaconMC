@@ -1,0 +1,18 @@
+[17:02:38] [Server/DEBUG]: Starting Plugin APi
+[17:02:38] [Server/INFO]: Plugin API loading...
+[17:02:38] [Server/INFO]: Checking some things...
+[17:02:38] [Server/INFO]: Folder plugin exists!
+[17:02:38] [Server/INFO]: Starting loading : Plugin Demo
+[17:02:38] [Server/INFO]: Loaded !
+[17:02:38] [Server/INFO]: Starting Minecraft server...
+[17:02:38] [Server/DEBUG]: Server version: Alpha-dev
+[17:02:38] [Server/DEBUG]: MC version: 1.19.4
+[17:02:38] [Server/DEBUG]: Protocol version: 762
+[17:02:38] [Server/INFO]: Loading ExamplePlugin from FewerElk (v 1.0)... COMPLETE !
+[17:02:38] [Server/INFO]: Loading worlds...
+[17:02:38] [Server/DEBUG]: Analysing worlds...
+[17:02:38] [Server/DEBUG]: 0 worlds found !
+[17:02:38] [Server/INFO]: DONE ! Server successfully started on 0.1 seconds.
+[17:03:01] [Server/DEBUG]: New client
+[17:03:01] [Server/DEBUG]: Event 'on server list ping' triggered !
+[17:03:01] [Server/ERROR]: [WinError 10045] L’opération tentée n’est pas prise en charge pour le type d’objet référencé
