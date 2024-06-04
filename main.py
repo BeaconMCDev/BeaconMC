@@ -369,8 +369,8 @@ class Packet(object):
         self.packet = packet
         self.args = args
 
-        if packet == None and typep == None:
-            raise PacketException(f"No information provided in the Packet instance {self}")
+        #if packet == None or b"" and typep == None:
+        #    raise PacketException(f"No information provided in the Packet instance {self}")
         if direction == "-INCOMING":
             self.incoming_packet()
         elif direction == "-OUTGOING":
@@ -393,12 +393,16 @@ class Packet(object):
 
     def pack_varint(self, d):
         o = b""
-        while True:
-            b = d & 0x7F
-            d >>= 7
-            o += struct.pack("B", b | (0x80 if d > 0 else 0))
-            if d == 0:
-                break
+        if d > 255:
+            o = bytes(hex(255), "utf-8")
+        else:
+
+            while True:
+                b = d & 0x7F
+                d >>= 7
+                o += struct.pack("B", b | (0x80 if d > 0 else 0))
+                if d == 0:
+                    break
         return o
     
     def pack_data(self, d):
@@ -424,6 +428,9 @@ class Packet(object):
         print(self.pack_varint(len(out)))
         out = self.pack_varint(len(out)) + out
         return out
+    
+    def __str__(self):
+        return self.__repr__().decode()
 
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
@@ -510,7 +517,7 @@ class Client(object):
                 #        self.username = u
                 #        self.joining()
         except Exception as e:
-            log(e, 2)
+            raise e
 
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""

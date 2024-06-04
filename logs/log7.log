@@ -1,0 +1,18 @@
+[13:29:24] [Server/DEBUG]: Starting Plugin APi
+[13:29:24] [Server/INFO]: Plugin API loading...
+[13:29:24] [Server/INFO]: Checking some things...
+[13:29:24] [Server/INFO]: Folder plugin exists!
+[13:29:24] [Server/INFO]: Starting loading : Plugin Demo
+[13:29:24] [Server/INFO]: Loaded !
+[13:29:24] [Server/INFO]: Starting Minecraft server...
+[13:29:24] [Server/DEBUG]: Server version: Alpha-dev
+[13:29:24] [Server/DEBUG]: MC version: 1.19.4
+[13:29:24] [Server/DEBUG]: Protocol version: 762
+[13:29:24] [Server/INFO]: Loading ExamplePlugin from FewerElk (v 1.0)... COMPLETE !
+[13:29:24] [Server/INFO]: Loading worlds...
+[13:29:24] [Server/DEBUG]: Analysing worlds...
+[13:29:24] [Server/DEBUG]: 0 worlds found !
+[13:29:24] [Server/INFO]: DONE ! Server successfully started on 0.09 seconds.
+[13:29:27] [Server/DEBUG]: New client
+[13:29:27] [Server/DEBUG]: b'\x0f\x00\x00\tlocalhostc\xdd\x01\x01\x00'
+[13:29:27] [Server/DEBUG]: Received ping

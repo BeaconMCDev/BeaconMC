@@ -13,16 +13,12 @@ def unpack_varint(s):
 
 def pack_varint(d: int):
     o = b""
-    if d > 255:
-        o = bytes(hex(255))
-    else:
-
-        while True:
-            b = d & 0x7F
-            d >>= 7
-            o += struct.pack("B", b | (0x80 if d > 0 else 0))
-            if d == 0:
-                break
+    while True:
+        b = d & 0x7F
+        d >>= 7
+        o += struct.pack("B", b | (0x80 if d > 0 else 0))
+        if d == 0:
+            break
     return o
 
 def pack_data(d):
@@ -73,4 +69,4 @@ def get_info2(host='localhost', port=25565):
 
     return s.recv(10000)
 
-print(get_info2(host="localhost", port=25565))
+print(get_info(host="localhost", port=25565))
