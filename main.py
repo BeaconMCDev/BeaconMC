@@ -18,6 +18,8 @@ import hashlib #for md5 auth system
 import platform
 import pluginapi
 import json
+from typing import Literal
+import struct
 
 dt_starting_to_start = tm.time()
 
@@ -354,7 +356,74 @@ class MCServer(object):
             return lst[0]
         else:
             raise TwoPlayerWithSameUsernameException(f"2 players with the same username {username} were found.")
+        
 
+class PacketException(Exception):
+    pass
+
+class Packet(object):
+    def __init__(self, socket: skt.socket, direction: Literal["-OUTGOING", "-INCOMING"], typep: hex=None, packet:bytes=None, args:tuple = None):
+        self.type = typep
+        self.socket = socket
+        self.direction = direction
+        self.packet = packet
+        self.args = args
+
+        if packet == None and typep == None:
+            raise PacketException(f"No information provided in the Packet instance {self}")
+        if direction == "-INCOMING":
+            self.incoming_packet()
+        elif direction == "-OUTGOING":
+            self.outgoing_packet()
+
+    def incoming_packet(self):
+        if self.type == None:
+            self.unpack()
+
+    def unpack(self):
+        lenth = self.packet[0]
+        id = self.packet[1]
+        other = self.packet[2:]
+        self.type = id
+        self.args = other
+        return lenth
+
+    def outgoing_packet(self):
+        ...
+
+    def pack_varint(self, d):
+        o = b""
+        while True:
+            b = d & 0x7F
+            d >>= 7
+            o += struct.pack("B", b | (0x80 if d > 0 else 0))
+            if d == 0:
+                break
+        return o
+    
+    def pack_data(self, d):
+        h = self.pack_varint(len(d))
+        if type(d) == str:
+            d = bytes(d, "utf-8")
+        return h + d
+
+    def send(self):
+        if self.direction == "-OUTGOING":
+            self.socket.send(self.__repr__())
+        else:
+            raise PacketException("Incoming packet tryied to be sended")
+
+    def __repr__(self) -> bytes:
+        out = self.pack_varint(self.type)
+        for i in self.args:
+            if type(i) == "<class 'int'>":
+                out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
+            else:
+                out += self.pack_varint(len(self.pack_data(i))) + self.pack_data(i)
+        print("Longueur :")
+        print(self.pack_varint(len(out)))
+        out = self.pack_varint(len(out)) + out
+        return out
 
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
@@ -385,7 +454,7 @@ class Client(object):
         """Per client thread"""
         self.id = id
         try:
-            self.on_SLP()
+            #self.SLP()
             while self.connected:
                 try:
                     self.request = self.connexion.recv(4096)
@@ -396,8 +465,14 @@ class Client(object):
                     continue
                 log(self.request, 3)
 
-                if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
-                    self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
+                self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
+                
+                # note : packet type are an integer
+                if self.packet.type == 0:
+                    
+                    self.SLP()
+                #if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
+                #    self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
                 else:
                         tm.sleep(1)
                         continue
@@ -509,24 +584,40 @@ class Client(object):
     def ping(self):
         """Ping sent to clients periodically."""
         self.connexion.send("\x01".encode())
-    def SLP(self, msg: str):
+
+    def int_to_hex_escape(n):
+        if n < 0:
+            raise ValueError("L'entier doit être positif.")
+
+        hex_string = n.to_bytes((n.bit_length() + 7) // 8, 'big').hex()
+        escaped_string = ''.join(f'\\x{hex_string[i:i+2]}' for i in range(0, len(hex_string), 2))
+        return escaped_string
+
+
+
+    def SLP(self):
         log("Received ping", 3)
         favicon = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACmElEQVR4Xu2ZsU7cQBRFV6AQgqIIFNFRpuIb+IT8B5+RlpqeElGlSRspbaTQpIyoaOiShh8geiu91dvrO9fDsGt2Z8bSKfA8v5l75LWNPXtKbBez4yaYYXDbsKhmBgKwoHaWBPw7+TQoqJ2FgBbCs4xzAWygNlIZZzbQAhh8SQDurA2VsQtQg5HHPzsrgfX6+eVgDu7HNZSiMnYBajCCiyuF9dpKAb8v95++fv7wbFiv5wjIrYuojMUCbCFYkwvrlRssty6iMnYBajCCk97dvF0s3PFTfAzsNSbg+/n7RY3N+/DjzdK82B9RGYsFMHIWw3qNCbDQcb/9jT0VKmMXoAYjuDjGqgX4neP+297S/o0QkBuWwXoxAZHc6wtDZewC1GAEF9QFTCAgXgMM++0btxfvBj0VKuNGC/D6jbwLNC+APQnmwHqNCbBT3k9/ewrc2CfBHFivMQGR3LqIytgFqMEITloK67UVArYZlbELUIO1oDJ2AWqwFlTGlQu4Oj2ib4JfE5Vx5QJKblPrRmXsAtRgCV1ADQLwImYXNqxJ1a1LwOXxx8F8ingsy+hQARgg9S8nq1uXAAuFfRXxWJbRmVRA/MLDwP6RKgTgmx0E+0eaFGBnjL8J8o8j+Fs37FO96sUyOpMI8IXiFx4khkpdUDH8VgiI2IKxT2kvRezNMjrVCFAvSllGpxoB6lU5y+hMIiD+Xu2BBvuU9opcnx0OejosozOJADyOgce8pBfCMjpVCBirYxkdKsDvvcbfX7vJr0A46dh+hdXFee0ZgD0H4HEGe754kQCUgc1TpATkgnNH7HeO9Yp4rMrYBahBo3kBNaAydgFqsBZSGW1/swJsn21NCvDwTQqI4ZsTgOGbEsDC2zYX0AKp7T9EfzJht1pgIgAAAABJRU5ErkJggg=="
-        if msg == "\x01":  # Check for SLP packet ID
-            response = {
-                "version": {"name": SERVER_VERSION, "protocol": PROTOCOL_VERSION},
-                "players": {"max": 100, "online": len(self.server.list_clients), "sample": [{"name": "FewerElk", "id": "16dcb929-b271-4db3-9cc6-059a851fcce1"}]},
-                "description": {"text": MOTD},
-                "favicon": "data:image/png;base64," + favicon,
-                "modinfo": {"type": "FML", "modlist": []},
-                "enforcesSecureChat": True,
-                "previewsChat": True
-            }  
+        
+        response = {
+            "version": {"name": SERVER_VERSION, "protocol": PROTOCOL_VERSION},
+            "players": {"max": MAX_PLAYERS, "online": len(self.server.list_clients), "sample": [{"name": "FewerElk", "id": "16dcb929-b271-4db3-9cc6-059a851fcce1"}]},
+            "description": {"text": MOTD},
+            "favicon": "data:image/png;base64," + favicon,
+            "modinfo": {"type": "FML", "modlist": []},
+            "enforcesSecureChat": True,
+            "previewsChat": True
+        }
 
-            response_str = json.dumps(response)
-            response_length = str(len(response_str))
-            packet = f"\x01{response_length}{response_str}"
-            self.connexion.send(packet.encode())
+        response_str = json.dumps(response)
+
+        packet_response = Packet(socket=self.connexion, direction="-OUTGOING", typep=0, args=(response_str, ))
+        
+        response_length = str(len(response_str))
+        response_length = chr(len(response_str))
+
+        print(f"Response : {packet_response.__repr__()}")
+        packet_response.send()
 
     def on_SLP(self):
         log("Event 'on server list ping' triggered !", 3)
@@ -888,7 +979,8 @@ if __name__ == "__main__":
         srv = MCServer()
         srv.start()
     except Exception as e:
-        log("FATAL ERROR : An error occured while running the server : uncatched exception.", 100)
+        log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
         log(e, 100)
+        log(type(e))
         srv.crash(e)
 
