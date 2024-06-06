@@ -245,6 +245,7 @@ class MCServer(object):
         state = "OFF"
         if critical:
             for i in self.list_clients:
+                i: Client
                 i.disconnect(reason=tr.key("disconnect.server_crashed"))
         else:
             for i in self.list_clients:
@@ -362,6 +363,10 @@ class PacketException(Exception):
     pass
 
 class Packet(object):
+    # DANGER | DO NOT TOUCH
+    SEGMENT_BITS = 0x7F
+    CONTINUE_BIT = 0x80
+
     def __init__(self, socket: skt.socket, direction: Literal["-OUTGOING", "-INCOMING"], typep: hex=None, packet:bytes=None, args:tuple = None):
         self.type = typep
         self.socket = socket
@@ -377,7 +382,7 @@ class Packet(object):
             self.outgoing_packet()
 
     def incoming_packet(self):
-        if self.type == None:
+        if self.type == None and not(self.packet == b""):
             self.unpack()
 
     def unpack(self):
@@ -391,12 +396,13 @@ class Packet(object):
     def outgoing_packet(self):
         ...
 
-    def pack_varint(self, d):
+    def pack_varint(self, d:int):
         o = b""
-        if d > 255:
-            o = bytes(hex(255), "utf-8")
-        else:
-
+        #if d >= 255:
+        #    o = d.to_bytes(2, byteorder="little")
+        #else:
+        #test
+        if True:
             while True:
                 b = d & 0x7F
                 d >>= 7
@@ -418,12 +424,12 @@ class Packet(object):
             raise PacketException("Incoming packet tryied to be sended")
 
     def __repr__(self) -> bytes:
-        out = self.pack_varint(self.type)
+        out = self.pack_varint(self.type)   #pack the type
         for i in self.args:
             if type(i) == "<class 'int'>":
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
             else:
-                out += self.pack_varint(len(self.pack_data(i))) + self.pack_data(i)
+                out += self.pack_data(i)
         print("Longueur :")
         print(self.pack_varint(len(out)))
         out = self.pack_varint(len(out)) + out
@@ -436,7 +442,7 @@ class Packet(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 class Client(object):
-    def __init__(self, connexion, info, server:MCServer):
+    def __init__(self, connexion: skt.socket, info, server:MCServer):
         log("New client", 3)
         self.connexion = connexion
         self.info = info
@@ -478,6 +484,7 @@ class Client(object):
                 if self.packet.type == 0:
                     
                     self.SLP()
+                    self.connexion.close()
                 #if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
                 #    self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
                 else:
@@ -573,9 +580,9 @@ class Client(object):
         self.connected = False
         if reason == "":
             reason = tr.key("disconnect.default")
-        self.connexion.send(f"\x0e{bytes(reason)}".encode())
+        self.connexion.send(f"\x0e{reason}".encode("utf-8"))
         self.connexion.close()
-        self.server.list_client.remove(self)
+        self.server.list_clients.remove(self)
         del(self)
 
     def do_spawn(self):
@@ -623,7 +630,7 @@ class Client(object):
         response_length = str(len(response_str))
         response_length = chr(len(response_str))
 
-        print(f"Response : {packet_response.__repr__()}")
+        log(f"Response : {packet_response.__repr__()}", 3)
         packet_response.send()
 
     def on_SLP(self):

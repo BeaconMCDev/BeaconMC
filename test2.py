@@ -41,10 +41,10 @@ def get_info(host='localhost', port=25565):
     s.send(pack_data("\x00"))
 
     # Read response
-    print(unpack_varint(s))     # Packet length
-    print(unpack_varint(s))     # Packet ID
+    print(f"Packet lenth : {unpack_varint(s)}")     # Packet length
+    print(f"Packet ID : {unpack_varint(s)}")     # Packet ID
     l = unpack_varint(s) # String length
-    print(l)
+    print(f"String lenth : {l}")
 
     d = b""
     while len(d) < l:
@@ -55,7 +55,7 @@ def get_info(host='localhost', port=25565):
 
     # Load json and return
     print(d)
-    return json.loads(d.decode('utf8'))
+    return json.loads(d.decode('utf-8'))
 
 def get_info2(host='localhost', port=25565):
 
@@ -67,6 +67,8 @@ def get_info2(host='localhost', port=25565):
     s.send(pack_data(b"\x00\x00" + pack_data(host.encode('utf8')) + pack_port(port) + b"\x01"))
     s.send(pack_data("\x00"))
 
-    return s.recv(10000)
+    a = s.recv(10000)
+    
+    return f"{len(a)} --> {a}"
 
 print(get_info(host="localhost", port=25565))
