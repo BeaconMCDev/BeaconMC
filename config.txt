@@ -1,5 +1,5 @@
 whitelist=true
 max_players=5
-motd=§aMy%20Server
+motd=§aA BeaconMC server
 debug_mode=true
 lang=en
