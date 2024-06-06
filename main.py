@@ -472,7 +472,6 @@ class Client(object):
         """Per client thread"""
         self.id = id
         try:
-            #self.SLP()
             while self.connected:
                 try:
                     self.request = self.connexion.recv(4096)
@@ -489,6 +488,9 @@ class Client(object):
                         self.SLP()
                         self.connexion.close()
                     else:
+                        self.SLP()              
+                        self.connexion.close()   # temp fix
+                        return
                         self.joining()
                 else:
                         tm.sleep(1)
