@@ -57,6 +57,9 @@ with open("config.txt", "r") as config:
         elif dt[0] == "lang":
             lang = dt[1]
             print(f"Lang: {arg}")
+        elif dt[0] == "online_mode":
+            dico = {"true": True, "false": False}
+            ONLINE_MODE = dico[arg]
         else:
             continue
 
@@ -160,6 +163,7 @@ class MCServer(object):
     PROTOCOL_VERSION = PROTOCOL_VERSION
     PORT = PORT              
     IP = IP
+    ONLINE_MODE = ONLINE_MODE
 
     def __init__(self):
         """Init the server"""
@@ -452,6 +456,7 @@ class Client(object):
         self.y = None
         self.z = None
         self.connected = True
+        self.state = 0
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -471,7 +476,6 @@ class Client(object):
             while self.connected:
                 try:
                     self.request = self.connexion.recv(4096)
-                    #self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
                 except:
                     continue
                 if self.request == "":
@@ -480,13 +484,12 @@ class Client(object):
 
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
-                # note : packet type are an integer
                 if self.packet.type == 0:
-                    
-                    self.SLP()
-                    self.connexion.close()
-                #if self.request == b'\x10\x00\xf2\x05\t127.0.0.1c\xdd\x01\x01\x00':
-                #    self.connexion.send(b'\x85\x01\x00\x82\x01{"version":{"name":"1.19.4","protocol":754},"players":{"max":0,"online":0,"sample":[]},"description":{"text":"{\"health\":true}"}}')
+                    if self.packet.args[-1] == 1:
+                        self.SLP()
+                        self.connexion.close()
+                    else:
+                        self.joining()
                 else:
                         tm.sleep(1)
                         continue
@@ -552,6 +555,33 @@ class Client(object):
 
     def joining(self):
         """When the request is a joining request"""
+        self.username = self.packet.args[0]
+        self.uuid = self.packet.args[1]
+        log(f"Player {self.username} with uuid {self.uuid} is loging in !")
+
+        if connected_players >= MAX_PLAYERS:
+            log(f"Disconnecting {self.username}: {tr.key("disconnect.server_full")}", 0)
+            self.disconnect(tr.key("disconnect.server_full"))
+            return
+        #HOW TO GET THE PROTOCOL VERSION ?
+        if not(PROTOCOL_VERSION == PROTOCOL_VERSION):
+            log(f"Disconnecting {self.username} : {tr.key("disconnect.bad_protocol")}.", 0)
+            self.disconnect(tr.key("disconnect.bad_protocol"))
+            return
+        if not(self.server.is_premium(self.username)):
+            log(f"Disconnecting {self.username} : {tr.key("disconnect.not_premium")}.", 0)
+            self.disconnect(tr.key("disconnect.not_premium"))
+            return
+        packet_r = Packet(self.connexion, "-OUTGOING", typep=2, args=(self.uuid, self.username, 0, False))
+        log(packet_r, 0)
+        packet_r.send()
+
+        self.state = 1
+        p_response = Packet(self.connexion, direction="-OUTGOING", typep=1, args=("serverid", b"publick key", "verify token", ONLINE_MODE))
+        log(p_response, 3)
+        p_response.send()
+
+        """
         self.p_version = self.request[1]
         self.username = self.request[1:64]
         self.key = self.request[65:129]
@@ -572,7 +602,7 @@ class Client(object):
                 self.disconnect(tr.key("disconnect.server_full"))
         else:
             log(f"User {self.username} is not premium ! Access couldn't be gived.", 1)
-            self.disconnect(tr.key("disconnect.not_premium"))
+            self.disconnect(tr.key("disconnect.not_premium"))"""
 
     def disconnect(self, reason=""):
         """Disconnect the player

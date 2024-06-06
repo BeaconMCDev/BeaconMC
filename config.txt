@@ -3,3 +3,4 @@ max_players=5
 motd=§aA BeaconMC server
 debug_mode=true
 lang=en
+online_mode=false
