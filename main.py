@@ -643,8 +643,14 @@ class Client(object):
 
     def SLP(self):
         log("Received ping", 3)
-        favicon = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACmElEQVR4Xu2ZsU7cQBRFV6AQgqIIFNFRpuIb+IT8B5+RlpqeElGlSRspbaTQpIyoaOiShh8geiu91dvrO9fDsGt2Z8bSKfA8v5l75LWNPXtKbBez4yaYYXDbsKhmBgKwoHaWBPw7+TQoqJ2FgBbCs4xzAWygNlIZZzbQAhh8SQDurA2VsQtQg5HHPzsrgfX6+eVgDu7HNZSiMnYBajCCiyuF9dpKAb8v95++fv7wbFiv5wjIrYuojMUCbCFYkwvrlRssty6iMnYBajCCk97dvF0s3PFTfAzsNSbg+/n7RY3N+/DjzdK82B9RGYsFMHIWw3qNCbDQcb/9jT0VKmMXoAYjuDjGqgX4neP+297S/o0QkBuWwXoxAZHc6wtDZewC1GAEF9QFTCAgXgMM++0btxfvBj0VKuNGC/D6jbwLNC+APQnmwHqNCbBT3k9/ewrc2CfBHFivMQGR3LqIytgFqMEITloK67UVArYZlbELUIO1oDJ2AWqwFlTGlQu4Oj2ib4JfE5Vx5QJKblPrRmXsAtRgCV1ADQLwImYXNqxJ1a1LwOXxx8F8ingsy+hQARgg9S8nq1uXAAuFfRXxWJbRmVRA/MLDwP6RKgTgmx0E+0eaFGBnjL8J8o8j+Fs37FO96sUyOpMI8IXiFx4khkpdUDH8VgiI2IKxT2kvRezNMjrVCFAvSllGpxoB6lU5y+hMIiD+Xu2BBvuU9opcnx0OejosozOJADyOgce8pBfCMjpVCBirYxkdKsDvvcbfX7vJr0A46dh+hdXFee0ZgD0H4HEGe754kQCUgc1TpATkgnNH7HeO9Yp4rMrYBahBo3kBNaAydgFqsBZSGW1/swJsn21NCvDwTQqI4ZsTgOGbEsDC2zYX0AKp7T9EfzJht1pgIgAAAABJRU5ErkJggg=="
-        
+
+        from base64 import b64encode
+        try :
+            with open('server-icon.png', 'rb') as image_file :
+                favicon = b64encode(image_file.read()).decode('utf-8')
+        except FileNotFoundError:
+            log("Server icon not found, using defauly", 1)
+            favicon = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACmElEQVR4Xu2ZsU7cQBRFV6AQgqIIFNFRpuIb+IT8B5+RlpqeElGlSRspbaTQpIyoaOiShh8geiu91dvrO9fDsGt2Z8bSKfA8v5l75LWNPXtKbBez4yaYYXDbsKhmBgKwoHaWBPw7+TQoqJ2FgBbCs4xzAWygNlIZZzbQAhh8SQDurA2VsQtQg5HHPzsrgfX6+eVgDu7HNZSiMnYBajCCiyuF9dpKAb8v95++fv7wbFiv5wjIrYuojMUCbCFYkwvrlRssty6iMnYBajCCk97dvF0s3PFTfAzsNSbg+/n7RY3N+/DjzdK82B9RGYsFMHIWw3qNCbDQcb/9jT0VKmMXoAYjuDjGqgX4neP+297S/o0QkBuWwXoxAZHc6wtDZewC1GAEF9QFTCAgXgMM++0btxfvBj0VKuNGC/D6jbwLNC+APQnmwHqNCbBT3k9/ewrc2CfBHFivMQGR3LqIytgFqMEITloK67UVArYZlbELUIO1oDJ2AWqwFlTGlQu4Oj2ib4JfE5Vx5QJKblPrRmXsAtRgCV1ADQLwImYXNqxJ1a1LwOXxx8F8ingsy+hQARgg9S8nq1uXAAuFfRXxWJbRmVRA/MLDwP6RKgTgmx0E+0eaFGBnjL8J8o8j+Fs37FO96sUyOpMI8IXiFx4khkpdUDH8VgiI2IKxT2kvRezNMjrVCFAvSllGpxoB6lU5y+hMIiD+Xu2BBvuU9opcnx0OejosozOJADyOgce8pBfCMjpVCBirYxkdKsDvvcbfX7vJr0A46dh+hdXFee0ZgD0H4HEGe754kQCUgc1TpATkgnNH7HeO9Yp4rMrYBahBo3kBNaAydgFqsBZSGW1/swJsn21NCvDwTQqI4ZsTgOGbEsDC2zYX0AKp7T9EfzJht1pgIgAAAABJRU5ErkJggg=="
         response = {
             "version": {"name": CLIENT_VERSION, "protocol": PROTOCOL_VERSION},
             "players": {"max": MAX_PLAYERS, "online": len(self.server.list_clients), "sample": [{"name": "FewerElk", "id": "16dcb929-b271-4db3-9cc6-059a851fcce1"}]},
