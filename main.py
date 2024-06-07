@@ -585,16 +585,19 @@ class Client(object):
         log(f"Player {self.username} with uuid {self.uuid} is loging in !")
 
         if connected_players >= MAX_PLAYERS:
-            log(f"Disconnecting {self.username}: {tr.key('disconnect.server_full')}", 0)
+            r = tr.key("disconnect.server_full")
+            log(f"Disconnecting {self.username}: {r}", 0)
             self.disconnect(tr.key("disconnect.server_full"))
             return
         #HOW TO GET THE PROTOCOL VERSION ?
         if not(PROTOCOL_VERSION == PROTOCOL_VERSION):
-            log(f"Disconnecting {self.username} : {tr.key("disconnect.bad_protocol")}.", 0)
+            r = tr.key("disconnect.bad_protocol")
+            log(f"Disconnecting {self.username} : {r}.", 0)
             self.bad_version()
             return
         if not(self.server.is_premium(self.username)):
-            log(f"Disconnecting {self.username} : {tr.key("disconnect.not_premium")}.", 0)
+            r = tr.key("disconnect.not_premium")
+            log(f"Disconnecting {self.username} : {r}.", 0)
             self.disconnect(tr.key("disconnect.not_premium"))
             return
         
