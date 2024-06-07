@@ -585,7 +585,7 @@ class Client(object):
         log(f"Player {self.username} with uuid {self.uuid} is loging in !")
 
         if connected_players >= MAX_PLAYERS:
-            log(f"Disconnecting {self.username}: {tr.key("disconnect.server_full")}", 0)
+            log(f"Disconnecting {self.username}: {tr.key('disconnect.server_full')}", 0)
             self.disconnect(tr.key("disconnect.server_full"))
             return
         #HOW TO GET THE PROTOCOL VERSION ?
