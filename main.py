@@ -7,9 +7,7 @@ print("_________________________________________________________\nStarting Beaco
 
 print("Importing librairies...")
 #IMPORTS - LIBRAIRIES
-from tkinter.simpledialog import *
 import socket as skt
-import tkinter as tk
 import time as tm
 import random as rdm
 import plugins.modulable_pluginsystem as mplsys
