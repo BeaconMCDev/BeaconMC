@@ -20,6 +20,7 @@ import pluginapi
 import json
 from typing import Literal
 import struct
+import uuid
 
 dt_starting_to_start = tm.time()
 
@@ -481,17 +482,31 @@ class Client(object):
                     continue
                 log(self.request, 3)
 
+                if self.request == b"\x00":
+                    pass #status ping
+
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
                 if self.packet.type == 0:
                     if self.packet.args[-1] == 1:
                         self.SLP()
                         self.connexion.close()
+                        self.connected = False
                     else:
                         self.SLP()              
                         self.connexion.close()   # temp fix
-                        return
+                        self.connected = False
+                        continue
                         self.joining()
+                elif self.packet.type == 1:
+                    self.SLP()
+                    self.connexion.close()
+                    self.connected = False
+                elif self.packet.type == 3:
+                    if self.state == 1:
+                        ...
+                    else:
+                        log(f"BadPacket.", 1)
                 else:
                         tm.sleep(1)
                         continue
@@ -530,6 +545,9 @@ class Client(object):
                 #        self.joining()
         except Exception as e:
             raise e
+        
+    def status_request(self):
+        ...
 
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""
@@ -555,6 +573,11 @@ class Client(object):
         """update the client pos with the request"""
         ...
 
+    def unpack_uuid(self, d:bytes):
+        msb = struct.unpack('>Q', d[:8])[0]
+        lsb = struct.unpack('>Q', d[8:])[0]
+        return uuid.UUID(int=(msb << 64) | lsb)
+
     def joining(self):
         """When the request is a joining request"""
         self.username = self.packet.args[0]
@@ -568,20 +591,24 @@ class Client(object):
         #HOW TO GET THE PROTOCOL VERSION ?
         if not(PROTOCOL_VERSION == PROTOCOL_VERSION):
             log(f"Disconnecting {self.username} : {tr.key("disconnect.bad_protocol")}.", 0)
-            self.disconnect(tr.key("disconnect.bad_protocol"))
+            self.bad_version()
             return
         if not(self.server.is_premium(self.username)):
             log(f"Disconnecting {self.username} : {tr.key("disconnect.not_premium")}.", 0)
             self.disconnect(tr.key("disconnect.not_premium"))
             return
+        
+        if ONLINE_MODE:
+            
+            p_response = Packet(self.connexion, direction="-OUTGOING", typep=1, args=("serverid", b"publick key", "verify token", ONLINE_MODE))
+            log(p_response, 3)
+            p_response.send()
+
         packet_r = Packet(self.connexion, "-OUTGOING", typep=2, args=(self.uuid, self.username, 0, False))
         log(packet_r, 0)
         packet_r.send()
-
         self.state = 1
-        p_response = Packet(self.connexion, direction="-OUTGOING", typep=1, args=("serverid", b"publick key", "verify token", ONLINE_MODE))
-        log(p_response, 3)
-        p_response.send()
+
 
         """
         self.p_version = self.request[1]
