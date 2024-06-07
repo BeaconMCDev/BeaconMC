@@ -7,18 +7,19 @@ print("_________________________________________________________\nStarting Beaco
 
 print("Importing librairies...")
 #IMPORTS - LIBRAIRIES
+from tkinter.simpledialog import *
 import socket as skt
 import tkinter as tk
-from tkinter.simpledialog import *
 import time as tm
 import random as rdm
-import os
+import plugins.modulable_pluginsystem as mplsys
+from typing import Literal
 import threading as thread
+import os
 import hashlib #for md5 auth system
 import platform
 import pluginapi
 import json
-from typing import Literal
 import struct
 import uuid
 
@@ -211,7 +212,6 @@ class MCServer(object):
 
     def load_plugins(self):
         """Load the plugins"""
-        import plugins.modulable_pluginsystem as mplsys
         self.PLUGIN_ALLOWED = mplsys.ENABLE_PLUGINS
         self.PLUGIN_LIST = mplsys.PLUGIN_LIST
 
