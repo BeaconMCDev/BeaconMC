@@ -22,6 +22,7 @@ import struct
 import uuid
 
 dt_starting_to_start = tm.time()
+lthr = []
 
 #BASE ERROR
 class OSNotCompatibleError(OSError):
@@ -246,6 +247,9 @@ class MCServer(object):
         log("Stopping the server...", 0)
         global state
         state = "OFF"
+        global lthr
+        for t in lthr:
+            t.join()
         if critical:
             for i in self.list_clients:
                 i: Client
@@ -471,7 +475,7 @@ class Client(object):
         """Per client thread"""
         self.id = id
         try:
-            while self.connected:
+            while self.connected and state == "ON":
                 try:
                     self.request = self.connexion.recv(4096)
                 except:
