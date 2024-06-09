@@ -56,7 +56,7 @@ with open("config.txt", "r") as config:
             DEBUG = dico[arg]
             print(f"Debug mode: {arg}")
         elif dt[0] == "lang":
-            lang = dt[1]
+            lang = arg
             print(f"Lang: {arg}")
         elif dt[0] == "online_mode":
             dico = {"true": True, "false": False}
@@ -207,6 +207,7 @@ class MCServer(object):
         self.load_worlds()
         self.act = thread.Thread(target=self.add_client_thread)
         self.act.start()
+        lthr.append(self.act)
         self.main()
 
     def load_plugins(self):
@@ -248,8 +249,7 @@ class MCServer(object):
         global state
         state = "OFF"
         global lthr
-        for t in lthr:
-            t.join()
+        log("Disconnecting all the clients...", 0)
         if critical:
             for i in self.list_clients:
                 i: Client
@@ -257,9 +257,16 @@ class MCServer(object):
         else:
             for i in self.list_clients:
                 i.disconnect(reason=tr.key("disconnect.server_closed"))
+        log("Closing socket...", 0)
         self.socket.close()
+        log("Stopping all tasks...", 0)
+        for t in lthr:
+            t: thread.Thread
+            t.join()
+        
         ...
         if not(critical):
+            log("Server closed.", 0)
             exit(0)
         else:
             log("Server closed : Critical error.", 100)
@@ -274,7 +281,7 @@ class MCServer(object):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
             crashfile.write(""" BeaconMC 1.16.5\n________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\n{0}""".format(reason))
-
+        self.stop(True, reason)
 
 
     def add_client_thread(self):
@@ -291,6 +298,7 @@ class MCServer(object):
             self.list_clients.append(cl)
             thr = thread.Thread(target=cl.client_thread, args=[self.client_id_count])
             thr.start()
+            lthr.append(thr)
             self.client_id_count += 1
             tm.sleep(0.1)
 
@@ -494,6 +502,7 @@ class Client(object):
                         self.SLP()
                         self.connexion.close()
                         self.connected = False
+                        self.server.list_clients.remove(self)
                     else:
                         self.SLP()              
                         self.connexion.close()   # temp fix
@@ -545,6 +554,7 @@ class Client(object):
                 #            c -= 1
                 #        self.username = u
                 #        self.joining()
+            self.server.list_clients.remove(self)
         except Exception as e:
             raise e
         
@@ -697,10 +707,6 @@ class Client(object):
 
         packet_response = Packet(socket=self.connexion, direction="-OUTGOING", typep=0, args=(response_str, ))
         
-        response_length = str(len(response_str))
-        response_length = chr(len(response_str))
-
-        log(f"Response : {packet_response.__repr__()}", 3)
         packet_response.send()
 
     def on_SLP(self):
@@ -1064,7 +1070,6 @@ if __name__ == "__main__":
         srv.start()
     except Exception as e:
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
-        log(e, 100)
-        log(type(e))
-        srv.crash(e)
+        log(f"{type(e)}: {e}", 100)
+        srv.stop(critical=True, reason=f"{type(e)}: {e}")
 
