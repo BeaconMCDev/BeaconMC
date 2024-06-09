@@ -1,4 +1,0 @@
-[13:20:12] [Server/INFO]: Stopping the server...
-[13:20:12] [Server/CRITICAL]: FATAL ERROR : An error occured while running the server : uncaught exception.
-[13:20:12] [Server/CRITICAL]: string argument without an encoding
-[13:20:12] [Server/UNKNOW]: <class 'TypeError'>
