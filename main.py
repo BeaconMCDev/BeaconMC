@@ -309,7 +309,7 @@ class MCServer(object):
         while os.path.exists("crash_reports/crash{0}".format(c)):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
-            crashfile.write(f""" BeaconMC {SERVER_VERSION}\n\nFor Minecraft {CLIENT_VERSION}________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nThe server crashed because of the following cause : {reason}\nDebug mode : {DEBUG}""")
+            crashfile.write(f""" BeaconMC {SERVER_VERSION}\n\nFor Minecraft {CLIENT_VERSION}\n________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nThe server crashed because of the following cause : {reason}\nDebug mode : {DEBUG}""")
 
 
     def add_client_thread(self):
@@ -771,7 +771,8 @@ class NeoWorld(object):
     def load(self):
         """Load the world"""
         nbt_file = nbtlib.load(self.BASE + "level.dat")
-        nbt_file["Data"]
+        self.difficulty = nbt_file["Data"]["Difficulty"]
+        self.wonderingtraderspawnchance = nbt_file["Data"]["WanderingTraderSpawnChance"]
         print(nbt_file)
 
 
