@@ -1,7 +1,6 @@
 """Minecraft server in python 3.11
-Sources for dev : 
-- https://minecraft.fandom.com/wiki/Classic_server_protocol
-- https://minecraft.fandom.com/wiki/Protocol_version?so=search"""
+Source for dev : 
+- https://wiki.vg"""
 
 print("_________________________________________________________\nStarting BeaconMC 1.19.4\n_________________________________________________________")
 
@@ -20,6 +19,13 @@ import pluginapi
 import json
 import struct
 import uuid
+try:
+    import nbtlib
+except ModuleNotFoundError:
+    print("Installing missing library...")
+    os.system("pip install nbtlib")
+    import nbtlib
+    print("Done")
 
 dt_starting_to_start = tm.time()
 lthr = []
@@ -102,6 +108,14 @@ IP = "0.0.0.0"
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
 CONFIG_TO_REQUEST = {"\u00A7": "\xc2\xa7", "§": "\xc2\xa7"}
+#log counts
+errors = 0
+warnings = 0
+debug = 0
+info = 0
+critical = 0
+unknow = 0
+
 print("")
 
 def log(msg:str, type:int=-1):
@@ -113,21 +127,30 @@ def log(msg:str, type:int=-1):
     - 4: chat
     - 100: critical
     - other: unknow"""
+    global errors, warnings, debug, info, critical, unknow
+
     if type == 0:
         t = "INFO"
+        info += 1
     elif type == 1:
         t = "WARN"
+        warnings += 1
     elif type == 2:
         t = "ERROR"
+        errors += 1
     elif type == 3:
         t = "DEBUG"
         if not(DEBUG):
             return
+        else:
+            debug += 1
     elif type == 4:
         t = "CHAT"
     elif type == 100:
         t = "CRITICAL"
+        critical += 1
     else:
+        unknow += 1
         t = "UNKNOW"
     time = gettime()
     text = f"[{time}] [Server/{t}]: {msg}"
@@ -181,7 +204,10 @@ class MCServer(object):
         items_list = os.listdir(f"{os.getcwd()}{SEP}worlds")
         lst_world = []
         for item in items_list:
-            name, extention = item.split(".")
+            try:
+                name, extention = item.split(".")
+            except ValueError:
+                continue
             if extention == ".mcworld":
                 lst_world.append(name)
         log(f"{len(lst_world)} worlds found !", 3)
@@ -241,16 +267,16 @@ class MCServer(object):
             self.stop()
             exit(0)
 
-    def stop(self, critical=False, reason=""):
+    def stop(self, critical_stop=False, reason=""):
         """stop the server"""
-        if critical:
+        if critical_stop:
             log("Critical server stop trigered !", 100)
         log("Stopping the server...", 0)
         global state
         state = "OFF"
         global lthr
         log("Disconnecting all the clients...", 0)
-        if critical:
+        if critical_stop:
             for i in self.list_clients:
                 i: Client
                 i.disconnect(reason=tr.key("disconnect.server_crashed"))
@@ -265,12 +291,15 @@ class MCServer(object):
             t.join()
         
         ...
-        if not(critical):
-            log("Server closed.", 0)
+        
+        if not(critical_stop):
+            log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs.", 0)
             exit(0)
         else:
-            log("Server closed : Critical error.", 100)
+            log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
             self.crash(reason)
+            exit(-1)
+
 
     def crash(self, reason):
         """Generate a crash report
@@ -280,8 +309,7 @@ class MCServer(object):
         while os.path.exists("crash_reports/crash{0}".format(c)):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
-            crashfile.write(""" BeaconMC 1.16.5\n________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\n{0}""".format(reason))
-        self.stop(True, reason)
+            crashfile.write(f""" BeaconMC {SERVER_VERSION}\n\nFor Minecraft {CLIENT_VERSION}________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nThe server crashed because of the following cause : {reason}\nDebug mode : {DEBUG}""")
 
 
     def add_client_thread(self):
@@ -445,8 +473,6 @@ class Packet(object):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
             else:
                 out += self.pack_data(i)
-        print("Longueur :")
-        print(self.pack_varint(len(out)))
         out = self.pack_varint(len(out)) + out
         return out
     
@@ -691,9 +717,9 @@ class Client(object):
             with open('server-icon.png', 'rb') as image_file :
                 favicon = b64encode(image_file.read()).decode('utf-8')
         except FileNotFoundError:
-            log("Server icon not found, using defauly", 1)
-            favicon = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACmElEQVR4Xu2ZsU7cQBRFV6AQgqIIFNFRpuIb+IT8B5+RlpqeElGlSRspbaTQpIyoaOiShh8geiu91dvrO9fDsGt2Z8bSKfA8v5l75LWNPXtKbBez4yaYYXDbsKhmBgKwoHaWBPw7+TQoqJ2FgBbCs4xzAWygNlIZZzbQAhh8SQDurA2VsQtQg5HHPzsrgfX6+eVgDu7HNZSiMnYBajCCiyuF9dpKAb8v95++fv7wbFiv5wjIrYuojMUCbCFYkwvrlRssty6iMnYBajCCk97dvF0s3PFTfAzsNSbg+/n7RY3N+/DjzdK82B9RGYsFMHIWw3qNCbDQcb/9jT0VKmMXoAYjuDjGqgX4neP+297S/o0QkBuWwXoxAZHc6wtDZewC1GAEF9QFTCAgXgMM++0btxfvBj0VKuNGC/D6jbwLNC+APQnmwHqNCbBT3k9/ewrc2CfBHFivMQGR3LqIytgFqMEITloK67UVArYZlbELUIO1oDJ2AWqwFlTGlQu4Oj2ib4JfE5Vx5QJKblPrRmXsAtRgCV1ADQLwImYXNqxJ1a1LwOXxx8F8ingsy+hQARgg9S8nq1uXAAuFfRXxWJbRmVRA/MLDwP6RKgTgmx0E+0eaFGBnjL8J8o8j+Fs37FO96sUyOpMI8IXiFx4khkpdUDH8VgiI2IKxT2kvRezNMjrVCFAvSllGpxoB6lU5y+hMIiD+Xu2BBvuU9opcnx0OejosozOJADyOgce8pBfCMjpVCBirYxkdKsDvvcbfX7vJr0A46dh+hdXFee0ZgD0H4HEGe754kQCUgc1TpATkgnNH7HeO9Yp4rMrYBahBo3kBNaAydgFqsBZSGW1/swJsn21NCvDwTQqI4ZsTgOGbEsDC2zYX0AKp7T9EfzJht1pgIgAAAABJRU5ErkJggg=="
-        response = {
+            log("Server icon not found, using default", 1)
+            favicon = "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"
+            response = {
             "version": {"name": CLIENT_VERSION, "protocol": PROTOCOL_VERSION},
             "players": {"max": MAX_PLAYERS, "online": len(self.server.list_clients), "sample": [{"name": "FewerElk", "id": "16dcb929-b271-4db3-9cc6-059a851fcce1"}]},
             "description": {"text": MOTD},
@@ -726,6 +752,48 @@ class Client(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
+class NeoWorld(object):
+    def __init__(self, name, level=-1):
+        """Args:
+        - name: the name of the world (str). Used to load and save worlds.
+        - level: the type of the world (int). Can be 0 (overworld), 1 (nether) or 2 (end). -1 by default. -1 is for unknow level (when loading for example)"""
+        self.name = name
+        if level == -1:
+            self.level = None
+        else:
+            self.level = level
+        self.loaded = False
+        self.generated = None
+        self.BASE = f"{os.getcwd()}{SEP}worlds{SEP}{name}{SEP}"
+        self.data = None
+        self.spawn_coord = None
+
+    def load(self):
+        """Load the world"""
+        nbt_file = nbtlib.load(self.BASE + "level.dat")
+        nbt_file["Data"]
+        print(nbt_file)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class World(object):
     """World class"""
     def __init__(self, name, level=-1):
