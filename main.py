@@ -196,6 +196,25 @@ class MCServer(object):
         self.list_info = []
         self.list_clients = []
         self.list_worlds = []
+        try:
+            with open("eula.txt", "r") as eula_file:
+                if eula_file.read() == "eula=true":
+                    pass
+                else:
+                    log("You need to agree the Minecraft EULA to continue.", 1)
+                    log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
+                    log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
+                    self.stop(False, reason="You need to accept Minecraft eula to continue.")
+                return
+        except Exception as e:
+            print(f"{type(e)} : {e}")
+            log("The eula.txt file was not found, or the server was modified !", 1)
+            log("You need to agree the Minecraft EULA to continue.", 2)
+            log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
+            log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
+            self.stop(False, reason="You need to accept Minecraft eula to continue.")
+            return
+        
 
     def worlds_analyse(self):
         """Search for worlds in the worlds folder.
@@ -267,7 +286,7 @@ class MCServer(object):
             self.stop()
             exit(0)
 
-    def stop(self, critical_stop=False, reason=""):
+    def stop(self, critical_stop=False, reason="Server closed"):
         """stop the server"""
         if critical_stop:
             log("Critical server stop trigered !", 100)
@@ -293,8 +312,8 @@ class MCServer(object):
         ...
         
         if not(critical_stop):
-            log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs.", 0)
-            exit(0)
+            log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
+            exit()
         else:
             log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
             self.crash(reason)
