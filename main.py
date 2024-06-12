@@ -247,13 +247,25 @@ class MCServer(object):
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
         #self.heartbeat()
 
+        log("Loading plugins...", 0)
         self.load_plugins()
 
+        log("Starting console GUI...", 0)
+        self.gui = ConsoleGUI()
+
+        self.gui_thr = thread.Thread(target=self.gui.mainthread)
+        self.gui_thr.start()
+        lthr.append(self.gui_thr)
+
+        log("Starting listening...", 0)
         self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
+
         self.load_worlds()
+
         self.act = thread.Thread(target=self.add_client_thread)
         self.act.start()
         lthr.append(self.act)
+
         self.main()
 
     def load_plugins(self):
@@ -1157,6 +1169,13 @@ class Command(object):
             return False
         self.srv.stop()
         return True
+    
+class ConsoleGUI(object):
+    def __init__(self):
+        ...
+
+    def mainthread(self):
+        ...
 
 #PRE MAIN INSTRUCTIONS
 be_ready_to_log()
