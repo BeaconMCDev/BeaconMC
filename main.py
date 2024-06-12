@@ -6,6 +6,7 @@ print("_________________________________________________________\nStarting Beaco
 
 print("Importing librairies...")
 #IMPORTS - LIBRAIRIES
+import math
 import socket as skt
 import time as tm
 import random as rdm
@@ -789,12 +790,25 @@ class NeoWorld(object):
 
     def load(self):
         """Load the world"""
+        #Load world settings
         nbt_file = nbtlib.load(self.BASE + "level.dat")
         self.difficulty = nbt_file["Data"]["Difficulty"]
         self.wonderingtraderspawnchance = nbt_file["Data"]["WanderingTraderSpawnChance"]
-        print(nbt_file)
+        ...
+
+        self.regions = []
+        
 
 
+class Region(object):
+    def __init__(self, x:int, z:int, world_name:str):
+        self.x = x
+        self.z = z
+        self.file = f"worlds{SEP}{world_name}r.{x}.{z}.mca"
+
+    def is_chunk_in_region(self, x:int, z:int) -> bool:
+        region_xz = lambda x,z: (math.floor(x / 32), math.floor(z / 32))
+        return region_xz(x, z) == (self.x, self.z)
 
 
 
