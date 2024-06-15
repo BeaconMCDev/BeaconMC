@@ -338,10 +338,16 @@ class MCServer(object):
         Arg:
         - reason: str --> The crash message"""
         c = 0
+        try:
+            import traceback
+            import datetime
+            t = traceback.format_exc()
+        except:
+            t = None
         while os.path.exists("crash_reports/crash{0}".format(c)):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
-            crashfile.write(f""" BeaconMC {SERVER_VERSION}\n\nFor Minecraft {CLIENT_VERSION}\n________________________________________________________________________________________________________________\nA critical error advent, that force the server to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nThe server crashed because of the following cause : {reason}\nDebug mode : {DEBUG}""")
+            crashfile.write(f"""{datetime.datetime.now()}\nBeaconMC {SERVER_VERSION}\nFor Minecraft {CLIENT_VERSION}\n________________________________________________________________________________________________________________\nCritical error, the server had to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nCause of the crash : {reason}\nDebug mode : {DEBUG}\n________________________________________________________________________________________________________________\n{t}""")
 
 
     def add_client_thread(self):
@@ -457,8 +463,21 @@ class Packet(object):
             self.outgoing_packet()
 
     def incoming_packet(self):
-        if self.type == None and not(self.packet == b""):
-            self.unpack()
+        ...
+
+    def wait_for_packet(self):
+        if self.type == "-INCOMING":
+            self.lenth = self.unpack_varint(self.socket.recv(1))
+            tc = self.lenth
+            if self.lenth <= 0:
+                raise PacketException("NullPacket")
+            self.id = self.unpack_varint(self.socket.recv(1))
+            tc -= 1
+            if self.id == 0:
+                # 2 more possibles cases
+                ...
+        else:
+            raise PacketException("Wating to receive packet in -OUTGOING mode")
 
     def unpack(self):
         lenth = self.packet[0]
@@ -485,6 +504,15 @@ class Packet(object):
                 if d == 0:
                     break
         return o
+    
+    def unpack_varint(data):
+        d = 0
+        for i in range(5):
+            b = data[i]
+            d |= (b & 0x7F) << (7 * i)
+            if not b & 0x80:
+                break
+        return d
     
     def pack_data(self, d):
         h = self.pack_varint(len(d))
@@ -525,7 +553,7 @@ class Client(object):
         self.y = None
         self.z = None
         self.connected = True
-        self.state = 0
+        self.state = None
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -543,7 +571,8 @@ class Client(object):
         try:
             while self.connected and state == "ON":
                 try:
-                    self.request = self.connexion.recv(4096)
+                    lenth = self.connexion.recv(1)
+                    self.request = lenth + self.connexion.recv(Packet.unpack_varint(lenth))
                 except:
                     continue
                 if self.request == "":
@@ -680,7 +709,6 @@ class Client(object):
         packet_r = Packet(self.connexion, "-OUTGOING", typep=2, args=(self.uuid, self.username, 0, False))
         log(packet_r, 0)
         packet_r.send()
-        self.state = 1
 
 
         """
@@ -1192,5 +1220,5 @@ if __name__ == "__main__":
     except Exception as e:
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
         log(f"{type(e)}: {e}", 100)
-        srv.stop(critical=True, reason=f"{type(e)}: {e}")
+        srv.stop(critical_stop=True, reason=f"{type(e)}: {e}")
 
