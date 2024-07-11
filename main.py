@@ -583,13 +583,7 @@ class Client(object):
                 
                 if self.packet.type == 0:
                     if self.packet.args[-1] == 1:
-                        self.SLP()
-                        self.connexion.close()
-                        self.connected = False
-                        self.server.list_clients.remove(self)
-                    else:
-                        #self.SLP()              
-                         if self.connexion.recv(1) != \x00:
+                        if self.connexion.recv(1) != \x00:
                              self.connexion.close()   # temp fix
                              self.connected = False
                              log("Protocol error in client request, disconnecting it...", 2)
@@ -598,11 +592,16 @@ class Client(object):
                          else:
                               #ping sequence (to move ?)
                              self.SLP()
-                             self.connexion.recv(1)
                              payload = self.connexion.recv(self.connexion.recv(1))
                              pingresppacket = Packet(self.connexion, "-OUTGOING", \x01, payload)
                              pingresppacket.send()
-                        #self.joining()
+                        self.connexion.close()
+                        self.connected = False
+                        self.server.list_clients.remove(self)
+                    else:
+                        self.SLP()              
+                         
+                        self.joining()
                 elif self.packet.type == 1:
                     self.SLP()
                     self.connexion.close()
