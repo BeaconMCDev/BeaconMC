@@ -570,6 +570,7 @@ class Client(object):
         self.id = id
         try:
             while self.connected and state == "ON":
+                # Auth loop
                 try:
                     lenth = self.connexion.recv(1)
                     self.request = lenth + self.connexion.recv(Packet.unpack_varint(lenth))
