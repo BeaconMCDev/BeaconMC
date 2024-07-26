@@ -463,7 +463,7 @@ class Packet(object):
             self.outgoing_packet()
 
     def incoming_packet(self):
-        ...
+        self.unpack()
 
     def wait_for_packet(self):
         if self.type == "-INCOMING":
@@ -529,7 +529,7 @@ class Packet(object):
     def __repr__(self) -> bytes:
         out = self.pack_varint(self.type)   #pack the type
         for i in self.args:
-            if type(i) == "<class 'int'>":
+            if isinstance(i, int):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
             else:
                 out += self.pack_data(i)
@@ -542,6 +542,8 @@ class Packet(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
+
+
 class Client(object):
     def __init__(self, connexion: skt.socket, info, server:MCServer):
         log("New client", 3)
@@ -553,7 +555,7 @@ class Client(object):
         self.y = None
         self.z = None
         self.connected = True
-        self.state = None
+        self.protocol_state = "Handshaking"
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -569,6 +571,10 @@ class Client(object):
         """Per client thread"""
         self.id = id
         try:
+            log(f"New client from {self.info}", 3)
+            log("Starting listening loop in Handshaking state", 3)
+
+            # Ping / Auth loop (to developp)
             while self.connected and state == "ON":
                 try:
                     lenth = self.connexion.recv(1)
@@ -578,30 +584,85 @@ class Client(object):
                 if self.request == "":
                     continue
                 log(self.request, 3)
+                self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
 
-                if self.request == b"\x00":
-                    pass #status ping
+                if self.packet.type == 0 and self.protocol_state == "Handshaking":
+                    #Handshake
+
+                    if self.packet.args[-1] == 1:
+                        # Switch protocol state to status
+                        self.protocol_state = "Status"
+                        log(f"Switching to Status state for {self.info}", 3)
+
+                        continue
+
+                    elif self.packet.args[-1] == 2:
+                        # Switch protocol state to login
+                        self.protocol_state = "Login"
+                        log(f"Switching to login state for {self.info}", 3)
+
+                        continue
+
+                    elif self.packet.args[-1] == 3:
+                        # Switch protocol state to transfer
+                        self.protocol_state = "Transfer"
+                        log(f"Switching to transfer state for {self.info}", 3)
+                        
+                        continue
+
+                elif self.packet.type == 0 and self.protocol_state == "Status":
+                    #Status request -> Status response (SLP)
+                    self.SLP()
+                    continue
+
+                elif self.packet.type == 1 and self.protocol_state == "Status":
+                    payload = self.packet.args[0]
+                    self.ping_response(payload)
+                    self.connexion.close()
+                    self.connected = False
+                    break
+
+            ###############################################################################
+
+
+            if not(self.connected and state == "ON"):
+                #If server is stopping or the client is disconnecting (usefull ?)
+                log(f"Disconnecting {self.info} for some misc reasons.", 3)
+                self.connexion.close()
+                return
+            
+            ###############################################################################
+
+
+            while self.connected and state == "ON":
+                #to clean
 
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
                 if self.packet.type == 0:
                     if self.packet.args[-1] == 1:
+                        self.protocol_state = "Status"
                         self.SLP()
                         self.connexion.close()
                         self.connected = False
                         self.server.list_clients.remove(self)
+                    elif self.packet.args[-1] == 2:
+                        self.protocol_state = "Login"
+                        ...
+                    elif self.packet.args[-1] == 3:
+                        self.protocol_state == "Transfer"
+                        ...
                     else:
-                        self.SLP()              
-                        self.connexion.close()   # temp fix
+                        self.connexion.close()
                         self.connected = False
-                        continue
-                        self.joining()
+                        self.server.list_clients.remove(self)
+                        log("Client sent an invalid next state field in handshake. Connexion closed.")
                 elif self.packet.type == 1:
                     self.SLP()
                     self.connexion.close()
                     self.connected = False
                 elif self.packet.type == 3:
-                    if self.state == 1:
+                    if self.protocol_state == 1:
                         ...
                     else:
                         log(f"BadPacket.", 1)
@@ -644,6 +705,12 @@ class Client(object):
             self.server.list_clients.remove(self)
         except Exception as e:
             raise e
+        
+    def ping_response(self, payload):
+        """Send a response to a ping to make the client get the ping in ms of the server."""
+
+        response = Packet(self.connexion, "-OUTGOING", typep=1, args=(payload,))
+        response.send()
         
     def status_request(self):
         ...
