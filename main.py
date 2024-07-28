@@ -20,6 +20,7 @@ import pluginapi
 import json
 import struct
 import uuid
+import traceback
 try:
     import nbtlib
 except ModuleNotFoundError:
@@ -299,7 +300,7 @@ class MCServer(object):
             self.stop()
             exit(0)
 
-    def stop(self, critical_stop=False, reason="Server closed"):
+    def stop(self, critical_stop=False, reason="Server closed", e:Exception=None):
         """stop the server"""
         if critical_stop:
             log("Critical server stop trigered !", 100)
@@ -329,17 +330,16 @@ class MCServer(object):
             exit()
         else:
             log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
-            self.crash(reason)
+            self.crash(reason, e)
             exit(-1)
 
 
-    def crash(self, reason):
+    def crash(self, reason, e:Exception=None):
         """Generate a crash report
         Arg:
         - reason: str --> The crash message"""
         c = 0
         try:
-            import traceback
             import datetime
             t = traceback.format_exc()
         except:
@@ -347,7 +347,7 @@ class MCServer(object):
         while os.path.exists("crash_reports/crash{0}".format(c)):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
-            crashfile.write(f"""{datetime.datetime.now()}\nBeaconMC {SERVER_VERSION}\nFor Minecraft {CLIENT_VERSION}\n________________________________________________________________________________________________________________\nCritical error, the server had to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nCause of the crash : {reason}\nDebug mode : {DEBUG}\n________________________________________________________________________________________________________________\n{t}""")
+            crashfile.write(f"""{datetime.datetime.now()}\nBeaconMC {SERVER_VERSION}\nFor Minecraft {CLIENT_VERSION}\n________________________________________________________________________________________________________________\nCritical error, the server had to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nCause of the crash : {reason}\n{traceback.format_exc(e)}\nDebug mode : {DEBUG}\n________________________________________________________________________________________________________________\n{t}""")
 
 
     def add_client_thread(self):
@@ -464,6 +464,15 @@ class Packet(object):
 
     def incoming_packet(self):
         self.unpack()
+
+    def unpack_uuid(self, uuid):
+        if len(uuid) != 16:
+            raise ValueError(f"invalid lenth {len(uuid)} for binary uuid")
+
+        hex_uuid = uuid.hex()
+        uuid_format = f"{hex_uuid[:8]}-{hex_uuid[8:12]}-{hex_uuid[12:16]}-{hex_uuid[16:20]}-{hex_uuid[20:]}"
+
+        return uuid_format
 
     def wait_for_packet(self):
         if self.type == "-INCOMING":
@@ -622,6 +631,33 @@ class Client(object):
                     self.SLP()
                     continue
 
+                elif self.packet.type == 0 and self.protocol_state == "Login":
+
+                    unamelenth = self.packet.args[0]
+                    i = 1
+                    self.username = ""
+                    while i < unamelenth:
+                        sb = self.packet.args[i:i+1]
+                        self.username += sb.decode("utf-8")
+                        i += 1
+
+                    self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i:])
+
+                    if ONLINE_MODE:
+                        #TODO Encryption Request
+                        ...
+                    
+                        #TODO Enable compression (would be optional) (in other "if" fork)
+                        ...
+                    else:
+                        #load player properties
+                        ...
+                        self.properties = ()
+                        response = Packet(self.connexion, "-OUTGOING", 2, args=(self.uuid, self.username, len(self.properties), self.properties, not(DEBUG)))
+                        response.send()
+                        self.server.list_clients.append(self)
+                        break
+
                 elif self.packet.type == 1 and self.protocol_state == "Status":
                     payload = self.packet.args[0]
                     self.ping_response(payload)
@@ -675,7 +711,11 @@ class Client(object):
                 #        self.joining()
             self.server.list_clients.remove(self)
         except Exception as e:
-            raise e
+            import traceback
+            log(f"{traceback.format_exc()}", 2)
+            self.connected = False
+            dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Internal server error"}', ))
+
         
     def ping_response(self, payload):
         """Send a response to a ping to make the client get the ping in ms of the server."""
@@ -1257,6 +1297,6 @@ if __name__ == "__main__":
         srv.start()
     except Exception as e:
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
-        log(f"{type(e)}: {e}", 100)
-        srv.stop(critical_stop=True, reason=f"{type(e)}: {e}")
+        log(f"{traceback.format_exc(e)}", 100)
+        srv.stop(critical_stop=True, reason=f"{e}", e=e)
 
