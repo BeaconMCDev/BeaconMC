@@ -540,10 +540,28 @@ class Packet(object):
         for i in self.args:
             if isinstance(i, int):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
+            elif isinstance(i, UUID):
+                out += self.pack_uuid(i)
+            elif isinstance(i, bool):
+                if i:
+                    out += b"\x01"
+                else:
+                    out += b"\x00"
+            elif isinstance(i, tuple):
+                ...
             else:
                 out += self.pack_data(i)
         out = self.pack_varint(len(out)) + out
         return out
+    
+    def pack_uuid(self, uuidObject):
+        uuid = uuidObject.uuid
+
+        hex_uuid = uuid.replace('-', '')
+
+        binaire_uuid = bytes.fromhex(hex_uuid)
+
+        return binaire_uuid
     
     def __str__(self):
         return self.__repr__().decode()
@@ -552,10 +570,12 @@ class Packet(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 
+class UUID(object):
+    def __init__(self, uuid):
+        self.uuid = uuid
 
 class Client(object):
     def __init__(self, connexion: skt.socket, info, server:MCServer):
-        log("New client", 3)
         self.connexion = connexion
         self.info = info
         self.server = server
@@ -589,8 +609,8 @@ class Client(object):
                 try:
                     lenth = self.connexion.recv(1)
                     self.request = lenth + self.connexion.recv(Packet.unpack_varint(lenth))
-                except:
-                    continue
+                except ConnectionResetError:
+                    log(f"Client {self.info} disconnected : Connexion reset.")
                 if self.request == "":
                     continue
                 log(self.request, 3)
@@ -636,12 +656,15 @@ class Client(object):
                     unamelenth = self.packet.args[0]
                     i = 1
                     self.username = ""
-                    while i < unamelenth:
+                    while i <= unamelenth:
                         sb = self.packet.args[i:i+1]
                         self.username += sb.decode("utf-8")
                         i += 1
 
-                    self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i:])
+                    self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i+1:])
+
+                    log(f"UUID of {self.username} is {self.uuid}.", 0)
+                    log(f"{self.username} is logging in from {self.info}.", 0)
 
                     if ONLINE_MODE:
                         #TODO Encryption Request
@@ -653,7 +676,7 @@ class Client(object):
                         #load player properties
                         ...
                         self.properties = ()
-                        response = Packet(self.connexion, "-OUTGOING", 2, args=(self.uuid, self.username, len(self.properties), self.properties, not(DEBUG)))
+                        response = Packet(self.connexion, "-OUTGOING", 2, args=(UUID(self.uuid), self.username, 0, not(DEBUG)))
                         response.send()
                         self.server.list_clients.append(self)
                         break
@@ -679,7 +702,6 @@ class Client(object):
             while self.connected and state == "ON":
                 #to clean
                 l = self.connexion.recv(1)
-                self.re
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
                 ...
