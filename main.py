@@ -361,7 +361,7 @@ class MCServer(object):
                 tm.sleep(0.1)
                 continue
             cl = Client(client_connection, client_info, self)
-            self.list_clients.append(cl)
+            #self.list_clients.append(cl)
             thr = thread.Thread(target=cl.client_thread, args=[self.client_id_count])
             thr.start()
             lthr.append(thr)
