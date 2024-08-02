@@ -402,8 +402,9 @@ class MCServer(object):
         if author == "":
             msg = message
         else:
-            msg = f"{author}: {message}"
+            msg = f"<{author}>: {message}"
         for p in self.list_clients:
+            p: Client
             p.send_msg_to_chat(msg)
         log(msg, 4)
 
@@ -541,7 +542,7 @@ class Packet(object):
             if isinstance(i, int):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
             elif isinstance(i, UUID):
-                out += self.pack_uuid(i)
+                out += (self.pack_varint(1) + self.pack_uuid(i))
             elif isinstance(i, bool):
                 if i:
                     out += b"\x01"
@@ -677,6 +678,7 @@ class Client(object):
                         ...
                         self.properties = ()
                         response = Packet(self.connexion, "-OUTGOING", 2, args=(UUID(self.uuid), self.username, 0, not(DEBUG)))
+                        log(response.__repr__(), 3)
                         response.send()
                         self.server.list_clients.append(self)
                         break
@@ -698,9 +700,12 @@ class Client(object):
             
             ###############################################################################
 
-
+            log(f"{self.username} joined the game.", 0)
+            self.server.post_to_chat(f"{self.username} joined the game")
             while self.connected and state == "ON":
                 #to clean
+                
+
                 l = self.connexion.recv(1)
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
@@ -732,6 +737,10 @@ class Client(object):
                 #        self.username = u
                 #        self.joining()
             self.server.list_clients.remove(self)
+        except ConnectionAbortedError:
+            log(f"Connexion aborted by client {self.info} ({self.username})", 0)
+            self.connexion.close()
+            self.connected = False
         except Exception as e:
             import traceback
             log(f"{traceback.format_exc()}", 2)
@@ -906,7 +915,9 @@ class Client(object):
         """Post a message in the player's chat.
         Argument:
         - msg:str --> the message to post on the chat"""
-        self.connexion.send(f"\x0d\x00{bytes(msg)}".encode())
+        packet = Packet(self.connexion, "-OUTGOING", 108, args=("{'color':'#FFDE59', 'text':'" + self.username + "joined the game.}", False))
+        print(packet.__repr__())
+        packet.send()
 
 
 ########################################################################################################################################################################################################################
