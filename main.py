@@ -667,6 +667,12 @@ class Client(object):
                     log(f"UUID of {self.username} is {self.uuid}.", 0)
                     log(f"{self.username} is logging in from {self.info}.", 0)
 
+                    if len(self.server.list_clients) >= MAX_PLAYERS:
+                        dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Server full."}', ))
+                        self.connected = False
+                        log(f"{self.username} lost connexion : server full.", 0)
+                        break
+
                     if ONLINE_MODE:
                         #TODO Encryption Request
                         ...
