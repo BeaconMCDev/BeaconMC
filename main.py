@@ -672,7 +672,20 @@ class Client(object):
                         self.connected = False
                         log(f"{self.username} lost connexion : server full.", 0)
                         break
-
+                    if WHITELIST:
+                        with open("whitelist.json", "r") as wf:
+                            data = json.loads(wf.read())
+                            o = 0
+                            for d in data:
+                                if d["uuid"] == self.uuid:
+                                    o += 1
+                            if o != 1:
+                                self.connected = False
+                                dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"You are not whitelisted on this server."}', ))
+                                log(f"{self.username} lost connexion : You are not connected to this server.", 0)
+                                if o > 1:
+                                    log("User is whitelisted more than 1 time !", 1)
+                                
                     if ONLINE_MODE:
                         #TODO Encryption Request
                         ...
