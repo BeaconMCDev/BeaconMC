@@ -157,8 +157,15 @@ def log(msg:str, type:int=-1):
     time = gettime()
     text = f"[{time}] [Server/{t}]: {msg}"
     print(text)
-    with open(logfile, "+a") as file:
-        file.write(text + "\n")
+    try:
+        with open(logfile, "+a") as file:
+            file.write(text + "\n")
+    except:
+        print('Error in log system! Creating file... ')
+        os.mkdir('logs')
+        with open(logfile, "+w") as file:
+            file.write(text + "\n")
+
 
     return
 

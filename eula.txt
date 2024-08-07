@@ -1,4 +1,4 @@
 # Please accept de EULA to run server
 
 # TODO: add the link to the EULA (cf. Mojang website)
-eula=false
+eula=true
