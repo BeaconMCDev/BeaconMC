@@ -207,7 +207,8 @@ class MCServer(object):
         self.list_worlds = []
         try:
             with open("eula.txt", "r") as eula_file:
-                if eula_file.read() == "eula=true":
+                eula =eula_file.read().split()
+                if "eula=true" in eula:
                     pass
                 else:
                     log("You need to agree the Minecraft EULA to continue.", 1)
