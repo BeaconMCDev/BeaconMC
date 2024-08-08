@@ -1,3 +1,4 @@
 # Please accept de EULA to run server
-# You can read the terms here : https://www.minecraft.net/fr-ca/eula
+# You can read the terms here : 
+# https://www.minecraft.net/en-us/eula
 eula=false
