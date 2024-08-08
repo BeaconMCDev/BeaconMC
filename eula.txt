@@ -1,4 +1,3 @@
 # Please accept de EULA to run server
-
-# TODO: add the link to the EULA (cf. Mojang website)
-eula=true
+# You can read the terms here : https://www.minecraft.net/fr-ca/eula
+eula=false
