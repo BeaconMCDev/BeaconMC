@@ -18,6 +18,7 @@ import hashlib #for md5 auth system
 import platform
 import pluginapi
 import json
+import mojangapi as m_api
 import struct
 import uuid
 import traceback
@@ -690,7 +691,7 @@ class Client(object):
                             if o != 1:
                                 self.connected = False
                                 dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"You are not whitelisted on this server."}', ))
-                                log(f"{self.username} lost connexion : You are not connected to this server.", 0)
+                                log(f"{self.username} lost connexion : You are not whitelisted to this server.", 0)
                                 if o > 1:
                                     log("User is whitelisted more than 1 time !", 1)
                                 
@@ -698,6 +699,17 @@ class Client(object):
                         #TODO Encryption Request
                         ...
                     
+                        api_system = m_api.Accounts()
+                        check_result = api_system.authenticate(self.username, self.uuid)
+                         if check_result[0]:
+                            log(f"sucessfully authenticated {self.username}.", 3)
+                            pass
+                        else:
+                            log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
+                            self.connected = False
+                            dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Failed to login."}', ))
+                            log(f"{self.username} lost connexion: Failed to login", 0)
+                        
                         #TODO Enable compression (would be optional) (in other "if" fork)
                         ...
                     else:
