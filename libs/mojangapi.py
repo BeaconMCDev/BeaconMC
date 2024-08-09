@@ -1,10 +1,13 @@
 #=========================
-# BEACONMC 1.16.5
+# BEACONMC 1.19.4
 #=========================
 # Mojang API
 
 import requests
 import json
+
+class MinecraftAccountVerificationError(Exception):
+    pass
 
 class Accounts(object):
     def exists(self, username):
@@ -32,6 +35,23 @@ class Accounts(object):
         except Exception as e:
             print(e)
             return False
+            
+    def authenticate(self, username, uuid):
+        try:
+            response = requests.get(f"https://api.mojang.com/users/profiles/minecraft/{username}")
+        
+            if response.status_code == 200:
+                profile = response.json()
+            
+                if profile['id'] == uuid.replace('-', ''):
+                    return (True, "")
+                else:
+                    return (False, f"UUID doesn't match. Receivt: {uuid}, expected: {profile['id']}.")
+            else:
+                return (False, f"This username doesn't exist ({response.status_code}).")
+    
+        except Exception as e:
+            raise MinecraftAccountVerificationError from e
         
 if __name__ == "__main__":
     acc = Accounts()
