@@ -701,7 +701,7 @@ class Client(object):
                     
                         api_system = m_api.Accounts()
                         check_result = api_system.authenticate(self.username, self.uuid)
-                         if check_result[0]:
+                        if check_result[0]:
                             log(f"sucessfully authenticated {self.username}.", 3)
                             pass
                         else:
