@@ -51,7 +51,7 @@ with open("config.txt", "r") as config:
         else:
             arg = dt[1]
         if dt[0] == "whitelist":
-            dico = {"true": True, "false": False}
+            dico = {"true": False, "false": True}
             public = dico[arg]
             print(f"Whitelist: {arg}")
         elif dt[0] == "max_players":
@@ -681,7 +681,7 @@ class Client(object):
                         self.connected = False
                         log(f"{self.username} lost connexion : server full.", 0)
                         break
-                    if WHITELIST:
+                    if not(public):
                         with open("whitelist.json", "r") as wf:
                             data = json.loads(wf.read())
                             o = 0
