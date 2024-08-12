@@ -4,6 +4,7 @@
 [![Discord](https://img.shields.io/discord/1159181236560986112?label=discord&logo=discord)](https://discord.gg/pxkT9dtuN8)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.19.4-brightgreen)](#)
 [![Development Status](https://img.shields.io/badge/Status-In%20Development-orange)](#)
+[![Code](https://github.com/FewerTeam/BeaconMC/actions/workflows/python-app.yml/badge.svg)](https://github.com/FewerTeam/BeaconMC/actions/workflows/python-app.yml)
 
 BeaconMC is a Minecraft server written in Python 3 that aims to simplify Minecraft development, particularly for plugins, which are typically created in Java.
 
