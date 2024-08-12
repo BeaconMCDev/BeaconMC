@@ -614,6 +614,8 @@ class Client(object):
             log("Starting listening loop in Handshaking state", 3)
 
             # Ping / Auth loop (to developp)
+            d_reason = "None"
+            misc_d = True
             while self.connected and state == "ON":
                 # Auth loop
                 try:
@@ -679,8 +681,9 @@ class Client(object):
                     if len(self.server.list_clients) >= MAX_PLAYERS:
                         dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Server full."}', ))
                         self.connected = False
-                        log(f"{self.username} lost connexion : server full.", 0)
-                        break
+                        misc_d = False
+                        d_reason = "Server full"
+                        continue
                     if not(public):
                         with open("whitelist.json", "r") as wf:
                             data = json.loads(wf.read())
@@ -691,7 +694,10 @@ class Client(object):
                             if o != 1:
                                 self.connected = False
                                 dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"You are not whitelisted on this server."}', ))
-                                log(f"{self.username} lost connexion : You are not whitelisted to this server.", 0)
+                                
+                                d_reason = "You are not whitelisted to this server."
+                                misc_d = False
+                    
                                 if o > 1:
                                     log("User is whitelisted more than 1 time !", 1)
                                 
@@ -708,7 +714,8 @@ class Client(object):
                             log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
                             self.connected = False
                             dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Failed to login."}', ))
-                            log(f"{self.username} lost connexion: Failed to login", 0)
+                            d_reason = "Failed to login"
+                            misc_d = False
                         
                         #TODO Enable compression (would be optional) (in other "if" fork)
                         ...
@@ -733,7 +740,10 @@ class Client(object):
 
             if not(self.connected and state == "ON"):
                 #If server is stopping or the client is disconnecting (usefull ?)
-                log(f"Disconnecting {self.info} for some misc reasons.", 3)
+                if misc_d:
+                    log(f"Disconnecting {self.info} for some misc reasons.", 3)
+                else:
+                    log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
             
