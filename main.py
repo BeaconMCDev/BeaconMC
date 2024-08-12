@@ -270,7 +270,7 @@ class MCServer(object):
         lthr.append(self.gui_thr)
 
         log("Starting listening...", 0)
-        self.socket.listen(MAX_PLAYERS + 1)  #+1 is for the temp connexions
+        self.socket.listen(MAX_PLAYERS + 1)  # +1 is for the temp connexions
 
         self.load_worlds()
 
@@ -289,7 +289,6 @@ class MCServer(object):
             pl.set_server(self)
             if pl._on_load():
                 pl.on_load()
-            
 
     def load_worlds(self):
         """Load all of the server's worlds"""
@@ -311,7 +310,7 @@ class MCServer(object):
             self.stop()
             exit(0)
 
-    def stop(self, critical_stop=False, reason="Server closed", e:Exception=None):
+    def stop(self, critical_stop=False, reason="Server closed", e: Exception=None):
         """stop the server"""
         if critical_stop:
             log("Critical server stop trigered !", 100)
@@ -333,10 +332,8 @@ class MCServer(object):
         for t in lthr:
             t: thread.Thread
             t.join()
-        
         ...
-        
-        if not(critical_stop):
+        if not (critical_stop):
             log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
             exit()
         else:
@@ -344,8 +341,7 @@ class MCServer(object):
             self.crash(reason, e)
             exit(-1)
 
-
-    def crash(self, reason, e:Exception=None):
+    def crash(self, reason, e: Exception = None):
         """Generate a crash report
         Arg:
         - reason: str --> The crash message"""
@@ -353,13 +349,12 @@ class MCServer(object):
         try:
             import datetime
             t = traceback.format_exc()
-        except:
+        except Exception:
             t = None
         while os.path.exists("crash_reports/crash{0}".format(c)):
             c += 1
         with open("crash_reports/crash{0}".format(c), "w") as crashfile:
             crashfile.write(f"""{datetime.datetime.now()}\nBeaconMC {SERVER_VERSION}\nFor Minecraft {CLIENT_VERSION}\n________________________________________________________________________________________________________________\nCritical error, the server had to stop. This crash report contain informations about the crash.\n________________________________________________________________________________________________________________\nCause of the crash : {reason}\n{traceback.format_exc(e)}\nDebug mode : {DEBUG}\n________________________________________________________________________________________________________________\n{t}""")
-
 
     def add_client_thread(self):
         """Thread for add clients."""
@@ -372,22 +367,22 @@ class MCServer(object):
                 tm.sleep(0.1)
                 continue
             cl = Client(client_connection, client_info, self)
-            #self.list_clients.append(cl)
+            # self.list_clients.append(cl)
             thr = thread.Thread(target=cl.client_thread, args=[self.client_id_count])
             thr.start()
             lthr.append(thr)
             self.client_id_count += 1
             tm.sleep(0.1)
 
-    def is_premium(self, username:str):
+    def is_premium(self, username: str):
         """Check if the user is a premium user. Return a boolean"""
         import libs.mojangapi as mojangapi
 
         accchecker = mojangapi.Accounts()
         return accchecker.check(self.username)
 
-        
-    def setblock(self, base_request:bytes):
+
+    def setblock(self, base_request: bytes):
         """Analyse the setblock request and modify a block"""
         id = base_request[0]
         x = base_request[1:2]
@@ -395,17 +390,17 @@ class MCServer(object):
         z = base_request[5:6]
         mode = base_request[7]
         block = base_request[8]
-        #check the request
+        # check the request
         if id != "\x05":
             log("A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !", 100)
             self.stop(critical=True, reason="A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !")
             raise RequestAnalyseException("Exception on analysing a request : bad method used (setblock andnot unknow).")
-        #TODO: Modify the block in the world
+        # TODO: Modify the block in the world
         ...
-        #TODO: send to every clients the modification
+        # TODO: send to every clients the modification
         ...
 
-    def post_to_chat(self, message:str, author:str=""):
+    def post_to_chat(self, message: str, author: str = ""):
         """Post a message in all player's chat
         Args:
         - message: str --> the message to send
