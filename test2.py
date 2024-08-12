@@ -27,8 +27,10 @@ def pack_data(d):
         d = bytes(d, "utf-8")
     return h + d
 
+
 def pack_port(i):
     return struct.pack('>H', i)
+
 
 def get_info(host='localhost', port=25565):
 
@@ -43,7 +45,7 @@ def get_info(host='localhost', port=25565):
     # Read response
     print(f"Packet lenth : {unpack_varint(s)}")     # Packet length
     print(f"Packet ID : {unpack_varint(s)}")     # Packet ID
-    l = unpack_varint(s) # String length
+    l = unpack_varint(s)  # String length
     print(f"String lenth : {l}")
 
     d = b""
@@ -57,8 +59,8 @@ def get_info(host='localhost', port=25565):
     print(d)
     return json.loads(d.decode('utf-8'))
 
-def get_info2(host='localhost', port=25565):
 
+def get_info2(host='localhost', port=25565):
     # Connect
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host, port))
@@ -70,5 +72,6 @@ def get_info2(host='localhost', port=25565):
     a = s.recv(10000)
     
     return f"{len(a)} --> {a}"
+
 
 print(get_info(host="localhost", port=25565))
