@@ -1,7 +1,7 @@
 # BeaconMC
 
 [![Website](https://img.shields.io/badge/Website-BeaconMC-blue)](https://fewerteam.github.io/BeaconMC)
-[![Discord](https://img.shields.io/discord/pxkT9dtuN8?label=Discord&logo=discord&color=7289da)](https://discord.gg/pxkT9dtuN8)
+[![Discord](https://img.shields.io/discord/1159181236560986112?label=discord&logo=discord)](https://discord.gg/pxkT9dtuN8)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.19.4-brightgreen)](#)
 [![Development Status](https://img.shields.io/badge/Status-In%20Development-orange)](#)
 
