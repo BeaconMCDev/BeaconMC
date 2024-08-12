@@ -1,9 +1,10 @@
 """The plugin api that allow plugin creation"""
 
+
 # class
 class Plugin(object):
-    def __init__(self, name: str, author: str, 
-        server: object, version: str, srv_version: str):
+    def __init__(self, name: str, author: str,
+            server: object, version: str, srv_version: str):
         self.name = name
         self.author = author
         self.server = server
@@ -30,21 +31,20 @@ class Plugin(object):
         self.state = -1
         self.LOCK = True   # used to block the bypasses
 
-    def on_player_join(self, player:str):
+    def on_player_join(self, player: str):
         pass
 
-    def on_player_leave(self, player:str):
+    def on_player_leave(self, player: str):
         pass
 
-    def on_player_death(self, player:str, message:str):
+    def on_player_death(self, player: str, message: str):
         pass
 
-    def on_player_reaspawn(self, player:str):
+    def on_player_reaspawn(self, player: str):
         pass
 
-    def on_message(self, messag:str, sourcev):
+    def on_message(self, messag: str, sourcev):
         pass
 
-    def on_mp(self, message:str, source:str, addressee:str):
+    def on_mp(self, message: str, source: str, addressee: str):
         pass
-        
