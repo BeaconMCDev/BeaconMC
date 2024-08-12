@@ -1052,7 +1052,7 @@ class World(object):
             self.data.append(c4)
             self.spawn_coord = {"x": 8, "y": 8, "y": 8}
 
-    def setblock(self, x:int, y:int, z:int, id:int, nbt:str=""):
+    def setblock(self, x: int, y: int, z: int, id: int, nbt: str=""):
         """Modify a block into the world.
         Args:
         - x (int): the x coordinate of the block
@@ -1096,7 +1096,7 @@ class World(object):
                 break
         return i
 
-    def _block_to_chunk_coords(self, x:int, y:int, z:int):
+    def _block_to_chunk_coords(self, x: int, y: int, z: int):
         """Convert a block coord to a chunk coord. Args: the coordinates. Return the chunk coords."""
         nx = x // 16
         ny = y // 16
@@ -1178,7 +1178,7 @@ class World(object):
             file.write(dt)
         log("Saved !")
 
-    def encode(self, data:list):
+    def encode(self, data: list):
         """Encode the world that will be saved.
         Arg:
         - data: (list) the data to encode.
@@ -1201,10 +1201,8 @@ class World(object):
 
         return final
 
-
     def generate(self):
         ...
-
 
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
@@ -1213,24 +1211,23 @@ class Translation(object):
     def __init__(self, lang):
         self.lang = lang
 
-
     def en(self, key):
         """English translation"""
-        dico = {"disconnect.default": "Disconnected.", 
+        dico = {"disconnect.default": "Disconnected.",
                 "disconnect.server_full": "Server full.",
-                "disconnect.not_premium": "Auth failed : user not premium.", 
-                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.", 
-                "disconnect.server_closed": "Server closed.", 
+                "disconnect.not_premium": "Auth failed : user not premium.",
+                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.",
+                "disconnect.server_closed": "Server closed.",
                 "disconnect.server_crashed": "Server crashed indeed of a critical error."}
         return dico[key]
 
     def fr(self, key):
         """French translation"""
-        dico = {"disconnect.default": "Déconnecté", 
+        dico = {"disconnect.default": "Déconnecté",
                 "disconnect.server_full": "Le serveur est plein.",
-                "disconnect.not_premium": "L'authentification a échouée : utilisateur non premium.", 
-                "disconnect.bad_protocol": "Merci de se connecter avec une autre version : protocole incompatioble.", 
-                "disconnect.server_closed": "Serveur fermé.", 
+                "disconnect.not_premium": "L'authentification a échouée : utilisateur non premium.",
+                "disconnect.bad_protocol": "Merci de se connecter avec une autre version : protocole incompatioble.",
+                "disconnect.server_closed": "Serveur fermé.",
                 "disconnect.server_crashed": "Le serveur a planté suite à une erreur critique."}
         return dico[key]
 
@@ -1238,9 +1235,9 @@ class Translation(object):
         """Espagnol translation"""      #TODO
         dico = {"disconnect.default": "Disconnected.", 
                 "disconnect.server_full": "Server full.",
-                "disconnect.not_premium": "Auth failed : user not premium.", 
-                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.", 
-                "disconnect.server_closed": "Server closed.", 
+                "disconnect.not_premium": "Auth failed : user not premium.",
+                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.",
+                "disconnect.server_closed": "Server closed.",
                 "disconnect.server_crashed": "Server crashed indeed of a critical error."}
         return dico[key]
 
@@ -1261,7 +1258,7 @@ class Translation(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
-#Exception class
+# Exception class
 class RequestAnalyseException(Exception):
     """Exception when analysing a request"""
     pass
@@ -1271,8 +1268,8 @@ class TwoPlayerWithSameUsernameException(Exception):
 
 class Command(object):
     def __init__(self, command: str, source: Client, server: MCServer):
-        self.COMMANDS = {"/msg": self.msg, 
-                "/tell": self.msg, 
+        self.COMMANDS = {"/msg": self.msg,
+                "/tell": self.msg,
                 "/stop":self.stop}   # other will be added later
 
         self.srv = server
@@ -1324,12 +1321,14 @@ class Command(object):
         self.srv.stop()
         return True
 
+
 class ConsoleGUI(object):
     def __init__(self):
         ...
 
     def mainthread(self):
         ...
+
 
 # PRE MAIN INSTRUCTIONS
 be_ready_to_log()
