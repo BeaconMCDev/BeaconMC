@@ -1,11 +1,8 @@
-"""Minecraft server in python 3.11
-Source for dev : 
-- https://wiki.vg"""
+""" BeaconMC - Python 3
+    Source for dev :
+    - https://wiki.vg"""
 
-print("_________________________________________________________\nStarting BeaconMC 1.19.4\n_________________________________________________________")
-
-print("Importing librairies...")
-#IMPORTS - LIBRAIRIES
+# IMPORTS - LIBRAIRIES
 import math
 import socket as skt
 import time as tm
@@ -29,11 +26,13 @@ except ModuleNotFoundError:
     os.system("pip install nbtlib")
     import nbtlib
     print("Done")
+    
+print("_________________________________________________________\nStarting BeaconMC 1.19.4\n_________________________________________________________")
 
 dt_starting_to_start = tm.time()
 lthr = []
 
-#BASE ERROR
+# BASE ERROR
 class OSNotCompatibleError(OSError):
     pass
 
