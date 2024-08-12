@@ -1,9 +1,9 @@
 """BEACONMC - modulable_pluginsystem file"""
 
-#If this option is true, the plugins will be loaded normally. Else, they will not be loaded.
+# If this option is true, the plugins will be loaded normally. Else, they will not be loaded.
 ENABLE_PLUGINS = True
 
-#Put here the plugins import
+# Put here the plugins import
 #
 # EXAMPLE
 #
@@ -16,7 +16,7 @@ ENABLE_PLUGINS = True
 import plugins.example.main as ex
 pl = ex.Plugin()
 
-#Put here the plugin instances
+# Put here the plugin instances
 #
 # EXAMPLE
 #
