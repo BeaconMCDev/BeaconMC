@@ -381,7 +381,6 @@ class MCServer(object):
         accchecker = mojangapi.Accounts()
         return accchecker.check(self.username)
 
-
     def setblock(self, base_request: bytes):
         """Analyse the setblock request and modify a block"""
         id = base_request[0]
@@ -414,7 +413,7 @@ class MCServer(object):
             p.send_msg_to_chat(msg)
         log(msg, 4)
 
-    def mp(self, message:str, addressee:str, author:str):
+    def mp(self, message: str, addressee: str, author: str):
         """Send a mp to 1 player
         Args:
         - message:str --> the message to send in mp
@@ -445,24 +444,28 @@ class MCServer(object):
             return lst[0]
         else:
             raise TwoPlayerWithSameUsernameException(f"2 players with the same username {username} were found.")
-        
+
 
 class PacketException(Exception):
     pass
+
 
 class Packet(object):
     # DANGER | DO NOT TOUCH
     SEGMENT_BITS = 0x7F
     CONTINUE_BIT = 0x80
 
-    def __init__(self, socket: skt.socket, direction: Literal["-OUTGOING", "-INCOMING"], typep: hex=None, packet:bytes=None, args:tuple = None):
+    def __init__(self, socket: skt.socket, 
+    direction: Literal["-OUTGOING", "-INCOMING"], typep: hex = None, 
+    packet: bytes = None, args: tuple = None):
+
         self.type = typep
         self.socket = socket
         self.direction = direction
         self.packet = packet
         self.args = args
 
-        #if packet == None or b"" and typep == None:
+        # if packet == None or b"" and typep == None:
         #    raise PacketException(f"No information provided in the Packet instance {self}")
         if direction == "-INCOMING":
             self.incoming_packet()
@@ -506,12 +509,13 @@ class Packet(object):
     def outgoing_packet(self):
         ...
 
-    def pack_varint(self, d:int):
+    def pack_varint(self, d: int):
         o = b""
-        #if d >= 255:
+        # if d >= 255:
         #    o = d.to_bytes(2, byteorder="little")
-        #else:
-        #test
+        # else:
+
+        # test
         if True:
             while True:
                 b = d & 0x7F
@@ -520,7 +524,7 @@ class Packet(object):
                 if d == 0:
                     break
         return o
-    
+
     def unpack_varint(data):
         d = 0
         for i in range(5):
@@ -529,10 +533,10 @@ class Packet(object):
             if not b & 0x80:
                 break
         return d
-    
+
     def pack_data(self, d):
         h = self.pack_varint(len(d))
-        if type(d) == str:
+        if isinstance(d, str):
             d = bytes(d, "utf-8")
         return h + d
 
@@ -543,7 +547,7 @@ class Packet(object):
             raise PacketException("Incoming packet tryied to be sended")
 
     def __repr__(self) -> bytes:
-        out = self.pack_varint(self.type)   #pack the type
+        out = self.pack_varint(self.type)   # pack the type
         for i in self.args:
             if isinstance(i, int):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
@@ -560,7 +564,7 @@ class Packet(object):
                 out += self.pack_data(i)
         out = self.pack_varint(len(out)) + out
         return out
-    
+
     def pack_uuid(self, uuidObject):
         uuid = uuidObject.uuid
 
@@ -569,7 +573,7 @@ class Packet(object):
         binaire_uuid = bytes.fromhex(hex_uuid)
 
         return binaire_uuid
-    
+
     def __str__(self):
         return self.__repr__().decode()
 
@@ -577,12 +581,14 @@ class Packet(object):
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
 
+
 class UUID(object):
     def __init__(self, uuid):
         self.uuid = uuid
 
+
 class Client(object):
-    def __init__(self, connexion: skt.socket, info, server:MCServer):
+    def __init__(self, connexion: skt.socket, info, server: MCServer):
         self.connexion = connexion
         self.info = info
         self.server = server
@@ -627,7 +633,7 @@ class Client(object):
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
 
                 if self.packet.type == 0 and self.protocol_state == "Handshaking":
-                    #Handshake
+                    # Handshake
 
                     if self.packet.args[-1] == 1:
                         # Switch protocol state to status
@@ -647,16 +653,15 @@ class Client(object):
                         # Switch protocol state to transfer
                         self.protocol_state = "Transfer"
                         log(f"Switching to transfer state for {self.info}", 3)
-                        
+
                         continue
                     else:
-                         self.connected = False
-                         self.connected = False
-                         log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
-                         break
-
+                        self.connected = False
+                        self.connected = False
+                        log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
+                        break
                 elif self.packet.type == 0 and self.protocol_state == "Status":
-                    #Status request -> Status response (SLP)
+                    # Status request -> Status response (SLP)
                     self.SLP()
                     continue
 
@@ -682,7 +687,7 @@ class Client(object):
                         d_reason = "Server full"
                         continue
                     if not(public):
-                        with open("whitelist.json", "r") as wf:
+                        with open ("whitelist.json", "r") as wf:
                             data = json.loads(wf.read())
                             o = 0
                             for d in data:
@@ -690,17 +695,16 @@ class Client(object):
                                     o += 1
                             if o != 1:
                                 self.connected = False
-                                
+
                                 d_reason = "You are not whitelisted on this server."
                                 misc_d = False
-                    
+
                                 if o > 1:
                                     log("User is whitelisted more than 1 time !", 1)
                                 continue
                     if ONLINE_MODE:
-                        #TODO Encryption Request
+                        # TODO Encryption Request
                         ...
-                    
                         api_system = m_api.Accounts()
                         check_result = api_system.authenticate(self.username, self.uuid)
                         if check_result[0]:
@@ -711,11 +715,11 @@ class Client(object):
                             self.connected = False
                             d_reason = "Failed to login"
                             misc_d = False
-                        
-                        #TODO Enable compression (would be optional) (in other "if" fork)
+
+                        # TODO Enable compression (would be optional) (in other "if" fork)
                         ...
                     else:
-                        #load player properties
+                        # load player properties
                         ...
                         self.properties = ()
                         response = Packet(self.connexion, "-OUTGOING", 2, args=(UUID(self.uuid), self.username, 0, not(DEBUG)))
@@ -734,7 +738,7 @@ class Client(object):
 
 
             if not(self.connected and state == "ON"):
-                #If server is stopping or the client is disconnecting (usefull ?)
+                # If server is stopping or the client is disconnecting (usefull ?)
                 if misc_d:
                     log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
@@ -748,7 +752,7 @@ class Client(object):
             log(f"{self.username} joined the game.", 0)
             self.server.post_to_chat(f"{self.username} joined the game")
             while self.connected and state == "ON":
-                #to clean
+                # to clean
                 
 
                 l = self.connexion.recv(1)
@@ -757,19 +761,19 @@ class Client(object):
                 ...
 
 
-                #if self.request[0] == "\x05":
+                # if self.request[0] == "\x05":
                 #    #setblock message
                 #    self.server.setblock(self.request)
-                #elif self.request[0] == "\x08":
+                # elif self.request[0] == "\x08":
                 #    #pos message
                 #    self.update_pos()
-                #elif self.request[0] == "\x0d":
+                # elif self.request[0] == "\x0d":
                 #    #chat message
                 #    if self.request[2] == "/":#surely not that
                 #        ... #cmd
 #   
                 #    self.server.post_to_chat(author=self.username, message=self.request[1:])
-                #elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
+                # elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
                 #    if self.request[-5:] == "\xd5\x11\x01\x01\x00":
                 #        #server list request
                 #        self.connexion.send(bytes('\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"{0}"},"players":{"max":{1},"online":{2}},"version":{"name":"{3}","protocol":{4}}}'.format(self.treat(MOTD), MAX_PLAYERS, connected_players, CLIENT_VERSION, PROTOCOL_VERSION)))
@@ -842,7 +846,7 @@ class Client(object):
             log(f"Disconnecting {self.username}: {r}", 0)
             self.disconnect(tr.key("disconnect.server_full"))
             return
-        #HOW TO GET THE PROTOCOL VERSION ?
+        # HOW TO GET THE PROTOCOL VERSION ?
         if not(PROTOCOL_VERSION == PROTOCOL_VERSION):
             r = tr.key("disconnect.bad_protocol")
             log(f"Disconnecting {self.username} : {r}.", 0)
