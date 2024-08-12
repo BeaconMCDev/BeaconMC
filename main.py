@@ -19,6 +19,7 @@ import mojangapi as m_api
 import struct
 import uuid
 import traceback
+from base64 import b64encode
 try:
     import nbtlib
 except ModuleNotFoundError:
@@ -746,20 +747,18 @@ class Client(object):
                     log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
-            
+
             ###############################################################################
 
             log(f"{self.username} joined the game.", 0)
             self.server.post_to_chat(f"{self.username} joined the game")
             while self.connected and state == "ON":
                 # to clean
-                
 
                 l = self.connexion.recv(1)
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
                 ...
-
 
                 # if self.request[0] == "\x05":
                 #    #setblock message
@@ -771,7 +770,6 @@ class Client(object):
                 #    #chat message
                 #    if self.request[2] == "/":#surely not that
                 #        ... #cmd
-#   
                 #    self.server.post_to_chat(author=self.username, message=self.request[1:])
                 # elif self.request[:4] == "\x13\x00\xf2\x05\x0c":
                 #    if self.request[-5:] == "\xd5\x11\x01\x01\x00":
@@ -796,13 +794,12 @@ class Client(object):
             self.connected = False
             dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Internal server error"}', ))
 
-        
     def ping_response(self, payload):
         """Send a response to a ping to make the client get the ping in ms of the server."""
 
         response = Packet(self.connexion, "-OUTGOING", typep=1, args=(payload,))
         response.send()
-        
+
     def status_request(self):
         ...
 
@@ -857,9 +854,8 @@ class Client(object):
             log(f"Disconnecting {self.username} : {r}.", 0)
             self.disconnect(tr.key("disconnect.not_premium"))
             return
-        
+
         if ONLINE_MODE:
-            
             p_response = Packet(self.connexion, direction="-OUTGOING", typep=1, args=("serverid", b"publick key", "verify token", ONLINE_MODE))
             log(p_response, 3)
             p_response.send()
@@ -925,12 +921,8 @@ class Client(object):
         escaped_string = ''.join(f'\\x{hex_string[i:i+2]}' for i in range(0, len(hex_string), 2))
         return escaped_string
 
-
-
     def SLP(self):
         log("Received ping", 3)
-
-        from base64 import b64encode
         try :
             with open('server-icon.png', 'rb') as image_file :
                 favicon = b64encode(image_file.read()).decode('utf-8')
@@ -948,9 +940,7 @@ class Client(object):
         }
 
         response_str = json.dumps(response)
-
         packet_response = Packet(socket=self.connexion, direction="-OUTGOING", typep=0, args=(response_str, ))
-        
         packet_response.send()
 
     def on_SLP(self):
@@ -959,8 +949,8 @@ class Client(object):
         request = encode(request)
         self.connexion.send(request, 1024)
 
-            #self.connexion.send(f'0x01{"version":{"name":"1.19.4","protocol":762},"players":{"max":100,"online":5,"sample":[{"name":"thinkofdeath","id":"4566e69f-c907-48ee-8d71-d7ba5aa00d20"}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,<data>","enforcesSecureChat":true,"previewsChat":true}')
-    def send_msg_to_chat(self, msg:str):
+        # self.connexion.send(f'0x01{"version":{"name":"1.19.4","protocol":762},"players":{"max":100,"online":5,"sample":[{"name":"thinkofdeath","id":"4566e69f-c907-48ee-8d71-d7ba5aa00d20"}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,<data>","enforcesSecureChat":true,"previewsChat":true}')
+    def send_msg_to_chat(self, msg: str):
         """Post a message in the player's chat.
         Argument:
         - msg:str --> the message to post on the chat"""
@@ -990,42 +980,24 @@ class NeoWorld(object):
 
     def load(self):
         """Load the world"""
-        #Load world settings
+        # Load world settings
         nbt_file = nbtlib.load(self.BASE + "level.dat")
         self.difficulty = nbt_file["Data"]["Difficulty"]
         self.wonderingtraderspawnchance = nbt_file["Data"]["WanderingTraderSpawnChance"]
         ...
 
         self.regions = []
-        
 
 
 class Region(object):
-    def __init__(self, x:int, z:int, world_name:str):
+    def __init__(self, x: int, z: int, world_name:str):
         self.x = x
         self.z = z
         self.file = f"worlds{SEP}{world_name}r.{x}.{z}.mca"
 
-    def is_chunk_in_region(self, x:int, z:int) -> bool:
+    def is_chunk_in_region(self, x: int, z: int) -> bool:
         region_xz = lambda x,z: (math.floor(x / 32), math.floor(z / 32))
         return region_xz(x, z) == (self.x, self.z)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class World(object):
@@ -1056,7 +1028,7 @@ class World(object):
                     return False
         except FileNotFoundError:
             return False
-        
+
     def generate(self, level, force=False):
         """Generate the world.
         Args:
@@ -1113,7 +1085,6 @@ class World(object):
         index_cible = x_coord + size_x * (y_coord + size_y * z_coord)
         element_cible = chunk[index_cible]
 
-
     def find_chunk_index(self, x, y, z):
         """Return the chunk Index with the gived coords."""
         index = None
@@ -1125,7 +1096,6 @@ class World(object):
                 break
         return i
 
-
     def _block_to_chunk_coords(self, x:int, y:int, z:int):
         """Convert a block coord to a chunk coord. Args: the coordinates. Return the chunk coords."""
         nx = x // 16
@@ -1133,9 +1103,8 @@ class World(object):
         nz = z // 16
 
         return {"x": nx, "y": ny, "z": nz}
-            
 
-    def _new_chunk(self, x:int, y:int, z:int):
+    def _new_chunk(self, x: int, y: int, z: int):
         """Create a new chunk at the specified CHUNKS COORD !
         - Args:
             - x (int) the X chunk pos
@@ -1147,7 +1116,6 @@ class World(object):
         while count != (16**3):
             c.append((0, ""))
         return c
-
 
     def load(self):
         """Read a world file and return a World List.
@@ -1161,39 +1129,38 @@ class World(object):
             self.data = data
             return self.data
 
-
-    def decode(self, data:str):
+    def decode(self, data: str):
         """Decode some data.
         --> Return the world (see world/world_format.md## World format (in running app))"""
         infos, world = data.split("=====")
-        #treat infos
+        # treat infos
         name, level = infos.split("::::")
         if name != self.name:
-            #something went wrong
+            # something went wrong
             log("Reading a world name different of the gived name !", 2)
             self.name = name
             log("Name modified.", 0)
         if self.level != level and self.level != None:
-            #something went wrong
+            # something went wrong
             log("Reading a world level different of the gived level !", 2)
             self.level = level
             log("Level modified.", 0)
         if self.level == None:
             self.level = level
-        
+
         chunks_list = world.split("<<|<<")
         final = []
-        #treat all chunks
+        # treat all chunks
         for chunk in chunks_list:
             base_chunk_list = []
             xyz, blocks_list = chunk.split("|")
 
-            #Treat chunk coords
+            # Treat chunk coords
             xyz = xyz.split(";")
             chunk_coord = {"x": xyz[0], "y": xyz[1], "z": xyz[1]}
             base_chunk_list.append(chunk_coord)
 
-            #Treat blocks
+            # Treat blocks
             lst_blocks = blocks_list.split(";")
             for block in lst_blocks:
                 b_type, nbt = block.split(">")
@@ -1202,7 +1169,7 @@ class World(object):
             final.append(base_chunk_list)
 
         return final
-    
+
     def save(self):
         """Save the world"""
         log(f"Saving world {self.name} (level {self.level})...")
@@ -1231,7 +1198,7 @@ class World(object):
             final += "<<|<<"
 
         final = final[:-5]
-        
+
         return final
 
 
@@ -1246,7 +1213,7 @@ class Translation(object):
     def __init__(self, lang):
         self.lang = lang
 
-    
+
     def en(self, key):
         """English translation"""
         dico = {"disconnect.default": "Disconnected.", 
@@ -1256,7 +1223,7 @@ class Translation(object):
                 "disconnect.server_closed": "Server closed.", 
                 "disconnect.server_crashed": "Server crashed indeed of a critical error."}
         return dico[key]
-    
+
     def fr(self, key):
         """French translation"""
         dico = {"disconnect.default": "Déconnecté", 
@@ -1266,7 +1233,7 @@ class Translation(object):
                 "disconnect.server_closed": "Serveur fermé.", 
                 "disconnect.server_crashed": "Le serveur a planté suite à une erreur critique."}
         return dico[key]
-    
+
     def es(self, key):
         """Espagnol translation"""      #TODO
         dico = {"disconnect.default": "Disconnected.", 
@@ -1303,10 +1270,10 @@ class TwoPlayerWithSameUsernameException(Exception):
     """Exception when 2 players or more have the same username"""
 
 class Command(object):
-    def __init__(self, command:str, source:Client, server:MCServer):
+    def __init__(self, command: str, source: Client, server: MCServer):
         self.COMMANDS = {"/msg": self.msg, 
                 "/tell": self.msg, 
-                "/stop":self.stop}   #other will be added later
+                "/stop":self.stop}   # other will be added later
 
         self.srv = server
 
@@ -1324,15 +1291,14 @@ class Command(object):
     def execute(self):
         cmdf = self.COMMANDS[self.base]
         if cmdf():
-            ...#ok
+            ...  # ok
         else:
-            ...#error
-
+            ...  # error
 
     def check_perm(self):
-        #if self.base in self.source.perms:
+        # if self.base in self.source.perms:
         #   return True
-        #else:
+        # else:
         #   return False
         return True
 
@@ -1349,7 +1315,7 @@ class Command(object):
         msg = args[1:]
         self.srv.mp(msg, player, self.source.username)
         return True
-    
+
     def stop(self, args):
         if len(args) != 0:
             log("Too much arguments !", 1)
@@ -1357,7 +1323,7 @@ class Command(object):
             return False
         self.srv.stop()
         return True
-    
+
 class ConsoleGUI(object):
     def __init__(self):
         ...
@@ -1365,11 +1331,11 @@ class ConsoleGUI(object):
     def mainthread(self):
         ...
 
-#PRE MAIN INSTRUCTIONS
+# PRE MAIN INSTRUCTIONS
 be_ready_to_log()
 
 
-#MAIN
+# MAIN
 if __name__ == "__main__":
     try:
         log('Starting Plugin APi', 3)
@@ -1381,4 +1347,3 @@ if __name__ == "__main__":
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
         log(f"{traceback.format_exc(e)}", 100)
         srv.stop(critical_stop=True, reason=f"{e}", e=e)
-
