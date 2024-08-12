@@ -32,6 +32,7 @@ print("_________________________________________________________\nStarting Beaco
 dt_starting_to_start = tm.time()
 lthr = []
 
+
 # BASE ERROR
 class OSNotCompatibleError(OSError):
     pass
@@ -121,7 +122,8 @@ unknow = 0
 
 print("")
 
-def log(msg: str, type: int = -1): 
+
+def log(msg: str, type: int = -1):
     """Types:
     - 0: info
     - 1: warning
@@ -182,7 +184,7 @@ def be_ready_to_log():
     print("Log system ready !")
 
 
-def encode(msg:str):
+def encode(msg: str):
     """Convert quickly a string into bytes that will be sended to the client."""
     return msg.encode()
 
@@ -194,9 +196,9 @@ def encode(msg:str):
 class MCServer(object):
     """Minecraft server class"""
     SERVER_VERSION = SERVER_VERSION
-    CLIENT_VERSION = CLIENT_VERSION  
+    CLIENT_VERSION = CLIENT_VERSION
     PROTOCOL_VERSION = PROTOCOL_VERSION
-    PORT = PORT              
+    PORT = PORT
     IP = IP
     ONLINE_MODE = ONLINE_MODE
 
@@ -216,7 +218,7 @@ class MCServer(object):
                     log("You need to agree the Minecraft EULA to continue.", 1)
                     log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
                     log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-                    self.stop(False, reason = "You need to accept Minecraft eula to continue.")
+                    self.stop(False, reason="You need to accept Minecraft eula to continue.")
                 return
         except Exception as e:
             print(f"{type(e)} : {e}")
@@ -224,9 +226,8 @@ class MCServer(object):
             log("You need to agree the Minecraft EULA to continue.", 2)
             log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
             log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-            self.stop(False, reason = "You need to agree eula to continue.")
+            self.stop(False, reason="You need to agree eula to continue.")
             return
-        
 
     def worlds_analyse(self):
         """Search for worlds in the worlds folder.
@@ -243,12 +244,10 @@ class MCServer(object):
                 lst_world.append(name)
         log(f"{len(lst_world)} worlds found !", 3)
         return lst_world
-    
-    
+
     def log(self, msg: str, type: int = -1):
         """An alternative of main.log(). Don't delete, used by plugins."""
         log(msg, type)
-
 
     def start(self):
         global state
@@ -258,7 +257,7 @@ class MCServer(object):
         log(f"Server version: {SERVER_VERSION}", 3)
         log(f"MC version: {CLIENT_VERSION}", 3)
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
-        #self.heartbeat()
+        # self.heartbeat()
 
         log("Loading plugins...", 0)
         self.load_plugins()
@@ -271,7 +270,7 @@ class MCServer(object):
         lthr.append(self.gui_thr)
 
         log("Starting listening...", 0)
-        self.socket.listen(MAX_PLAYERS + 1) #+1 is for the temp connexions
+        self.socket.listen(MAX_PLAYERS + 1)  #+1 is for the temp connexions
 
         self.load_worlds()
 
