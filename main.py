@@ -11,7 +11,7 @@ import plugins.modulable_pluginsystem as mplsys
 from typing import Literal
 import threading as thread
 import os
-import hashlib #for md5 auth system
+import hashlib  # for md5 auth system
 import platform
 import pluginapi
 import json
@@ -26,7 +26,7 @@ except ModuleNotFoundError:
     os.system("pip install nbtlib")
     import nbtlib
     print("Done")
-    
+
 print("_________________________________________________________\nStarting BeaconMC 1.19.4\n_________________________________________________________")
 
 dt_starting_to_start = tm.time()
@@ -36,7 +36,8 @@ lthr = []
 class OSNotCompatibleError(OSError):
     pass
 
-#CONFIG READING
+
+# CONFIG READING
 print("Reading the config file...")
 with open("config.txt", "r") as config:
     dt = None
@@ -86,31 +87,31 @@ else:
     raise OSNotCompatibleError(f"OS {OS} is not compatible ! Please use Linux or Windows !")
 print(f"OS {OS} is compatible !")
 
-#GLOBAL DATAS - VARIABLES
+# GLOBAL DATAS - VARIABLES
 connected_players = 0
 blacklist = []
 whitelist = []
-#public = True
+# public = True
 users = []
 logfile = ""
 state = "OFF"
 
-#GLOBAL DATAS - CONSTANTS
-#################################
-###          READ THIS       ####
-### don't touch this section ####
-#################################
+# GLOBAL DATAS - CONSTANTS
+# ################################
+# ##          READ THIS       ####
+# ## don't touch this section ####
+# ################################
 
-SERVER_VERSION = "Alpha-dev"    #Version of the server. For debug
-CLIENT_VERSION = "1.19.4"       #Which version the client must have to connect
-PROTOCOL_VERSION = 762          #Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
-PORT = 25565                    #Normal MC port
+SERVER_VERSION = "Alpha-dev"    # Version of the server. For debug
+CLIENT_VERSION = "1.19.4"       # Which version the client must have to connect
+PROTOCOL_VERSION = 762          # Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
+PORT = 25565                    # Normal MC port
 IP = "0.0.0.0"
-#MAX_PLAYERS = 5
+# MAX_PLAYERS = 5
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
 CONFIG_TO_REQUEST = {"\u00A7": "\xc2\xa7", "§": "\xc2\xa7"}
-#log counts
+# log counts
 errors = 0
 warnings = 0
 debug = 0
@@ -120,7 +121,7 @@ unknow = 0
 
 print("")
 
-def log(msg:str, type:int=-1):
+def log(msg: str, type: int = -1): 
     """Types:
     - 0: info
     - 1: warning
@@ -142,7 +143,7 @@ def log(msg:str, type:int=-1):
         errors += 1
     elif type == 3:
         t = "DEBUG"
-        if not(DEBUG):
+        if not (DEBUG):
             return
         else:
             debug += 1
@@ -160,17 +161,17 @@ def log(msg:str, type:int=-1):
     try:
         with open(logfile, "+a") as file:
             file.write(text + "\n")
-    except:
+    except Exception:
         print('Error in log system! Creating file... ')
         os.mkdir('logs')
         with open(logfile, "+w") as file:
             file.write(text + "\n")
-
-
     return
+
 
 def gettime():
     return tm.asctime(tm.localtime(tm.time())).split(" ")[-2]
+
 
 def be_ready_to_log():
     global logfile
@@ -180,17 +181,18 @@ def be_ready_to_log():
     logfile = f"logs/log{nb}.log"
     print("Log system ready !")
 
+
 def encode(msg:str):
     """Convert quickly a string into bytes that will be sended to the client."""
     return msg.encode()
-    
-########################################################################################################################################################################################################################
-########################################################################################################################################################################################################################
-########################################################################################################################################################################################################################
-#CLASSES
+
+
+# #######################################################################################################################################################################################################################
+# #######################################################################################################################################################################################################################
+# #######################################################################################################################################################################################################################
+# CLASSES
 class MCServer(object):
     """Minecraft server class"""
-
     SERVER_VERSION = SERVER_VERSION
     CLIENT_VERSION = CLIENT_VERSION  
     PROTOCOL_VERSION = PROTOCOL_VERSION
@@ -200,21 +202,21 @@ class MCServer(object):
 
     def __init__(self):
         """Init the server"""
-        self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  #socket creation
-        self.socket.bind((IP, PORT))            #bind the socket
+        self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  # socket creation
+        self.socket.bind((IP, PORT))            # bind the socket
         self.list_info = []
         self.list_clients = []
         self.list_worlds = []
         try:
             with open("eula.txt", "r") as eula_file:
-                eula =eula_file.read().split()
+                eula = eula_file.read().split()
                 if "eula=true" in eula:
                     pass
                 else:
                     log("You need to agree the Minecraft EULA to continue.", 1)
                     log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
                     log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-                    self.stop(False, reason="You need to accept Minecraft eula to continue.")
+                    self.stop(False, reason = "You need to accept Minecraft eula to continue.")
                 return
         except Exception as e:
             print(f"{type(e)} : {e}")
@@ -222,7 +224,7 @@ class MCServer(object):
             log("You need to agree the Minecraft EULA to continue.", 2)
             log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
             log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-            self.stop(False, reason="You need to accept Minecraft eula to continue.")
+            self.stop(False, reason = "You need to agree eula to continue.")
             return
         
 
@@ -242,9 +244,11 @@ class MCServer(object):
         log(f"{len(lst_world)} worlds found !", 3)
         return lst_world
     
-    def log(self, msg:str, type:int=-1):
+    
+    def log(self, msg: str, type: int = -1):
         """An alternative of main.log(). Don't delete, used by plugins."""
         log(msg, type)
+
 
     def start(self):
         global state
