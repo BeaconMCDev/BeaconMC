@@ -679,7 +679,7 @@ class Client(object):
                     log(f"{self.username} is logging in from {self.info}.", 0)
 
                     if len(self.server.list_clients) >= MAX_PLAYERS:
-                        dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Server full."}', ))
+
                         self.connected = False
                         misc_d = False
                         d_reason = "Server full"
@@ -693,14 +693,13 @@ class Client(object):
                                     o += 1
                             if o != 1:
                                 self.connected = False
-                                dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"You are not whitelisted on this server."}', ))
                                 
-                                d_reason = "You are not whitelisted to this server."
+                                d_reason = "You are not whitelisted on this server."
                                 misc_d = False
                     
                                 if o > 1:
                                     log("User is whitelisted more than 1 time !", 1)
-                                
+                                continue
                     if ONLINE_MODE:
                         #TODO Encryption Request
                         ...
@@ -713,7 +712,6 @@ class Client(object):
                         else:
                             log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
                             self.connected = False
-                            dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Failed to login."}', ))
                             d_reason = "Failed to login"
                             misc_d = False
                         
@@ -743,6 +741,7 @@ class Client(object):
                 if misc_d:
                     log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
+                    dp = Packet(self.connexion, "-OUTGOING", typep=27, args=(f'\{"text":"{d_reason}"\}', ))
                     log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
