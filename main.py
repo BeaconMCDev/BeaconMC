@@ -728,10 +728,10 @@ class Client(object):
                             enc_properties.append(p["name"])
                             enc_properties.append(p["value"])
                             enc_properties.append(False)
-                         parg = [UUID(self.uuid), self.username, len(self.properties)]
-                         for p in enc_properties:
-                             parg.append(p)
-                         parg.append(not(DEBUG))
+                        parg = [UUID(self.uuid), self.username, len(self.properties)]
+                        for p in enc_properties:
+                            parg.append(p)
+                        parg.append(not(DEBUG))
                         response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
                         log(response.__repr__(), 3)
                         response.send()
