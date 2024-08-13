@@ -727,7 +727,7 @@ class Client(object):
                         for p in self.properties:
                             enc_properties.append(p{"name"})
                             enc_properties.append(p{"value"})
-                             enc_properties.append(False)
+                            enc_properties.append(False)
                          parg = [UUID(self.uuid), self.username, len(self.properties)]
                          for p in enc_properties:
                              parg.append(p)
