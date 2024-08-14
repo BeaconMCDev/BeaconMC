@@ -755,7 +755,7 @@ class Client(object):
                 if misc_d:
                     log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
-                    dp = Packet(self.connexion, "-OUTGOING", typep=27, args=(f'\{"text":"{d_reason}"\}', ))
+                    dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(f'\{"text":"{d_reason}"\}', ))
                     log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
