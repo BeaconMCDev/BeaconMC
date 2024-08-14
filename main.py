@@ -19,6 +19,7 @@ import mojangapi as m_api
 import struct
 import uuid
 import traceback
+import requests
 from base64 import b64encode
 try:
     import nbtlib
