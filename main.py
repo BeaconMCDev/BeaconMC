@@ -721,8 +721,10 @@ class Client(object):
                         ...
                     else:
                         # load player properties
-                        ...
-                        self.properties = ()
+                        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
+                        self.properties = api_response["properties"]
+                         
+                        #self.properties = ({"name": "texture", "value": ""},)
                         enc_properties = []
                         for p in self.properties:
                             enc_properties.append(p["name"])
