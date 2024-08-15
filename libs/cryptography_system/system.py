@@ -17,7 +17,7 @@ class CryptoSystem(object):
             with open(".private_key.pem", "rb") as skf:
                 self._private_key = skf.read()
                 self.__private_key__ = serialization.load_pem_private_key(
-                    key_file.read(),
+                    self._private_key,
                     password=None,
                     backend=default_backend()
                 )
@@ -28,7 +28,7 @@ class CryptoSystem(object):
             with open("public_key.pem", "rb") as pkf:
                 self.public_key = pkf.read()
                 self.__public_key__ = serialization.load_pem_public_key(
-                    key_file.read(),
+                    self.public_key,
                     backend=default_backend()
                 )
 
