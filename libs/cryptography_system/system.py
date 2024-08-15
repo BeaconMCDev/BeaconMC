@@ -1,6 +1,6 @@
 """BeaconMC cryptography file
 FOR SOME SECURITY REASON, IT IS VERY NOT RECOMMENDED TO MODIFY THIS FILE.
-FOR ANY SECURITY FLAW, please contact me on DISCORD or at FEWERELK@GMAIL.COM, NOT ON GITHUB."""
+FOR ANY SECURITY FLAW, please contact me on https://github.com/FewerTeam/BeaconMC/security/advisories/new or at FEWERELK@GMAIL.COM, or open a ticket on DISCORD."""
 
 # IMPORTS
 from cryptography.hazmat.primitives.asymmetric import rsa
