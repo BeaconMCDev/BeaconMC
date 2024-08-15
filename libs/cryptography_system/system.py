@@ -36,6 +36,23 @@ class CryptoSystem(object):
         if self.public_key in null:
             return True
         return False
+        
+    def stop(self):
+        with open(".private_key.pem", "wb") as skf:
+            skf.write(self._private_key)
+        self._private_key = " "
+        del (self._private_key)
+        self.__private_key__ = ""
+        del (self.__private_key__)
+
+        with open("public_key.pem", "wb") as pkf:
+            skf.write(self.public_key)
+        self.public_key = " "
+        del(self.public_key)
+        self.__public_key__ = " "
+        del(self.__public_key__)
+        
+        del(self)
 
     def generate_keys(self):
         self.__private_key__ = rsa.generate_private_key(
