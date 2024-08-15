@@ -14,7 +14,7 @@ class CryptoSystem(object):
         try:
             with open(".private_key.pem", "rb") as skf:
                 self._PRIVATE_KEY = skf.read()
-            with open(".private_key.pem", "wb" as skf:
+            with open(".private_key.pem", "wb") as skf:
                 skf.write("403\nKEY HIDDEN FOR SECURITY REASONS. IT WILL BE WRITTEN HERE ON SERVER STOP (final action to prevent plugins access it).")
             with open("public_key.pem", "rb") as pkf:
                 self.PUBLIC_KEY = pkf.read()
