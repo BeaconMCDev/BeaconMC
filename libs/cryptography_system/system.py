@@ -38,4 +38,21 @@ class CryptoSystem(object):
         return False
 
     def generate_keys(self):
-        ...
+        self.__private_key__ = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+        
+        self._private_key = self.__private_key__.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        
+        self.__public_key__ = self.__private_key__.public_key()
+        
+        self.public_key = self.__public_key__.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
