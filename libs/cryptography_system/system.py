@@ -16,10 +16,22 @@ class CryptoSystem(object):
         try:
             with open(".private_key.pem", "rb") as skf:
                 self._private_key = skf.read()
+                self.__private_key__ = serialization.load_pem_private_key(
+                    key_file.read(),
+                    password=None,
+                    backend=default_backend()
+                )
+
             with open(".private_key.pem", "wb") as skf:
                 skf.write(self.KEY_HIDDEN_MESSAGE)
+
             with open("public_key.pem", "rb") as pkf:
                 self.public_key = pkf.read()
+                self.__public_key__ = serialization.load_pem_public_key(
+                    key_file.read(),
+                    backend=default_backend()
+                )
+
             if self.null_key():
                 self.generate_keys()
         except FileNotFoundError:
