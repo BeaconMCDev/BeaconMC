@@ -1,0 +1,29 @@
+comment:
+  footer: "\
+    ----\n\n
+    > [!NOTE]\n
+    > *This is an automated response created by a **GitHub Action***<br>
+    > *Mentioning the bot won't have any effect!*
+    "
+
+labels:
+  - name: 'EULA: Not accepted'
+    labeled:
+      issue:
+        body: |-
+          Hello @{{ issue.user.login }},
+          
+          It seems that you didn't aggre Minecraft EULA (End User License Agreement). You need to accept the terms (https://www.minecraft.net/en-us/eula) in eula.txt before running the server.
+          
+          This issue will be automatically closed.
+        action: close
+    - name: 'EULA: Not respected'
+    labeled:
+      issue:
+        body: |-
+          Hello @{{ issue.user.login }},
+          
+          It seems that you didn't respect the Minecraft EULA (End User License Agreement). As consequences you will not receive support.
+          
+          This issue will be automatically closed.
+        action: close
