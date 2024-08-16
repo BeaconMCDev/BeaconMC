@@ -607,6 +607,7 @@ class Client(object):
         self.z = None
         self.connected = True
         self.protocol_state = "Handshaking"
+        self.encrypted = False
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -713,13 +714,14 @@ class Client(object):
                                 continue
                     if ONLINE_MODE:
                         # TODO Encryption Request
-                        verify_token = b""
-                        for i in range(4):
-                            verify_token += bytes(rdm.randint(0, 10))
-                        resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
-                         #resp_pack.send()
-
-                        api_system = m_api.Accounts()
+                         if self.encrypted:  # soon
+                            verify_token = b""
+                             for i in range(4):
+                                 verify_token += bytes(rdm.randint(0, 10))
+                             resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
+                             resp_pack.send()
+                             continue
+                         api_system = m_api.Accounts()
                         check_result = api_system.authenticate(self.username, self.uuid)
                         if check_result[0]:
                             log(f"sucessfully authenticated {self.username}.", 3)
@@ -737,7 +739,7 @@ class Client(object):
                         api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
                         self.properties = api_response["properties"]
                          
-                        #self.properties = ({"name": "texture", "value": ""},)
+                        # self.properties = ({"name": "texture", "value": ""},)
                         enc_properties = []
                         for p in self.properties:
                             enc_properties.append(p["name"])
