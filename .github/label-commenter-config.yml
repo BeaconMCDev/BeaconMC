@@ -27,3 +27,34 @@ labels:
           
           This issue will be automatically closed.
         action: close
+  - name: 'duplicate'
+    labeled:
+      issue:
+        body: |-
+          Hello @{{ issue.user.login }},
+
+          It seems that this issue has already been reported to our contributors. If you think this is an error, please reopen the issue. Thank you for taking your time to report issue.
+
+          This issue will be automatically closed.
+        action: close
+  - name: ´invalid'
+    labeled:
+      issue:
+        body: |-
+          Hello @{{ issue.user.login }},
+          
+          It seems that your description is not valid, or some items are missing. Please provide missing items and fill the form correctly.
+    unlabeled:
+      issue:
+        body: |-
+          Thank you for respecting the form and adding informations.
+  - name: 'wontfix'
+    labeled:
+      issue:
+        body: |-
+          Hello @{{ issue.user.login }},
+
+          This issue/request will not be done for some reasons, but we appreciate your contribution.
+
+          This issue will be closed automatically.
+        action: close
