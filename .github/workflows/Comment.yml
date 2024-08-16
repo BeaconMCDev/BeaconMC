@@ -23,7 +23,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
       with:
-        ref: master
+        ref: v2-readme
     - name: Send Issue/Pull request comment
       uses: peaceiris/actions-label-commenter@v1
       env:
