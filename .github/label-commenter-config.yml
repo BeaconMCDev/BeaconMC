@@ -17,7 +17,7 @@ labels:
           
           This issue will be automatically closed.
         action: close
-    - name: 'EULA: Not respected'
+  - name: 'EULA: Not respected'
     labeled:
       issue:
         body: |-
