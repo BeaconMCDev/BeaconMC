@@ -57,7 +57,7 @@ class PluginLoader(object):
             # Wait for all threads to finish
             # for thread in threads:
                 # thread.join()
-
+                    ...
         except Exception as e:
             print(e)
 
