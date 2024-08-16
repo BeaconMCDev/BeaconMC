@@ -1,50 +1,25 @@
-name: Respond to Label Changes
+name: Comment
 
 on:
   issues:
-    types: [labeled, unlabeled]
+    types:
+    - labeled
+    - unlabeled
+  pull_request_target:
+    types:
+    - labeled
+    - unlabeled
 
 jobs:
-  respond:
+  give_comment:
+    if: github.event.issue.state == 'open' || github.event.pull_request.state == 'open'
     runs-on: ubuntu-latest
-
     steps:
-    - name: Check for a specific label
-      if: contains(github.event.issue.labels.*.name, 'EULA: Not accepted')
-      run: echo "The issue is labeled as 'EULA: Not accepted'."
-
-    - name: Post a response for 'EULA: Not accepted' label
-      if: contains(github.event.issue.labels.*.name, 'EULA: Not accepted')
-      uses: actions-ecosystem/action-create-comment@v1
+    - name: Checkout Code
+      uses: actions/checkout@v2
+      with:
+        ref: master
+    - name: Send Issue/Pull request comment
+      uses: peaceiris/actions-label-commenter@v1.8.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        issue_number: ${{ github.event.issue.number }}
-        body: |
-          It seems that you didn't agree the Minecraft EULA (End User Liscense Agreement). You need to accept the terms in eula.txt before running the server to br able to run it.
-
-    - name: Close the issue
-      if: contains(github.event.issue.labels.*.name, 'EULA: Not accepted')
-      uses: peter-evans/close-issue@v2
-      with:
-        issue-number: ${{ github.event.issue.number }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Check for a specific label
-      if: contains(github.event.issue.labels.*.name, 'EULA: Not respected')
-      run: echo "The issue is labeled as 'EULA: Not respected'."
-
-    - name: Post a response for 'EULA: Not respected' label
-      if: contains(github.event.issue.labels.*.name, 'EULA: Not respected')
-      uses: actions-ecosystem/action-create-comment@v1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        issue_number: ${{ github.event.issue.number }}
-        body: |
-          It seems that you didn't respect the Minecraft EULA (End User Liscense Agreement). As consequences you will not receive support (cf BeaconMC license).
-
-    - name: Close the issue
-      if: contains(github.event.issue.labels.*.name, 'EULA: Not respected')
-      uses: peter-evans/close-issue@v2
-      with:
-        issue-number: ${{ github.event.issue.number }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
