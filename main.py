@@ -714,14 +714,14 @@ class Client(object):
                                 continue
                     if ONLINE_MODE:
                         # TODO Encryption Request
-                         if self.encrypted:  # soon
-                             verify_token = b""
-                             for i in range(4):
-                                 verify_token += bytes(rdm.randint(0, 10))
-                             resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
-                             resp_pack.send()
-                             continue
-                         api_system = m_api.Accounts()
+                        if self.encrypted:  # soon
+                            verify_token = b""
+                            for i in range(4):
+                                verify_token += bytes(rdm.randint(0, 10))
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
+                            resp_pack.send()
+                            continue
+                        api_system = m_api.Accounts()
                         check_result = api_system.authenticate(self.username, self.uuid)
                         if check_result[0]:
                             log(f"sucessfully authenticated {self.username}.", 3)
