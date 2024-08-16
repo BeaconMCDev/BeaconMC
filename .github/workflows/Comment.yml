@@ -28,4 +28,4 @@ jobs:
       env:
         RUNNER_DEBUG: 1
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.BeaconMC_bot_token }}
