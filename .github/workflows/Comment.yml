@@ -10,6 +10,11 @@ on:
     - labeled
     - unlabeled
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   give_comment:
     if: github.event.issue.state == 'open' || github.event.pull_request.state == 'open'
@@ -21,5 +26,7 @@ jobs:
         ref: master
     - name: Send Issue/Pull request comment
       uses: peaceiris/actions-label-commenter@v1.8.2
+      env:
+        RUNNER_DEBUG: 1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
