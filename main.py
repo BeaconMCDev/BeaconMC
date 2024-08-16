@@ -337,6 +337,11 @@ class MCServer(object):
             t: thread.Thread
             t.join()
         ...
+        # Stop plugins
+        ...
+
+        # Save and clear sensitive cryptographic data
+        self.crypto_sys.stop()
         if not (critical_stop):
             log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
             exit()
