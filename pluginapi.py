@@ -62,8 +62,8 @@ class PluginLoader(object):
             print(e)
 
     def init_api(self):
-        main.log("Plugin API loading...", 0)
-        main.log("Checking some things...", 0)
+        self.server.log("Plugin API loading...", 0)
+        self.server.log("Checking some things...", 0)
         try:
             if os.path.isdir(PLUGIN_FOLDER_PATH):
                 self.server.log("Folder plugin exists!", 0)
