@@ -9,6 +9,7 @@ import time as tm
 import random as rdm
 import plugins.modulable_pluginsystem as mplsys
 from typing import Literal
+from libs.cryptography_system.system import CryptoSystem as Crypto
 import threading as thread
 import os
 import hashlib  # for md5 auth system
@@ -211,6 +212,7 @@ class MCServer(object):
         self.list_info = []
         self.list_clients = []
         self.list_worlds = []
+        self.crypto_sys = Crypto(self)
         try:
             with open("eula.txt", "r") as eula_file:
                 eula = eula_file.read().split()
@@ -706,7 +708,12 @@ class Client(object):
                                 continue
                     if ONLINE_MODE:
                         # TODO Encryption Request
-                        ...
+                        verify_token = b""
+                         for i in range(4):
+                            verify_token += bytes(rdm.randint(0, 10))
+                        resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
+                         #resp_pack.send()
+
                         api_system = m_api.Accounts()
                         check_result = api_system.authenticate(self.username, self.uuid)
                         if check_result[0]:
