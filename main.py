@@ -709,7 +709,7 @@ class Client(object):
                     if ONLINE_MODE:
                         # TODO Encryption Request
                         verify_token = b""
-                         for i in range(4):
+                        for i in range(4):
                             verify_token += bytes(rdm.randint(0, 10))
                         resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
                          #resp_pack.send()
