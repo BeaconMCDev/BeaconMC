@@ -35,7 +35,7 @@ class PluginLoader:
                     for a in pi.AUTHORS:
                         authors += a + ", "
                     authors = authors[:2]
-                    self.server.log(f"Loading {pui.NAME} v{pi.VERSION} from {authors}", 0)
+                    self.server.log(f"Loading {pi.NAME} v{pi.VERSION} from {authors}", 0)
                 plugin_instance.onEnable()
                 plugin_instance.enabled = True
                 self.plugins.append(plugin_instance)
