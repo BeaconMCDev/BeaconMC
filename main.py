@@ -285,7 +285,7 @@ class MCServer(object):
 
     def load_plugins(self):
         """Load the plugins"""
-        self.plugin_loader = plugin_api.PluginLoader(self)
+        self.plugin_loader = pluginapi.PluginLoader(self)
         self.plugin_loader.load_plugins()
 
     def load_worlds(self):
