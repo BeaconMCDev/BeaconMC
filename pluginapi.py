@@ -25,8 +25,8 @@ class PluginLoader:
         spec.loader.exec_module(module)
         
         if hasattr(module, 'Plugin'):
+            plugin_instance = module.Plugin(self.server)
             try:
-                plugin_instance = module.Plugin(self.server)
                 pi = plugin_instance
                 if hasattr(pi, "AUTHOR"):
                     self.server.log(f"Loading {pui.NAME} v{pi.VERSION} from {pi.AUTHOR}", 0)
@@ -39,5 +39,12 @@ class PluginLoader:
                 plugin_instance.onEnable()
                 plugin_instance.enabled = True
                 self.plugins.append(plugin_instance)
-            except:
-                ...
+            except Exception as e:
+                if hasattr(plugin_instance, 'disabled'):
+                    plugin_instance.disabled = True
+                else:
+                    self.plugins.remove(plugin_instance)
+                self.server.log("Plugin disabled due to issue when loading.", 2)
+                self.server.log(f"{type(e)}: {e}", 2)
+        else:
+            self.server.log(f"File {plugin_path} does not contain the Plugin class ! Skipping...", 1)
