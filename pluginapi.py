@@ -29,7 +29,7 @@ class PluginLoader:
             try:
                 pi = plugin_instance
                 if hasattr(pi, "AUTHOR"):
-                    self.server.log(f"Loading {pui.NAME} v{pi.VERSION} from {pi.AUTHOR}", 0)
+                    self.server.log(f"Loading {pi.NAME} v{pi.VERSION} from {pi.AUTHOR}", 0)
                 else:
                     authors = ""
                     for a in pi.AUTHORS:
