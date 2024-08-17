@@ -1,74 +1,28 @@
-# import main
 import os
-import sys
-import yaml
-# import threading
-PLUGIN_FOLDER_PATH = "plugins"
+import importlib.util
 
-# API
+class Plugin:
+    def __init__(self, name):
+        self.name = name
 
-class PluginLoader(object):
-    def __init__(self, server):
-        self.server = server
+class PluginLoader:
+    def __init__(self, plugins_dir='plugins'):
+        self.plugins_dir = plugins_dir
+        self.plugins = []
+
+    def load_plugins(self):
+        for root, dirs, files in os.walk(self.plugins_dir):
+            for file in files:
+                if file == 'plugin.py':
+                    plugin_path = os.path.join(root, file)
+                    plugin_name = os.path.basename(root)
+                    self._load_plugin(plugin_path, plugin_name)
+
+    def _load_plugin(self, plugin_path, plugin_name):
+        spec = importlib.util.spec_from_file_location(plugin_name, plugin_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
         
-    def core_get_version(self):
-        return f"{self.server.CLIENT_VERSION} {self.server.SERVER_VERSION}.{self.server.PROTOCOL_VERSION}"
-
-    def execute_file(self, file_path, plugin_directory):
-        try:
-            with open(file_path, "r") as file:
-                file_content = file.read()
-                exec(file_content, {'__file__': file_path, 'os': os})
-        except FileNotFoundError:
-            print("File not found")
-        except Exception as e:
-            print(e)
-
-    def process_list_file(self, yaml_file_path, plugin_directory):
-        try:
-            with open(yaml_file_path, "r") as yaml_file:
-                plugin_data = yaml.load(yaml_file, Loader=yaml.FullLoader)
-
-                name = plugin_data.get("Name")
-                description = plugin_data.get("Description")
-                main_file = plugin_data.get("main_file")
-                self.server.log(f"Starting loading : {name}",0)
-
-            self.execute_file(os.path.join(plugin_directory, main_file), plugin_directory)
-
-        except FileNotFoundError:
-            print("")
-        except Exception as e:
-            print("")
-        self.server.log('Loaded !',0)
-
-    def load_plugins(self, plugins_directory):
-        try:
-            # threads = []
-            plugins = os.listdir(plugins_directory)
-            for plugin in plugins:
-                plugin_path = os.path.join(plugins_directory, plugin)
-                yaml_file_path = os.path.join(plugin_path, "plugin.yaml")  
-                if os.path.isfile(yaml_file_path):
-                    # thread_plugin = threading.Thread(target=process_list_file, args=(yaml_file_path, plugin_path))
-                    # thread_plugin.start()
-                    # threads.append(thread_plugin)
-
-            # Wait for all threads to finish
-            # for thread in threads:
-                # thread.join()
-                    ...
-        except Exception as e:
-            print(e)
-
-    def init_api(self):
-        self.server.log("Plugin API loading...", 0)
-        self.server.log("Checking some things...", 0)
-        try:
-            if os.path.isdir(PLUGIN_FOLDER_PATH):
-                self.server.log("Folder plugin exists!", 0)
-            else:
-                os.mkdir(PLUGIN_FOLDER_PATH)
-        except Exception as e:
-            print(e)
-        self.load_plugins(plugins_directory=PLUGIN_FOLDER_PATH)
+        if hasattr(module, 'Plugin'):
+            plugin_instance = module.Plugin(plugin_name)
+            self.plugins.append(plugin_instance)
