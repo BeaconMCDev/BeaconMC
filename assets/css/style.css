@@ -1,4 +1,4 @@
-:root{
+:root {
     --background-color: #121212;
     --text-color: #ebebeb;
     --accent-color: #a8eb12;
@@ -10,26 +10,27 @@
 @font-face {
     font-family: "Geist";
     src:
-      url("../fonts/Geist-Regular.otf")
+        url("../fonts/Geist-Regular.otf")
 }
 
 @font-face {
     font-family: "GeistBold";
     src:
-      url("../fonts/Geist-Bold.otf")
+        url("../fonts/Geist-Bold.otf")
 }
 
 * {
     box-sizing: border-box
 }
 
-html,body{
+html,
+body {
     width: 100%;
     height: 100%;
     margin: 0
 }
 
-body{
+body {
     font-family: Geist;
     background-color: var(--background-color);
     color: var(--text-color);
@@ -39,17 +40,17 @@ body{
     flex-direction: column;
 }
 
-header{
+header {
     text-align: center;
     max-width: 70%;
 }
 
-header h1{
+header h1 {
     font-family: GeistBold;
     font-size: 4rem;
 }
 
-header ul{
+header ul {
     list-style: none;
     padding: 0;
     display: flex;
@@ -58,18 +59,18 @@ header ul{
     gap: 50px;
 }
 
-header ul li a{
+header ul li a {
     color: #aaaaaa;
     transition: all 0.5s;
     font-family: GeistBold;
     text-decoration: none;
 }
 
-header ul li a:hover{
+header ul li a:hover {
     color: var(--text-color)
 }
 
-main{
+main {
     flex: 1;
     display: flex;
     align-items: center;
@@ -77,22 +78,23 @@ main{
     gap: 50px;
 }
 
-main .about{
+main .about {
     width: 80%;
     display: flex;
     align-items: center;
     justify-content: space-around;
 }
 
-main .about div{
+main .about div {
     max-width: 50%;
 }
 
-main, footer{
+main,
+footer {
     width: 100%;
 }
 
-footer{
+footer {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -100,18 +102,18 @@ footer{
     justify-content: space-around;
 }
 
-a{
+a {
     color: skyblue;
 }
 
-pre{
+pre {
     background-color: #333;
     color: white;
     padding: 10px;
     border-radius: 8px;
 }
 
-.button{
+.button {
     font-size: 2rem;
     border: none;
     border-radius: 5px;
@@ -129,7 +131,7 @@ pre{
 .button-1 {
     background-color: var(--py-color-1);
 }
-  
+
 .button-1:hover {
     background-color: rgba(52, 122, 180, 0.7);
 }
@@ -138,7 +140,7 @@ pre{
     color: #333;
     background-color: var(--py-color-2);
 }
-  
+
 .button-2:hover {
     background-color: rgba(255, 202, 29, 0.7);
 }
@@ -148,35 +150,36 @@ pre{
     border-radius: 8px;
     background: transparent;
 }
-  
+
 .button-3:hover {
     background-color: #262626;
 }
 
-.buttons{
+.buttons {
     display: flex;
     align-items: center;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
-.buttons-column{
+.buttons-column {
     display: flex;
     gap: 20px;
     flex-direction: column;
 }
 
-.buttons-column .button{
+.buttons-column .button {
     justify-content: center !important;
 }
 
-.accent{
+.accent {
     background: var(--py-color-1);
     padding: 5px;
     border-radius: 6px;
 }
 
 .social {
-    max-width: 320px;
+    width: fit-content;
     display: flex;
     padding: 0.5rem 1.4rem;
     font-size: 0.875rem;
@@ -194,34 +197,83 @@ pre{
     cursor: pointer;
     transition: all 0.6s ease;
     text-decoration: none;
-  }
-  
-  .social svg {
+}
+
+.social svg {
     height: 24px;
     width: 24px;
     fill: #fff;
     margin-right: 0.5rem;
-  }
-  
-  .social:hover {
+}
+
+.social:hover {
     transform: scale(1.02);
     background-color: rgb(119, 133, 204);
     box-shadow: 0 2px 4px rgba(119, 133, 204, 0.1);
-  }
-  
-  .social:focus {
+}
+
+.social:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
-  }
-  
-  .social:active {
+}
+
+.social:active {
     transform: scale(0.98);
     opacity: 0.8;
-  }
-  
-  @media (max-width: 480px) {
+}
+
+@media (max-width: 480px) {
     .social {
-      max-width: 100%;
+        max-width: 100%;
     }
-  }
-  
+}
+
+
+.docs {
+    max-width: 60%;
+}
+
+
+@media only screen and (max-width: 768px) {
+    header {
+        max-width: 95%;
+    }
+
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    .buttons {
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .buttons .button {
+        width: 95%;
+    }
+
+    .about {
+        flex-direction: column-reverse;
+        width: 95%;
+    }
+
+    main .about div {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .docs {
+        max-width: 80%;
+    }
+
+    .social {
+        width: 100%;
+        justify-content: center;
+    }
+
+    footer {
+        flex-direction: column;
+        text-align: center;
+    }
+}
