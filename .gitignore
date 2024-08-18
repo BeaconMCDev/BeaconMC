@@ -1,1 +1,2 @@
-.vscode
+#Ignore vscode directory
+.vscode/
