@@ -6,3 +6,5 @@ You can contribute by going to the discord server.
 
 # Official website
 https://fewerteam.github.io/BeaconMC
+
+<i>Say hello to a new design by <a href="https://liamgenjs.vercel.app">liamgen.js</a></i>
