@@ -761,6 +761,47 @@ class Client(object):
                     self.connected = False
                     break
 
+                elif self.packet.type == 1 and self.protocol_state == "Login":
+                    self.shared_secret = b""
+                    for i in range(Packet.unpack_varint(self.packet.args[0])):
+                        self.shared_secret += self.packet.args[i]
+                    # TODO : decrypt shared secret with server secret key
+                    # TODO : the next of the packet
+                    if ONLINE_MODE:
+                        api_system = m_api.Accounts()
+                        check_result = api_system.authenticate(self.username, self.uuid)
+                        if check_result[0]:
+                            log(f"sucessfully authenticated {self.username}.", 3)
+                            pass
+                        else:
+                            log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
+                            self.connected = False
+                            d_reason = "Failed to login"
+                            misc_d = False
+
+                        # TODO Enable compression (would be optional) (in other "if" fork)
+                        ...
+                    else:
+                        # load player properties
+                        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
+                        self.properties = api_response["properties"]
+                         
+                        # self.properties = ({"name": "texture", "value": ""},)
+                        enc_properties = []
+                        for p in self.properties:
+                            enc_properties.append(p["name"])
+                            enc_properties.append(p["value"])
+                            enc_properties.append(False)
+                        parg = [UUID(self.uuid), self.username, len(self.properties)]
+                        for p in enc_properties:
+                            parg.append(p)
+                        parg.append(not(DEBUG))
+                        response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
+                        log(response.__repr__(), 3)
+                        response.send()
+                        self.server.list_clients.append(self)
+                        break
+
             ###############################################################################
 
 
