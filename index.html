@@ -1,39 +1,76 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>BeaconMC</title>
-        <link rel="shortcut icon" href="./favicon.ico" />
-        <link rel="stylesheet" href="./style.css">
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital@1&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <center>
-            <h1>BeaconMC</h1>
-            <p>The <markthisimportant>lightweight</markthisimportant> Python Minecraft server software !</p>
-            <div class="nav">
-                <button class="button-home" style="vertical-align:middle" onclick="window.location.href = './download';"><span>Download</span></button>
-                <button class="button-home" style="vertical-align:middle" onclick="window.location.href = './doc';"><span>Documentation</span></button>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeaconMC</title>
+
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header>
+        <h2>BeaconMC</h2>
+
+        <h1>
+            The <span class="accent">lightweight</span> Python Minecraft server software !
+        </h1>
+    </header>
+    <main>
+        <div class="buttons">
+            <a class="button-1 button" href="https://github.com/FewerTeam/BeaconMC/archive/refs/heads/main.zip" download>Download</a>
+            <a class="button-2 button" href="/documentation">Documentation</a>
+            <a class="button-3 button" href="https://github.com/FewerTeam/BeaconMC" target="_blank">GitHub&nbsp;<i class="fa-solid fa-external-link"></i></a>
+        </div>
+
+        <div class="about">
+            <div>
+                <h2>Our goal</h2>
+                <p>
+                    BeaconMC's goal is to provide an alternative to Java developed servers, and make the Minecraft plugin creation easier and more accessible for Python developers and for new developers.
+                </p>
+                <h2>An easy plugin creation</h2>
+                <p>
+                    We designed the plugin system to make it easy to use, efficiency and complete, with event handler, canceller and modifiers, and with a complete documentation (actually in work).
+                </p>
+                <h2>Join us now !</h2>
+                <p>
+                    Join us now on our Discord server and on our GitHub, you can contribute and help us to develop this project by posting an issue on GitHub or a ticket on Discord (and by this way you can become a BeaconMC developer) !
+                </p>
+
+                <a class="social" href="https://discord.gg/kFTsfbEWVc" target="_blank">
+                    <svg
+                      style="color: white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-discord"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z"
+                        fill="white"
+                      ></path>
+                    </svg>
+                    Join the discord
+                  </a>
+                  
             </div>
-        </center>
-        <h2>Our goal</h2> <img align="right", src="./icon.png", alt="BeaconMC logo" id="icon-home-bmc">
-        <p>BeaconMC's goal is to provide an alternative to Java developed servers, and make the Minecraft plugin creation easier and more accessible for Python developers and for new developers.</p>
 
-        <h2>An easy plugin creation</h2>
-        <p>We designed the plugin system to make it easy to use, efficiency and complete, with event handler, canceller and modifiers, and with a complete documentation (actually in work).</p>
-
-        <h2>Join us now !</h2>
-        <p>Join us now on our <a>Discord server</a> and on our <a>GitHub</a>, you can contribute and help us to develop this project by posting an issue on GitHub or a ticket on Discord (and by this way you can become a BeaconMC developer) !</p>
-        <a href="https://discord.gg/b5AAa8v6Uq"><img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/6266bc493fb42d4e27bb8393_847541504914fd33810e70a0ea73177e.ico" alt="Discord logo" width=100 height="100"></a>
-        <a href="https://github.com/FewerTeam/BeaconMC"><img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="GitHub logo" width=100 height="100" id="github-logo"></a>
-        <center>
-            <hr>
-            <footer>
-                <p>Website made by <a href="https://github.com/EletrixtimeYT">EletrixTime</a>, <a href="https://github.com/FewerElk">FewerElk</a> and <a href="https://github.com/mickbot-92">@mickbot-92</a></p>
-                <a href="https://github.com/FewerTeam/BeaconMC/tree/website">This website is open-source !</a>
-                <a href="https://discord.gg/s4Nx36UN7S">Discord</a>
-            </footer>
-
-        </center>
-
-    </body>
+            <img src="assets/logo.png" alt="">
+        </div>
+        
+    </main>
+    <footer>
+        <p>
+            This website is <a href="https://github.com/FewerTeam/BeaconMC/tree/website" target="_blank">Open Source</a>
+        </p>
+        <p>
+            Made by <a href="https://github.com/EletrixtimeYT" target="_blank">EletrixTime</a>, <a href="https://github.com/FewerElk" target="_blank">FewerElk</a>, <a href="https://github.com/mickbot-92" target="_blank">@mickbot-92</a> and <a href="https:/liamgenjs.vercel.app" target="_blank" style="color: #0888de">liamgen.js</a>
+        </p>
+    </footer>
+</body>
 </html>
