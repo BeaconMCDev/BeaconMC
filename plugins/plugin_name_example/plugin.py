@@ -1,8 +1,11 @@
 """ BeaconMC example plugin for the new system
 You should use this template for every plugin to avoid potential bugs or damages."""
 
+# Import plugin class parent
+from utils.plugins.BeaconMCPlugin import BeaconMCPlugin
+
 # First, the plugin file MUST contain the Plugin class
-class Plugin(object):
+class Plugin(BeaconMCPlugin):
 
     # Here place the plugin properties (equivalent of plugin.yml file in Java plugins)
 
@@ -25,20 +28,16 @@ class Plugin(object):
     def __init__(self, server):
         """Get the server instance from the loader.
         MUST BE WRITTEN"""
-        self.server = server
+        super().__init__(self, server)
 
-    # Optionnal
+    # Note : all the following events method are optinnal but you have to respect the arguments
     def onEnable(self):
         """Similar to Java plugins"""
         # In this exemple the plugin will log into the console "Hello World"
         self.server.log("Hello World", 0)
 
-    # Optionnal
     def onDisable(self):
         self.server.log("GoodBye !", 0)
 
-    # Optionnal
     def onPlayerJoinEvent(self, player):
         self.server.post_to_chat(f"Welcome {player.username} !")
-
-    # etc
