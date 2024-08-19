@@ -602,6 +602,7 @@ class Client(object):
         self.connected = True
         self.protocol_state = "Handshaking"
         self.encrypted = False
+        self.authenticated = False
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -719,6 +720,7 @@ class Client(object):
                         check_result = api_system.authenticate(self.username, self.uuid)
                         if check_result[0]:
                             log(f"sucessfully authenticated {self.username}.", 3)
+                             self.authenticated = True
                             pass
                         else:
                             log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
@@ -807,6 +809,11 @@ class Client(object):
                         response.send()
                         self.server.list_clients.append(self)
                         break
+                elif self.packet.type == 3 and self.protocol_state == "Login" and self.authenticated:
+                    self.protocol_state = "Configuration"
+                
+                elif self.packet.type == 1 and self.protocol_state == "Configuration":
+                    ...
 
             ###############################################################################
 
@@ -816,8 +823,11 @@ class Client(object):
                 if misc_d:
                     log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
-                    dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(f'\{"text":"{d_reason}"\}', ))
-                    log(f"{self.username} lost connexion: {d_reason}.", 0)
+                     if self.protocol_state == "Login":
+                        dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(f'\{"text":"{d_reason}"\}', ))
+                     elif self.protocol_state == "Configuration":
+                         dp = Packet(self.connexion, "-OUTGOING", typep=2, args=(f'\{"text":"{d_reason}"\}', ))
+                     log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
 
