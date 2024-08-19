@@ -22,7 +22,7 @@ class Plugin(object):
     _disabled = False
 
 
-    def __init__(self, logger, server):
+    def __init__(self, server):
         """Get the server instance from the loader.
         MUST BE WRITTEN"""
         self.server = server
