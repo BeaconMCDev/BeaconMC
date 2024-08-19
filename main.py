@@ -759,15 +759,15 @@ class Client(object):
                     self.shared_secret = b""
                     for i in range(Packet.unpack_varint(self.packet.args[0])):
                         self.shared_secret += self.packet.args[i]
-                         j = i
+                        j = i
                     verify_token2_lenth = self.packet.args[j+1]
-                     verify_token2 = b""
-                     for i in range(Packet.unpack_varint(verify_token2_lenth)):
+                    verify_token2 = b""
+                    for i in range(Packet.unpack_varint(verify_token2_lenth)):
                         verify_token2 += self.packet.args[j + i + 1]
-                     # decrypt token
-                     if verify_token == verify_token2:
-                         pass
-                     else:
+                    # decrypt token
+                    if verify_token == verify_token2:
+                        pass
+                    else:
                          log("An exception occured with encryption, disconnecting...", 2)
                          self.connected = False
                          misc_d = True
