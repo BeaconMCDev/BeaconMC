@@ -720,7 +720,7 @@ class Client(object):
                         check_result = api_system.authenticate(self.username, self.uuid)
                         if check_result[0]:
                             log(f"sucessfully authenticated {self.username}.", 3)
-                             self.authenticated = True
+                            self.authenticated = True
                             pass
                         else:
                             log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
