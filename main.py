@@ -7,7 +7,6 @@ import math
 import socket as skt
 import time as tm
 import random as rdm
-import plugins.modulable_pluginsystem as mplsys
 from typing import Literal
 from libs.cryptography_system.system import CryptoSystem as Crypto
 import threading as thread
@@ -286,13 +285,8 @@ class MCServer(object):
 
     def load_plugins(self):
         """Load the plugins"""
-        self.PLUGIN_ALLOWED = mplsys.ENABLE_PLUGINS
-        self.PLUGIN_LIST = mplsys.PLUGIN_LIST
-
-        for pl in self.PLUGIN_LIST:
-            pl.set_server(self)
-            if pl._on_load():
-                pl.on_load()
+        self.plugin_loader = pluginapi.PluginLoader(self)
+        self.plugin_loader.load_plugins()
 
     def load_worlds(self):
         """Load all of the server's worlds"""
