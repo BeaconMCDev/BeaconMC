@@ -813,7 +813,7 @@ class Client(object):
                 elif self.packet.type == 3 and self.protocol_state == "Login" and self.authenticated:
                     self.protocol_state = "Configuration"
                 
-                elif self.packet.type == 3 and self.protocol_state == "Configuration" and self.configured = True:
+                elif self.packet.type == 3 and self.protocol_state == "Configuration" and self.configured == True:
                     self.protocol_state = "Play"
 
             ###############################################################################
