@@ -603,6 +603,7 @@ class Client(object):
         self.protocol_state = "Handshaking"
         self.encrypted = False
         self.authenticated = False
+        self.configured = False
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -812,8 +813,8 @@ class Client(object):
                 elif self.packet.type == 3 and self.protocol_state == "Login" and self.authenticated:
                     self.protocol_state = "Configuration"
                 
-                elif self.packet.type == 1 and self.protocol_state == "Configuration":
-                    ...
+                elif self.packet.type == 3 and self.protocol_state == "Configuration" and self.configured = True:
+                    self.protocol_state = "Play"
 
             ###############################################################################
 
@@ -835,7 +836,7 @@ class Client(object):
 
             log(f"{self.username} joined the game.", 0)
             self.server.post_to_chat(f"{self.username} joined the game")
-            while self.connected and state == "ON":
+            while self.connected and state == "ON" and self.protocol_state == "Play":
                 # to clean
 
                 l = self.connexion.recv(1)
