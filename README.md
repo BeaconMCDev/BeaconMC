@@ -1,4 +1,4 @@
 # Official website
-https://fewerteam.github.io/BeaconMC
+https://beaconmcdev.github.io/BeaconMC
 
 <i>Say hello to a new design and SEO by <a href="https://liamgenjs.vercel.app">liamgen.js</a></i>
