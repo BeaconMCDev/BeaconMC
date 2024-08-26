@@ -15,7 +15,7 @@ import hashlib  # for md5 auth system
 import platform
 import pluginapi
 import json
-from libs import mojangapi
+from libs import mojangapi as mo_api
 import struct
 import uuid
 import traceback
