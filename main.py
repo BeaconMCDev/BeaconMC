@@ -260,8 +260,8 @@ class MCServer(object):
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
         # self.heartbeat()
 
-        log("Loading plugins...", 0)
-        self.load_plugins()
+        log("Loading plugins... (REMOVED)", 0)
+        #self.load_plugins()
 
         log("Starting console GUI...", 0)
         self.gui = ConsoleGUI()
@@ -1420,7 +1420,6 @@ be_ready_to_log()
 if __name__ == "__main__":
     try:
         log('Starting Plugin APi', 3)
-        pluginapi.init_api()
         tr = Translation(lang)
         srv = MCServer()
         srv.start()

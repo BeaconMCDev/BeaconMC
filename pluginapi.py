@@ -19,7 +19,7 @@ class PluginLoader:
                     plugin_name = os.path.basename(root)
                     self._load_plugin(plugin_path, plugin_name)
 
-    def _load_plugin(self, plugin_path, plugin_name):
+    def _load_plugin(self, plugin_path, plugin_name, temp):
         spec = importlib.util.spec_from_file_location(plugin_name, plugin_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
