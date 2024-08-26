@@ -1,6 +1,0 @@
-whitelist=true
-max_players=5
-motd=A BeaconMC server
-debug_mode=true
-lang=en
-online_mode=false
