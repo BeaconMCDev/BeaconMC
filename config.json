@@ -1,0 +1,8 @@
+{
+    "whitelist": false,
+    "max_players": 10,
+    "motd": "Welcome to BeaconMC !",
+    "online_mode": true,
+    "lang": "en",
+    "debug_mode": true
+}

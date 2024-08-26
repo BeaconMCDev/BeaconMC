@@ -46,36 +46,14 @@ print("""  ____  ______          _____ ____  _   _ __  __  _____
  |____/|______/_/    \_\_____\____/|_| \_|_|  |_|\_____|
 """)
 print("         (c) BeaconMC Team 2024")
-# CONFIG READING
-with open("config.txt", "r") as config:
-    dt = None
-    while dt != "":
-        dt = config.readline()
-        if dt == "":
-            break
-        dt = dt.split("=")
-        if dt[1][-1] == "\n":
-            arg = dt[1][:-1]
-        else:
-            arg = dt[1]
-        if dt[0] == "whitelist":
-            dico = {"true": False, "false": True}
-            public = dico[arg]
-
-        elif dt[0] == "max_players":
-            MAX_PLAYERS = int(arg)
-        elif dt[0] == "motd":
-            MOTD = arg
-        elif dt[0] == "debug_mode":
-            dico = {"true": True, "false": False}
-            DEBUG = dico[arg]
-        elif dt[0] == "lang":
-            lang = arg
-        elif dt[0] == "online_mode":
-            dico = {"true": True, "false": False}
-            ONLINE_MODE = dico[arg]
-        else:
-            continue
+_CONFIG = json.loads(open("config.json", "r").read())
+public = _CONFIG["whitelist"]
+MOTD = _CONFIG["motd"]
+MAX_PLAYERS = _CONFIG["max_players"]
+ONLINE_MODE = _CONFIG["online_mode"]
+lang = _CONFIG["lang"]
+DEBUG = _CONFIG["debug_mode"]
+            
 
 
 COMPATIBLE_OS = ["Windows", "Linux"]
