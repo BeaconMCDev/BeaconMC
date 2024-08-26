@@ -10,3 +10,4 @@ class BeaconMCPlugin(object):
 
     def onPlayerJoinEvent(self, player):
         pass
+    

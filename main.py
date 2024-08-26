@@ -15,7 +15,7 @@ import hashlib  # for md5 auth system
 import platform
 import pluginapi
 import json
-from libs import mojangapi as mo_api
+from libs import mojangapi as m_api
 import struct
 import uuid
 import traceback
@@ -261,7 +261,7 @@ class MCServer(object):
         # self.heartbeat()
 
         log("Loading plugins... (REMOVED)", 0)
-        #self.load_plugins()
+        self.load_plugins()
 
         log("Starting console GUI...", 0)
         self.gui = ConsoleGUI()
@@ -283,7 +283,7 @@ class MCServer(object):
 
     def load_plugins(self):
         """Load the plugins"""
-        self.plugin_loader = pluginapi.PluginLoader(self)
+        self.plugin_loader = pluginapi.PluginLoader(server=self)
         self.plugin_loader.load_plugins()
 
     def load_worlds(self):
