@@ -3,4 +3,4 @@ Disallow: /404.html
 Disallow: /creation.html
 Allow: /
 
-Sitemap: https://fewerteam.github.io/BeaconMC/sitemap.xml
+Sitemap: https://beaconmcdev.github.io/BeaconMC/sitemap.xml
