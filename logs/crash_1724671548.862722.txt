@@ -1,0 +1,24 @@
+
+=========================================
+        BEACON-MC CRASH REPORT
+=========================================
+Something went wrong, please submit the report on the issue tracker.
+Traceback :
+Traceback (most recent call last):
+  File "C:\Users\lisan\Downloads\BeaconMC-main\BeaconMC-main\main.py", line 1417, in <module>
+    pluginapi.init_api()
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'pluginapi' has no attribute 'init_api'
+
+=========================================
+OS : nt
+Python Version : 3.11.7 (tags/v3.11.7:fa7a6f2, Dec  4 2023, 19:24:49) [MSC v.1937 64 bit (AMD64)]
+BeaconMC Version : Alpha-dev 
+Plugins List : 
+- plugin_name_example
+- test2
+- test3
+
+Date : 2024-08-26 13:25:48.862722
+=========================================
+        

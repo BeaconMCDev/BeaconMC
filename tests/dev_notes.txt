@@ -1,0 +1,10 @@
+Requetes serveur --> client:
+- version incompatible : (fait/à tester)
+    b'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["1.16.5"]}' (message tiré d'un srv 1.19)
+- Info pour la liste des serveurs (exemple) : 
+    b'\xca\x01\x00\xc7\x01{"previewsChat":false,"description":{"text":"\xc2\xa79Aujourd\u0027hui : serveur ouvert de\xc2\xa72 truc\xc2\xa79 jusqu\u0027\xc3\xa0\xc2\xa74 truc\xc2\xa79."},"players":{"max":10,"online":0},"version":{"name":"1.19","protocol":759}}'
+    #####
+    TRES IMPORTANT
+    #####
+        - les § sont codés \xc2\xa7 dans les requetes. Cela donne \xc2\xa7 + code couleur
+            --> \xc2\xa79 par exemple pour §9 ou \u00A79
