@@ -2,6 +2,7 @@
 # BEACONMC 1.19.4
 # =========================
 # Mojang API
+# (C) BeaconMC Team
 
 import requests
 import json

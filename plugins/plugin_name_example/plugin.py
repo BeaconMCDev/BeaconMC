@@ -28,7 +28,7 @@ class Plugin(BeaconMCPlugin):
     def __init__(self, server):
         """Get the server instance from the loader.
         MUST BE WRITTEN"""
-        super().__init__(server)
+        super().__init__(self, server)
 
     # Note : all the following events method are optinnal but you have to respect the arguments
     def onEnable(self):

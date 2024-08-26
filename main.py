@@ -15,12 +15,13 @@ import hashlib  # for md5 auth system
 import platform
 import pluginapi
 import json
-import mojangapi as m_api
+from libs import mojangapi as m_api
 import struct
 import uuid
 import traceback
 import requests
 from base64 import b64encode
+from libs import crash_gen
 try:
     import nbtlib
 except ModuleNotFoundError:
@@ -29,7 +30,6 @@ except ModuleNotFoundError:
     import nbtlib
     print("Done")
 
-print("_________________________________________________________\nStarting BeaconMC 1.19.4\n_________________________________________________________")
 
 dt_starting_to_start = tm.time()
 lthr = []
@@ -38,10 +38,15 @@ lthr = []
 # BASE ERROR
 class OSNotCompatibleError(OSError):
     pass
-
-
+print("""  ____  ______          _____ ____  _   _ __  __  _____ 
+ |  _ \|  ____|   /\   / ____/ __ \| \ | |  \/  |/ ____|
+ | |_) | |__     /  \ | |   | |  | |  \| | \  / | |     
+ |  _ <|  __|   / /\ \| |   | |  | | . ` | |\/| | |     
+ | |_) | |____ / ____ \ |___| |__| | |\  | |  | | |____ 
+ |____/|______/_/    \_\_____\____/|_| \_|_|  |_|\_____|
+""")
+print("         (c) BeaconMC Team 2024")
 # CONFIG READING
-print("Reading the config file...")
 with open("config.txt", "r") as config:
     dt = None
     while dt != "":
@@ -56,29 +61,23 @@ with open("config.txt", "r") as config:
         if dt[0] == "whitelist":
             dico = {"true": False, "false": True}
             public = dico[arg]
-            print(f"Whitelist: {arg}")
+
         elif dt[0] == "max_players":
             MAX_PLAYERS = int(arg)
-            print(f"Max players: {arg}")
         elif dt[0] == "motd":
             MOTD = arg
-            print(f"MOTD: {arg}")
         elif dt[0] == "debug_mode":
             dico = {"true": True, "false": False}
             DEBUG = dico[arg]
-            print(f"Debug mode: {arg}")
         elif dt[0] == "lang":
             lang = arg
-            print(f"Lang: {arg}")
         elif dt[0] == "online_mode":
             dico = {"true": True, "false": False}
             ONLINE_MODE = dico[arg]
         else:
             continue
 
-print("Done.")
-print("Setting up the server...")
-print("Checking OS compatibility...")
+
 COMPATIBLE_OS = ["Windows", "Linux"]
 OS = platform.system()
 if OS in COMPATIBLE_OS:
@@ -88,7 +87,7 @@ if OS in COMPATIBLE_OS:
         SEP = "\\"
 else:
     raise OSNotCompatibleError(f"OS {OS} is not compatible ! Please use Linux or Windows !")
-print(f"OS {OS} is compatible !")
+
 
 # GLOBAL DATAS - VARIABLES
 connected_players = 0
@@ -183,7 +182,6 @@ def be_ready_to_log():
     while os.path.exists(f"logs/log{nb}.log"):
         nb += 1
     logfile = f"logs/log{nb}.log"
-    print("Log system ready !")
 
 
 def encode(msg: str):
@@ -262,7 +260,7 @@ class MCServer(object):
         log(f"Protocol version: {PROTOCOL_VERSION}", 3)
         # self.heartbeat()
 
-        log("Loading plugins...", 0)
+        log("Loading plugins... (REMOVED)", 0)
         self.load_plugins()
 
         log("Starting console GUI...", 0)
@@ -285,7 +283,7 @@ class MCServer(object):
 
     def load_plugins(self):
         """Load the plugins"""
-        self.plugin_loader = pluginapi.PluginLoader(self)
+        self.plugin_loader = pluginapi.PluginLoader(server=self)
         self.plugin_loader.load_plugins()
 
     def load_worlds(self):
@@ -1422,11 +1420,11 @@ be_ready_to_log()
 if __name__ == "__main__":
     try:
         log('Starting Plugin APi', 3)
-        pluginapi.init_api()
         tr = Translation(lang)
         srv = MCServer()
         srv.start()
     except Exception as e:
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
-        log(f"{traceback.format_exc(e)}", 100)
+        #log(f"{traceback.format_exc(e)}", 100) > Cause a error 
+        crash_gen.gen_crash_report()
         srv.stop(critical_stop=True, reason=f"{e}", e=e)
