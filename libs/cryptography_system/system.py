@@ -8,38 +8,48 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
 class CryptoSystem(object):
-    KEY_HIDDEN_MESSAGE = "403\nKEY HIDDEN FOR SECURITY REASONS. IT WILL BE WRITTEN HERE ON SERVER STOP (final action to prevent plugins access it)."
-    
+    KEY_HIDDEN_MESSAGE = b"403\nKEY HIDDEN FOR SECURITY REASONS. IT WILL BE WRITTEN HERE ON SERVER STOP (final action to prevent plugins accessing it)."
+    PATH = "libs/cryptography_system/"
+
     def __init__(self, server):
         """Load public and private keys. Hide private key for security reason."""
         self.server = server
         try:
-            with open(".private_key.pem", "rb") as skf:
+            with open(self.PATH + ".private_key.pem", "rb") as skf:
                 self._private_key = skf.read()
-                self.__private_key__ = serialization.load_pem_private_key(
-                    self._private_key,
-                    password=None,
-                    backend=default_backend()
-                )
+                try:
+                    self.__private_key__ = serialization.load_pem_private_key(
+                        self._private_key,
+                        password=None,
+                        backend=default_backend()
+                    )
+                except:
+                    self.__private_key__ = None
 
-            with open(".private_key.pem", "wb") as skf:
+            with open(self.PATH + ".private_key.pem", "wb") as skf:
                 skf.write(self.KEY_HIDDEN_MESSAGE)
 
-            with open("public_key.pem", "rb") as pkf:
+            with open(self.PATH + "public_key.pem", "rb") as pkf:
                 self.public_key = pkf.read()
-                self.__public_key__ = serialization.load_pem_public_key(
-                    self.public_key,
-                    backend=default_backend()
-                )
+                try:
+                    self.__public_key__ = serialization.load_pem_public_key(
+                        self.public_key,
+                        backend=default_backend()
+                    )
+                except:
+                    self.__public_key__ = None
 
-            if self.null_key():
+            with open(self.PATH + "public_key.pem", "wb") as pkf:
+                pkf.write(self.KEY_HIDDEN_MESSAGE)
+
+            if self.null_keys():
                 self.generate_keys()
         except FileNotFoundError:
             self.generate_keys()
 
     def null_keys(self) -> bool:
         """Check if keys exists or not (in project variables)."""
-        null = ("", " ", "None", "none", "null", "Null")
+        null = (None, "", " ", "None", "none", "null", "Null")
         if self._private_key == self.KEY_HIDDEN_MESSAGE:
             # The initial key was not restaured.
             return True
@@ -50,15 +60,15 @@ class CryptoSystem(object):
         return False
         
     def stop(self):
-        with open(".private_key.pem", "wb") as skf:
+        with open(self.PATH + ".private_key.pem", "wb") as skf:
             skf.write(self._private_key)
         self._private_key = " "
         del (self._private_key)
         self.__private_key__ = ""
         del (self.__private_key__)
 
-        with open("public_key.pem", "wb") as pkf:
-            skf.write(self.public_key)
+        with open(self.PATH + "public_key.pem", "wb") as pkf:
+            pkf.write(self.public_key)
         self.public_key = " "
         del(self.public_key)
         self.__public_key__ = " "

@@ -1,5 +1,5 @@
-# =========================
 # BEACONMC 1.19.4
+# =========================
 # =========================
 # Crash Generator
 # (C) BeaconMC Team
@@ -10,13 +10,12 @@ import os
 import sys
 import random
 from datetime import datetime
-from main import SERVER_VERSION
 import json
 
 TOTAL_PLUGIN = 0
-def gen_crash_report():
+def gen_crash_report(SERVER_VERSION):
     global TOTAL_PLUGIN
-    with open(f"logs/crash_{datetime.timestamp( datetime.now() )}.txt", "w") as f:
+    with open(f"crash_reports/crash_{datetime.timestamp( datetime.now() )}.txt", "w") as f:
 
         plugin_list = ""
         for p in os.listdir("plugins"):
@@ -28,6 +27,7 @@ def gen_crash_report():
         BEACON-MC CRASH REPORT
 =========================================
 Something went wrong, please submit the report on the issue tracker.
+https://github.com/BeaconMCDev/BeaconMC/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=
 Traceback :
 {traceback.format_exc()}
 =========================================

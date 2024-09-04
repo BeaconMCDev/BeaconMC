@@ -38,7 +38,7 @@ lthr = []
 # BASE ERROR
 class OSNotCompatibleError(OSError):
     pass
-print("""  ____  ______          _____ ____  _   _ __  __  _____ 
+print(r"""  ____  ______          _____ ____  _   _ __  __  _____ 
  |  _ \|  ____|   /\   / ____/ __ \| \ | |  \/  |/ ____|
  | |_) | |__     /  \ | |   | |  | |  \| | \  / | |     
  |  _ <|  __|   / /\ \| |   | |  | | . ` | |\/| | |     
@@ -200,7 +200,7 @@ class MCServer(object):
                     self.stop(False, reason="You need to accept Minecraft eula to continue.")
                 return
         except Exception as e:
-            print(f"{type(e)} : {e}")
+            log(traceback.format_exc(e), 2)
             log("The eula.txt file was not found, or the server was modified !", 1)
             log("You need to agree the Minecraft EULA to continue.", 2)
             log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
@@ -1404,5 +1404,5 @@ if __name__ == "__main__":
     except Exception as e:
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
         #log(f"{traceback.format_exc(e)}", 100) > Cause a error 
-        crash_gen.gen_crash_report()
+        crash_gen.gen_crash_report(SERVER_VERSION)
         srv.stop(critical_stop=True, reason=f"{e}", e=e)
