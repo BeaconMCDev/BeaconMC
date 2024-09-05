@@ -11,4 +11,50 @@ Requetes serveur --> client:
 
 J'ai retirer le load de plugin api parce-que ca buggait !
 
-Crypt Error !
+Client connects to the server
+C→S: Handshake State=2                                                                                      DONE
+C→S: Login Start                                                                                            DONE
+S→C: Encryption Request (optional)                                                                          DONE
+Client auth (Only if server sent Encryption Request)                                                        TO CHECK
+C→S: Encryption Response (Only if server sent Encryption Request)                                           IN THE WORK
+Server auth, both enable encryption (Only if server sent Encryption Request)
+S → C: Set Compression (Optional, enables compression)                                                      FUTURE VERSION ?
+S → C: Login Success                                                                                        DONE ?
+C → S: Login Acknowledged                                                                                   DONE
+C → S: Serverbound Plugin Message (Optional, minecraft:brand with the client's brand)
+C → S: Client Information (Optional)
+S → C: Clientbound Plugin Message (Optional, minecraft:brand with the server's brand)
+S → C: Feature Flags (Optional)
+S → C: Clientbound Known Packs
+C → S: Serverbound Known Packs
+S → C: Registry Data (Multiple)
+S → C: Update Tags (Optional)
+S → C: Finish Configuration
+C → S: Acknowledge Finish Configuration
+S → C: Login (play)
+S → C: Change Difficulty (Optional)
+S → C: Player Abilities (Optional)
+S → C: Set Held Item (Optional)
+S → C: Update Recipes (Optional)
+S → C: Entity Event (Optional, for the OP permission level; see Entity statuses#Player)
+S → C: Commands (Optional)
+S → C: Update Recipe Book (Optional)
+S → C: Synchronize Player Position
+C → S: Confirm Teleportation
+C → S: Set Player Position and Rotation (Optional, to confirm the spawn position)
+S → C: Server Data (Optional)
+S → C: Player Info Update (Add Player action, all players except the one joining (the Notchian server separates these, you don't need to))
+S → C: Player Info Update (Add Player action, joining player)
+S → C: Initialize World Border (Optional)
+S → C: Update Time (Optional)
+S → C: Set Default Spawn Position (Optional, “home” spawn, not where the client will spawn on login)
+S → C: Game Event (Start waiting for level chunks event, required for the client to spawn)
+S → C: Set Ticking State (Optional)
+S → C: Step Tick (Optional, the Notchian server sends this regardless of ticking state)
+S → C: Set Center Chunk
+S → C: Chunk Data and Update Light (One sent for each chunk in a circular area centered on the player's position)
+S → C: inventory, entities, etc.
+Offline mode
+If the server is in offline mode, it will not send the Encryption Request packet, and likewise, the client should not send Encryption Response. In this case, encryption is never enabled, and no authentication is performed.
+
+Clients can tell that a server is in offline mode if the server sends a Login Success without sending Encryption Request.

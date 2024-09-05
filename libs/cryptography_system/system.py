@@ -6,6 +6,7 @@ FOR ANY SECURITY FLAW, please contact me on https://github.com/FewerTeam/BeaconM
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+import traceback
 
 class CryptoSystem(object):
     KEY_HIDDEN_MESSAGE = b"403\nKEY HIDDEN FOR SECURITY REASONS. IT WILL BE WRITTEN HERE ON SERVER STOP (final action to prevent plugins accessing it)."
@@ -23,7 +24,8 @@ class CryptoSystem(object):
                         password=None,
                         backend=default_backend()
                     )
-                except:
+                except Exception as e:
+                    self.server.log(traceback.format_exc(), 2)
                     self.__private_key__ = None
 
             with open(self.PATH + ".private_key.pem", "wb") as skf:
@@ -36,7 +38,8 @@ class CryptoSystem(object):
                         self.public_key,
                         backend=default_backend()
                     )
-                except:
+                except Exception as e:
+                    self.server.log(traceback.format_exc(), 2)
                     self.__public_key__ = None
 
             with open(self.PATH + "public_key.pem", "wb") as pkf:

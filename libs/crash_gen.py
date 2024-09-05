@@ -15,6 +15,9 @@ import json
 TOTAL_PLUGIN = 0
 def gen_crash_report(SERVER_VERSION):
     global TOTAL_PLUGIN
+    with open("config.json", "r") as f:
+        config = json.loads(f.read())
+        online_mode = config["online_mode"]
     with open(f"crash_reports/crash_{datetime.timestamp( datetime.now() )}.txt", "w") as f:
 
         plugin_list = ""

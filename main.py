@@ -539,6 +539,8 @@ class Packet(object):
                     out += b"\x00"
             elif isinstance(i, tuple):
                 ...
+            # elif isinstance(i, bytes):
+            #     out += i
             else:
                 out += self.pack_data(i)
         out = self.pack_varint(len(out)) + out
@@ -590,6 +592,23 @@ class Client(object):
         """Starting the login in (rq C --> S)"""
         self.request
         ...
+
+    def load_properties(self):
+        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
+        self.properties = api_response["properties"]
+        enc_properties = []
+        for p in self.properties:
+            enc_properties.append(p["name"])
+            enc_properties.append(p["value"])
+            enc_properties.append(False)
+        parg = [UUID(self.uuid), self.username, len(self.properties)]
+        for p in enc_properties:
+            parg.append(p)
+        parg.append(not(DEBUG))
+        response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
+        log(response.__repr__(), 3)
+        response.send()
+        self.server.list_clients.append(self)
 
     def client_thread(self, id):
         """Per client thread"""
@@ -693,13 +712,6 @@ class Client(object):
                                     continue
                         if ONLINE_MODE:
                             # TODO Encryption Request
-                            if self.encrypted:  # soon
-                                verify_token = b""
-                                for i in range(4):
-                                    verify_token += bytes(rdm.randint(0, 10))
-                                resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
-                                resp_pack.send()
-                                continue
                             api_system = m_api.Accounts()
                             check_result = api_system.authenticate(self.username, self.uuid)
                             if check_result[0]:
@@ -711,28 +723,25 @@ class Client(object):
                                 self.connected = False
                                 d_reason = "Failed to login"
                                 misc_d = False
+                                break
+                            # Encryption request
+                            verify_token = bytearray()
+                            for i in range(4):
+                                verify_token.append(rdm.randint(0, 255))
+                            verify_token = bytes(verify_token)
+                            print(verify_token)
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.public_key), self.server.crypto_sys.public_key, 4, verify_token, True))
+                            resp_pack.send()
+                            print(resp_pack.__repr__())
+                            continue
+                            
 
                             # TODO Enable compression (would be optional) (in other "if" fork)
                             ...
                         else:
+                            log("WARNING! YOUR SERVER IS RUNNING OFFLINE MODE, SO CRACKED AND UNVERIFIED USERS CAN CONNECT. MOREOVER, IDENTITY THEFT IS POSSIBLE AND NOT DETECTABLE.", 1)
                             # load player properties
-                            api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
-                            self.properties = api_response["properties"]
-
-                            # self.properties = ({"name": "texture", "value": ""},)
-                            enc_properties = []
-                            for p in self.properties:
-                                enc_properties.append(p["name"])
-                                enc_properties.append(p["value"])
-                                enc_properties.append(False)
-                            parg = [UUID(self.uuid), self.username, len(self.properties)]
-                            for p in enc_properties:
-                                parg.append(p)
-                            parg.append(not(DEBUG))
-                            response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
-                            log(response.__repr__(), 3)
-                            response.send()
-                            self.server.list_clients.append(self)
+                            self.load_properties()
                             break
 
                     elif self.packet.type == 1:
@@ -753,40 +762,10 @@ class Client(object):
                              misc_d = True
                              d_reason = "Encryption error"
                         # TODO : decrypt shared secret with server secret key
-                        if ONLINE_MODE:
-                            api_system = m_api.Accounts()
-                            check_result = api_system.authenticate(self.username, self.uuid)
-                            if check_result[0]:
-                                log(f"sucessfully authenticated {self.username}.", 3)
-                                pass
-                            else:
-                                log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
-                                self.connected = False
-                                d_reason = "Failed to login"
-                                misc_d = False
-
-                            # TODO Enable compression (would be optional) (in other "if" fork)
-                            ...
-                        else:
-                            # load player properties
-                            api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
-                            self.properties = api_response["properties"]
-
-                            # self.properties = ({"name": "texture", "value": ""},)
-                            enc_properties = []
-                            for p in self.properties:
-                                enc_properties.append(p["name"])
-                                enc_properties.append(p["value"])
-                                enc_properties.append(False)
-                            parg = [UUID(self.uuid), self.username, len(self.properties)]
-                            for p in enc_properties:
-                                parg.append(p)
-                            parg.append(not(DEBUG))
-                            response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
-                            log(response.__repr__(), 3)
-                            response.send()
-                            self.server.list_clients.append(self)
-                            break
+                        self.encrypted = True
+                        
+                        self.load_properties()
+                        break
                     elif self.packet.type == 3 and self.authenticated:
                         self.protocol_state = "Configuration"
                 
