@@ -614,183 +614,186 @@ class Client(object):
 
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
 
-                if self.packet.type == 0 and self.protocol_state == "Handshaking":
-                    # Handshake
+                if self.protocol_state == "Handshaking":
 
-                    if self.packet.args[-1] == 1:
-                        # Switch protocol state to status
-                        self.protocol_state = "Status"
-                        log(f"Switching to Status state for {self.info}", 3)
+                    if self.packet.type == 0:
+                        if self.packet.args[-1] == 1:
+                            # Switch protocol state to status
+                            self.protocol_state = "Status"
+                            log(f"Switching to Status state for {self.info}", 3)
+                            continue
 
+                        elif self.packet.args[-1] == 2:
+                            # Switch protocol state to login
+                            self.protocol_state = "Login"
+                            log(f"Switching to login state for {self.info}", 3)
+                            continue
+
+                        elif self.packet.args[-1] == 3:
+                            # Switch protocol state to transfer
+                            self.protocol_state = "Transfer"
+                            log(f"Switching to transfer state for {self.info}", 3)
+                            continue
+                        else:
+                            self.connected = False
+                            self.connected = False
+                            log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
+                            break
+
+                elif self.protocol_state == "Status":
+                    if self.packet.type == 0:
+                        # Status request -> Status response (SLP)
+                        self.SLP()
                         continue
-
-                    elif self.packet.args[-1] == 2:
-                        # Switch protocol state to login
-                        self.protocol_state = "Login"
-                        log(f"Switching to login state for {self.info}", 3)
-
-                        continue
-
-                    elif self.packet.args[-1] == 3:
-                        # Switch protocol state to transfer
-                        self.protocol_state = "Transfer"
-                        log(f"Switching to transfer state for {self.info}", 3)
-
-                        continue
-                    else:
+                    elif self.packet.type == 1:
+                        pong_packet = self.packet
+                        pong_packet.direction = "-OUTGOING"
+                        pong_packet.send()
+                        # payload = self.packet.args[0]
+                        # self.ping_response(payload)
                         self.connected = False
-                        self.connected = False
-                        log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
                         break
-                elif self.packet.type == 0 and self.protocol_state == "Status":
-                    # Status request -> Status response (SLP)
-                    self.SLP()
-                    continue
 
-                elif self.packet.type == 0 and self.protocol_state == "Login":
+                elif self.protocol_state == "Login":
+                    if self.packet.type == 0:
+                        unamelenth = self.packet.args[0]
+                        i = 1
+                        self.username = ""
+                        while i <= unamelenth:
+                            sb = self.packet.args[i:i+1]
+                            self.username += sb.decode("utf-8")
+                            i += 1
 
-                    unamelenth = self.packet.args[0]
-                    i = 1
-                    self.username = ""
-                    while i <= unamelenth:
-                        sb = self.packet.args[i:i+1]
-                        self.username += sb.decode("utf-8")
-                        i += 1
+                        self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i+1:])
 
-                    self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i+1:])
+                        log(f"UUID of {self.username} is {self.uuid}.", 0)
+                        log(f"{self.username} is logging in from {self.info}.", 0)
 
-                    log(f"UUID of {self.username} is {self.uuid}.", 0)
-                    log(f"{self.username} is logging in from {self.info}.", 0)
+                        if len(self.server.list_clients) >= MAX_PLAYERS:
 
-                    if len(self.server.list_clients) >= MAX_PLAYERS:
+                            self.connected = False
+                            misc_d = False
+                            d_reason = "Server full"
+                            continue
+                        if whitelist:
+                            with open ("whitelist.json", "r") as wf:
+                                data = json.loads(wf.read())
+                                o = 0
+                                for d in data:
+                                    if d["uuid"] == self.uuid:
+                                        o += 1
+                                if o != 1:
+                                    self.connected = False
 
-                        self.connected = False
-                        misc_d = False
-                        d_reason = "Server full"
-                        continue
-                    if whitelist:
-                        with open ("whitelist.json", "r") as wf:
-                            data = json.loads(wf.read())
-                            o = 0
-                            for d in data:
-                                if d["uuid"] == self.uuid:
-                                    o += 1
-                            if o != 1:
+                                    d_reason = "You are not whitelisted on this server."
+                                    misc_d = False
+
+                                    if o > 1:
+                                        log("User is whitelisted more than 1 time !", 1)
+                                    continue
+                        if ONLINE_MODE:
+                            # TODO Encryption Request
+                            if self.encrypted:  # soon
+                                verify_token = b""
+                                for i in range(4):
+                                    verify_token += bytes(rdm.randint(0, 10))
+                                resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
+                                resp_pack.send()
+                                continue
+                            api_system = m_api.Accounts()
+                            check_result = api_system.authenticate(self.username, self.uuid)
+                            if check_result[0]:
+                                log(f"sucessfully authenticated {self.username}.", 3)
+                                self.authenticated = True
+                                pass
+                            else:
+                                log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
                                 self.connected = False
-
-                                d_reason = "You are not whitelisted on this server."
+                                d_reason = "Failed to login"
                                 misc_d = False
 
-                                if o > 1:
-                                    log("User is whitelisted more than 1 time !", 1)
-                                continue
-                    if ONLINE_MODE:
-                        # TODO Encryption Request
-                        if self.encrypted:  # soon
-                            verify_token = b""
-                            for i in range(4):
-                                verify_token += bytes(rdm.randint(0, 10))
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.__public_key__), self.server.crypto_sys.__public_key__, 4, verify_token, True))
-                            resp_pack.send()
-                            continue
-                        api_system = m_api.Accounts()
-                        check_result = api_system.authenticate(self.username, self.uuid)
-                        if check_result[0]:
-                            log(f"sucessfully authenticated {self.username}.", 3)
-                            self.authenticated = True
+                            # TODO Enable compression (would be optional) (in other "if" fork)
+                            ...
+                        else:
+                            # load player properties
+                            api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
+                            self.properties = api_response["properties"]
+
+                            # self.properties = ({"name": "texture", "value": ""},)
+                            enc_properties = []
+                            for p in self.properties:
+                                enc_properties.append(p["name"])
+                                enc_properties.append(p["value"])
+                                enc_properties.append(False)
+                            parg = [UUID(self.uuid), self.username, len(self.properties)]
+                            for p in enc_properties:
+                                parg.append(p)
+                            parg.append(not(DEBUG))
+                            response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
+                            log(response.__repr__(), 3)
+                            response.send()
+                            self.server.list_clients.append(self)
+                            break
+
+                    elif self.packet.type == 1:
+                        self.shared_secret = b""
+                        for i in range(Packet.unpack_varint(self.packet.args[0])):
+                            self.shared_secret += self.packet.args[i]
+                            j = i
+                        verify_token2_lenth = self.packet.args[j+1]
+                        verify_token2 = b""
+                        for i in range(Packet.unpack_varint(verify_token2_lenth)):
+                            verify_token2 += self.packet.args[j + i + 1]
+                        # decrypt token
+                        if verify_token == verify_token2:
                             pass
                         else:
-                            log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
-                            self.connected = False
-                            d_reason = "Failed to login"
-                            misc_d = False
+                             log("An exception occured with encryption, disconnecting...", 2)
+                             self.connected = False
+                             misc_d = True
+                             d_reason = "Encryption error"
+                        # TODO : decrypt shared secret with server secret key
+                        if ONLINE_MODE:
+                            api_system = m_api.Accounts()
+                            check_result = api_system.authenticate(self.username, self.uuid)
+                            if check_result[0]:
+                                log(f"sucessfully authenticated {self.username}.", 3)
+                                pass
+                            else:
+                                log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
+                                self.connected = False
+                                d_reason = "Failed to login"
+                                misc_d = False
 
-                        # TODO Enable compression (would be optional) (in other "if" fork)
-                        ...
-                    else:
-                        # load player properties
-                        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
-                        self.properties = api_response["properties"]
-                         
-                        # self.properties = ({"name": "texture", "value": ""},)
-                        enc_properties = []
-                        for p in self.properties:
-                            enc_properties.append(p["name"])
-                            enc_properties.append(p["value"])
-                            enc_properties.append(False)
-                        parg = [UUID(self.uuid), self.username, len(self.properties)]
-                        for p in enc_properties:
-                            parg.append(p)
-                        parg.append(not(DEBUG))
-                        response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
-                        log(response.__repr__(), 3)
-                        response.send()
-                        self.server.list_clients.append(self)
-                        break
-
-                elif self.packet.type == 1 and self.protocol_state == "Status":
-                    payload = self.packet.args[0]
-                    self.ping_response(payload)
-                    self.connected = False
-                    break
-
-                elif self.packet.type == 1 and self.protocol_state == "Login":
-                    self.shared_secret = b""
-                    for i in range(Packet.unpack_varint(self.packet.args[0])):
-                        self.shared_secret += self.packet.args[i]
-                        j = i
-                    verify_token2_lenth = self.packet.args[j+1]
-                    verify_token2 = b""
-                    for i in range(Packet.unpack_varint(verify_token2_lenth)):
-                        verify_token2 += self.packet.args[j + i + 1]
-                    # decrypt token
-                    if verify_token == verify_token2:
-                        pass
-                    else:
-                         log("An exception occured with encryption, disconnecting...", 2)
-                         self.connected = False
-                         misc_d = True
-                         d_reason = "Encryption error"
-                    # TODO : decrypt shared secret with server secret key
-                    if ONLINE_MODE:
-                        api_system = m_api.Accounts()
-                        check_result = api_system.authenticate(self.username, self.uuid)
-                        if check_result[0]:
-                            log(f"sucessfully authenticated {self.username}.", 3)
-                            pass
+                            # TODO Enable compression (would be optional) (in other "if" fork)
+                            ...
                         else:
-                            log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
-                            self.connected = False
-                            d_reason = "Failed to login"
-                            misc_d = False
+                            # load player properties
+                            api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
+                            self.properties = api_response["properties"]
 
-                        # TODO Enable compression (would be optional) (in other "if" fork)
-                        ...
-                    else:
-                        # load player properties
-                        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
-                        self.properties = api_response["properties"]
-                         
-                        # self.properties = ({"name": "texture", "value": ""},)
-                        enc_properties = []
-                        for p in self.properties:
-                            enc_properties.append(p["name"])
-                            enc_properties.append(p["value"])
-                            enc_properties.append(False)
-                        parg = [UUID(self.uuid), self.username, len(self.properties)]
-                        for p in enc_properties:
-                            parg.append(p)
-                        parg.append(not(DEBUG))
-                        response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
-                        log(response.__repr__(), 3)
-                        response.send()
-                        self.server.list_clients.append(self)
-                        break
-                elif self.packet.type == 3 and self.protocol_state == "Login" and self.authenticated:
-                    self.protocol_state = "Configuration"
+                            # self.properties = ({"name": "texture", "value": ""},)
+                            enc_properties = []
+                            for p in self.properties:
+                                enc_properties.append(p["name"])
+                                enc_properties.append(p["value"])
+                                enc_properties.append(False)
+                            parg = [UUID(self.uuid), self.username, len(self.properties)]
+                            for p in enc_properties:
+                                parg.append(p)
+                            parg.append(not(DEBUG))
+                            response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
+                            log(response.__repr__(), 3)
+                            response.send()
+                            self.server.list_clients.append(self)
+                            break
+                    elif self.packet.type == 3 and self.authenticated:
+                        self.protocol_state = "Configuration"
                 
-                elif self.packet.type == 3 and self.protocol_state == "Configuration" and self.configured == True:
-                    self.protocol_state = "Play"
+                elif self.protocol_state == "Configuration" and self.configured:
+                    if self.packet.type == 3:
+                        self.protocol_state = "Play"
+                        break
 
             ###############################################################################
 
