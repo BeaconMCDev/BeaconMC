@@ -47,7 +47,7 @@ print(r"""  ____  ______          _____ ____  _   _ __  __  _____
 """)
 print("         (c) BeaconMC Team 2024")
 _CONFIG = json.loads(open("config.json", "r").read())
-public = _CONFIG["whitelist"]
+whitelist = _CONFIG["whitelist"]
 MOTD = _CONFIG["motd"]
 MAX_PLAYERS = _CONFIG["max_players"]
 ONLINE_MODE = _CONFIG["online_mode"]
@@ -71,7 +71,7 @@ else:
 connected_players = 0
 blacklist = []
 whitelist = []
-# public = True
+# whitelist = True
 users = []
 logfile = ""
 state = "OFF"
@@ -668,7 +668,7 @@ class Client(object):
                         misc_d = False
                         d_reason = "Server full"
                         continue
-                    if not(public):
+                    if whitelist:
                         with open ("whitelist.json", "r") as wf:
                             data = json.loads(wf.read())
                             o = 0
@@ -801,9 +801,9 @@ class Client(object):
                     log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
                      if self.protocol_state == "Login":
-                        dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(f'\{"text":"{d_reason}"\}', ))
+                        dp = Packet(self.connexion, "-OUTGOING", typep=0, args=('{"text": "' + d_reason + '"', ))
                      elif self.protocol_state == "Configuration":
-                         dp = Packet(self.connexion, "-OUTGOING", typep=2, args=(f'\{"text":"{d_reason}"\}', ))
+                         dp = Packet(self.connexion, "-OUTGOING", typep=2, args=('{"text": "' + d_reason + '"', ))
                      log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
