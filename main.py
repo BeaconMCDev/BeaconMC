@@ -69,8 +69,8 @@ else:
 
 # GLOBAL DATAS - VARIABLES
 connected_players = 0
-blacklist = []
-whitelist = []
+blacklisted = []
+whitelisted = []
 # whitelist = True
 users = []
 logfile = ""
@@ -704,7 +704,7 @@ class Client(object):
                                 if o != 1:
                                     self.connected = False
 
-                                    d_reason = "You are not whitelisted on this server."
+                                    d_reason = "You are not whitelisted on this server"
                                     misc_d = False
 
                                     if o > 1:
@@ -782,11 +782,13 @@ class Client(object):
                 if misc_d:
                     log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
-                     if self.protocol_state == "Login":
-                        dp = Packet(self.connexion, "-OUTGOING", typep=0, args=('{"text": "' + d_reason + '"', ))
-                     elif self.protocol_state == "Configuration":
-                         dp = Packet(self.connexion, "-OUTGOING", typep=2, args=('{"text": "' + d_reason + '"', ))
-                     log(f"{self.username} lost connexion: {d_reason}.", 0)
+                    message = "{'text': '" + d_reason + "'}"
+                    if self.protocol_state == "Login":
+                        dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(message, ))
+                    elif self.protocol_state == "Configuration":
+                        dp = Packet(self.connexion, "-OUTGOING", typep=2, args=(message, ))
+                    dp.send()
+                    log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
 
