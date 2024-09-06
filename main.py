@@ -541,6 +541,9 @@ class Packet(object):
                 ...
             # elif isinstance(i, bytes):
             #     out += i
+            elif isinstance(i, str):
+                out += self.pack_varint(len(i))
+                out += bytes(i, "utf-8")
             else:
                 out += self.pack_data(i)
         out = self.pack_varint(len(out)) + out
