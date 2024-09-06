@@ -787,6 +787,7 @@ class Client(object):
                      elif self.protocol_state == "Configuration":
                          dp = Packet(self.connexion, "-OUTGOING", typep=2, args=('{"text": "' + d_reason + '"', ))
                      log(f"{self.username} lost connexion: {d_reason}.", 0)
+                     dp.send()
                 self.connexion.close()
                 return
 
@@ -835,6 +836,11 @@ class Client(object):
             log(f"{traceback.format_exc()}", 2)
             self.connected = False
             dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Internal server error"}', ))
+            dp.send()
+            self.connexion.close()
+            if self in self.server.list_clients:
+                self.server.list_clients.remove(self)
+            del(self)
 
     def ping_response(self, payload):
         """Send a response to a ping to make the client get the ping in ms of the server."""
