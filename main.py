@@ -227,6 +227,9 @@ class MCServer(object):
     def log(self, msg: str, type: int = -1):
         """An alternative of main.log(). Don't delete, used by plugins."""
         log(msg, type)
+        
+    def kick(self, client):
+        ...
 
     def banip(self, ip:str=None, client:object=None, username:str=None, reason:str=""):
         if reason == "":
@@ -740,7 +743,7 @@ class Client(object):
                                 if bip["ip"] == self.info:
                                     self.connected = False
                                     misc_d = False
-                                    d_reason = f"Your IP was banned : {bip["reason"]}"
+                                    d_reason = f"Your IP was banned : {bip['reason']}"
                                     log(f"{self.username}'s IP is banned. Disconnecting...", 0)
                                     break
                         with open("banned-players.json", "r") as f:
