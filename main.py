@@ -228,6 +228,25 @@ class MCServer(object):
         """An alternative of main.log(). Don't delete, used by plugins."""
         log(msg, type)
 
+    def banip(self, ip:str=None, client:object=None, username:str=None, reason:str=""):
+        if reason == "":
+            reason = "Banned by an operator"
+        if ip != None:
+            with open("banned-ips.json", "r") as f:
+                data = json.loads(f.read())
+            
+            data.append(
+                {
+                    "ip": ip, 
+                    "reason": reason
+                    # other info soon ?
+                }
+            )
+
+            with open("banned-ips.json", "w") as f:
+                f.write(json.dumps(data))
+        ...
+
     def start(self):
         global state
         """Start the server"""
@@ -686,10 +705,54 @@ class Client(object):
                             self.username += sb.decode("utf-8")
                             i += 1
 
+                        i = 0
                         self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i+1:])
+
 
                         log(f"UUID of {self.username} is {self.uuid}.", 0)
                         log(f"{self.username} is logging in from {self.info}.", 0)
+
+                        for player in self.server.list_clients:
+                            if self.username == player.username or self.uuid == player.uuid:
+                                if i == 1:
+                                    log(f"{self.username} is already connected !", 1)
+                                    if not(ONLINE_MODE):
+                                        if self.info == player.info:
+                                            self.connected = False
+                                            misc_d = False
+                                            d_reason = "You are already connected !"
+                                        else:
+                                            log("Banning the player for security reason: the server is running offline mode.", 1)
+                                            self.server.banip(ip=self.info, reason="Possible identity theft, please conctact an administrator.")
+                                            self.server.banip(ip=player.info, reason="Possible identity theft, please conctact an administrator.")
+                                            self.server.kick(player, "Possible identity theft, please conctact an administrator.")
+                                    else:
+                                        self.connected = False
+                                        misc_d = False
+                                        d_reason = "You are already connected !"
+                                    break
+                                else:
+                                    i += 1
+
+                        with open("banned-ips.json", "r") as f:
+                            banedips = json.loads(f.read())
+                            for bip in banedips:
+                                if bip["ip"] == self.info:
+                                    self.connected = False
+                                    misc_d = False
+                                    d_reason = f"Your IP was banned : {bip["reason"]}"
+                                    log(f"{self.username}'s IP is banned. Disconnecting...", 0)
+                                    break
+                        with open("banned-players.json", "r") as f:
+                            banedips = json.loads(f.read())
+                            for bip in banedips:
+                                if bip["username"] == self.info:
+                                    self.connected = False
+                                    misc_d = False
+                                    d_reason = f"Your account was banned : {bip["reason"]}"
+                                    log(f"{self.username} is banned. Disconnecting...", 0)
+                                    break
+                        
 
                         if len(self.server.list_clients) >= MAX_PLAYERS:
 
