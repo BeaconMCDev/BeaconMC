@@ -752,7 +752,7 @@ class Client(object):
                                 if bip["username"] == self.info:
                                     self.connected = False
                                     misc_d = False
-                                    d_reason = f"Your account was banned : {bip["reason"]}"
+                                    d_reason = f"Your account was banned : {bip['reason']}"
                                     log(f"{self.username} is banned. Disconnecting...", 0)
                                     break
                         
