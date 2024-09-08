@@ -26,7 +26,7 @@ def gen_crash_report(SERVER_VERSION):
         file_number += 1
         file_name = f"crash_reports/crash_{date_str}_{file_number}.txt"
 
-    with open(filename, "w") as f:
+    with open(file_name, "w") as f:
 
         plugin_list = ""
         for p in os.listdir("plugins"):
