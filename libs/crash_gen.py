@@ -18,7 +18,15 @@ def gen_crash_report(SERVER_VERSION):
     with open("config.json", "r") as f:
         config = json.loads(f.read())
         online_mode = config["online_mode"]
-    with open(f"crash_reports/crash_{datetime.timestamp( datetime.now() )}.txt", "w") as f:
+
+    date_str = datetime.now().strftime("%m-%d-%Y")
+    file_number = 1
+    file_name = f"crash_reports/crash_{date_str}_{file_number}.txt"
+    while os.path.exists(file_name):
+        file_number += 1
+        file_name = f"crash_reports/crash_{date_str}_{file_number}.txt"
+
+    with open(filename, "w") as f:
 
         plugin_list = ""
         for p in os.listdir("plugins"):
