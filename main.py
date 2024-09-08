@@ -605,8 +605,8 @@ class Packet(object):
         for i in self.args:
             if isinstance(i, int):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
-            elif isinstance(i, UUID):
-                out += (self.pack_varint(1) + self.pack_uuid(i))
+            # elif isinstance(i, UUID):
+            #     out += (self.pack_varint(1) + self.pack_uuid(i))
             elif isinstance(i, bool):
                 if i:
                     out += b"\x01"
