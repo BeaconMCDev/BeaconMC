@@ -228,12 +228,24 @@ class MCServer(object):
         """An alternative of main.log(). Don't delete, used by plugins."""
         log(msg, type)
         
-    def kick(self, client):
-        ...
+    def kick(self, client, reason="Kicked by an operator"):
+        if isinstance(client, Client):
+            if client in self.list_clients:
+                if client.connected:
+                    log(f"Kicking {client.username} ({client.uuid}): {reason}")
+                    client.disconnect(reason)
+                    return True
+                else:
+                    log(f"Failed to kick {client.username}: client not connected.", 1)
+                    return False
+            else:
+                log(f"Failed to kick {client.username}: client not registered.", 1)
+                return False
+        else:
+            log(f"Failed to kick {client}: not a Client instance.", 2)
+            return False
 
-    def banip(self, ip:str=None, client:object=None, username:str=None, reason:str=""):
-        if reason == "":
-            reason = "Banned by an operator"
+    def banip(self, ip:str=None, client:object=None, username:str=None, reason:str="Banned by an operator"):
         if ip != None:
             with open("banned-ips.json", "r") as f:
                 data = json.loads(f.read())
@@ -248,7 +260,48 @@ class MCServer(object):
 
             with open("banned-ips.json", "w") as f:
                 f.write(json.dumps(data))
-        ...
+        elif client != None:
+            with open("banned-ips.json", "r") as f:
+                data = json.loads(f.read())
+            
+            data.append(
+                {
+                    "ip": client.info, 
+                    "reason": reason
+                    # other info soon ?
+                }
+            )
+
+            with open("banned-ips.json", "w") as f:
+                f.write(json.dumps(data))
+        elif username != None:
+            with open("banned-ips.json", "r") as f:
+                data = json.loads(f.read())
+            i = 0
+            for c in self.list_clients:
+                if c.username == username:
+                    client = c
+                    i += 1
+            if i > 1:
+                raise TwoPlayerWithSameUsernameException()
+            elif i == 0:
+                log(f"Failed to kick {username}: player not found.", 1)
+                return
+            elif i == 1:
+                pass
+            else:
+                raise Exception("An unknow exception occured.")
+            
+            data.append(
+                {
+                    "ip": c.info, 
+                    "reason": reason
+                    # other info soon ?
+                }
+            )
+
+            with open("banned-ips.json", "w") as f:
+                f.write(json.dumps(data))
 
     def start(self):
         global state
