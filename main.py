@@ -371,10 +371,10 @@ class MCServer(object):
         if critical_stop:
             for i in self.list_clients:
                 i: Client
-                i.disconnect(reason=tr.key("disconnect.server_crashed"))
+                i.disconnect(reason=tr.key("disconnect.server.crash"))
         else:
             for i in self.list_clients:
-                i.disconnect(reason=tr.key("disconnect.server_closed"))
+                i.disconnect(reason=tr.key("disconnect.server.closed"))
         log("Closing socket...", 0)
         self.socket.close()
         log("Stopping all tasks...", 0)
