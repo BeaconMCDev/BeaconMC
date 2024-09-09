@@ -1,3 +1,13 @@
 {
-
+    "disconnect.whitelist": "You are not whitelisted on this server", 
+    "disconnect.ban.account": "Your account was banned: {reason}",
+    "disconnect.ban.ip": "Your IP was banned: {reason}",
+    "disconnect.username.conflict.online": "You are already connected", 
+    "disconnect.username.conflict.offline.sameip": "You are already connected",
+    "disconnect.username.conflict.offline.dif_ip": "Possible identity theft, please conctact an administrator.",
+    "disconnect.server.closed": "Server closed",
+    "disconnect.server.restart": "Server is restarting", 
+    "disconnect.server.crash": "The server crashed. Please contact an administrator",
+    "disconnect.server.error": "Internal exception, please contact an administrator", 
+    "disconnect.login.failed": "Failed to login"
 }
