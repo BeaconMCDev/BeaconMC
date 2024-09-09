@@ -1,0 +1,14 @@
+{
+    "disconnect.whitelist": "Vous n'êtes pas sur la liste blanche de ce serveur",
+    "disconnect.ban.account": "Votre compte a été banni : {reason}",
+    "disconnect.ban.ip": "Votre IP a été bannie : {reason}",
+    "disconnect.username.conflict.online": "Vous êtes déjà connecté",
+    "disconnect.username.conflict.offline.sameip": "Vous êtes déjà connecté",
+    "disconnect.username.conflict.offline.dif_ip": "Usurpation d'identité possible, veuillez contacter un administrateur.",
+    "disconnect.server.closed": "Serveur fermé",
+    "disconnect.server.restart": "Le serveur redémarre",
+    "disconnect.server.crash": "Le serveur a planté. Veuillez contacter un administrateur",
+    "disconnect.server.error": "Exception interne, veuillez contacter un administrateur",
+    "disconnect.login.failed": "Échec de la connexion",
+    "disconnect.full": "Serveur plein"
+}

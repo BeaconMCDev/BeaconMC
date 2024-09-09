@@ -1,3 +1,14 @@
 {
-
+    "disconnect.whitelist": "No estás en la lista blanca de este servidor",
+    "disconnect.ban.account": "Tu cuenta ha sido baneada: {reason}",
+    "disconnect.ban.ip": "Tu IP ha sido baneada: {reason}",
+    "disconnect.username.conflict.online": "Ya estás conectado",
+    "disconnect.username.conflict.offline.sameip": "Ya estás conectado",
+    "disconnect.username.conflict.offline.dif_ip": "Posible suplantación de identidad, por favor contacta a un administrador.",
+    "disconnect.server.closed": "Servidor cerrado",
+    "disconnect.server.restart": "El servidor se está reiniciando",
+    "disconnect.server.crash": "El servidor se ha caído. Por favor contacta a un administrador",
+    "disconnect.server.error": "Excepción interna, por favor contacta a un administrador",
+    "disconnect.login.failed": "Error al iniciar sesión",
+    "disconnect.full": "Servidor lleno"
 }

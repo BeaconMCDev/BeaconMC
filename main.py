@@ -778,16 +778,16 @@ class Client(object):
                                         if self.info == player.info:
                                             self.connected = False
                                             misc_d = False
-                                            d_reason = "You are already connected !"
+                                            d_reason = tr.key("disconnect.username.conflict.offline.sameip")
                                         else:
                                             log("Banning the player for security reason: the server is running offline mode.", 1)
-                                            self.server.banip(ip=self.info, reason="Possible identity theft, please conctact an administrator.")
-                                            self.server.banip(ip=player.info, reason="Possible identity theft, please conctact an administrator.")
-                                            self.server.kick(player, "Possible identity theft, please conctact an administrator.")
+                                            self.server.banip(ip=self.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
+                                            self.server.banip(ip=player.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
+                                            self.server.kick(player, tr.key("disconnect.username.conflict.offline.dif_ip"))
                                     else:
                                         self.connected = False
                                         misc_d = False
-                                        d_reason = "You are already connected !"
+                                        d_reason = tr.key("disconnect.username.conflict.online")
                                     break
                                 else:
                                     i += 1
@@ -798,16 +798,18 @@ class Client(object):
                                 if bip["ip"] == self.info:
                                     self.connected = False
                                     misc_d = False
-                                    d_reason = f"Your IP was banned : {bip['reason']}"
+                                    reason = {bip['reason']}
+                                    d_reason = tr.key("disconnect.ban.ip")
                                     log(f"{self.username}'s IP is banned. Disconnecting...", 0)
                                     break
                         with open("banned-players.json", "r") as f:
-                            banedips = json.loads(f.read())
-                            for bip in banedips:
-                                if bip["username"] == self.info:
+                            banedacc = json.loads(f.read())
+                            for bacc in banedacc:
+                                if bacc["username"] == self.info:
                                     self.connected = False
                                     misc_d = False
-                                    d_reason = f"Your account was banned : {bip['reason']}"
+                                    reason = {bacc['reason']}
+                                    d_reason = tr.key("disconnect.ban.account")
                                     log(f"{self.username} is banned. Disconnecting...", 0)
                                     break
                         
@@ -816,7 +818,7 @@ class Client(object):
 
                             self.connected = False
                             misc_d = False
-                            d_reason = "Server full"
+                            d_reason = tr.key("disconnect.full")
                             continue
                         if whitelist:
                             with open ("whitelist.json", "r") as wf:
@@ -828,7 +830,7 @@ class Client(object):
                                 if o != 1:
                                     self.connected = False
 
-                                    d_reason = "You are not whitelisted on this server"
+                                    d_reason = tr.key("disconnect.whitelist")
                                     misc_d = False
 
                                     if o > 1:
@@ -845,7 +847,7 @@ class Client(object):
                             else:
                                 log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
                                 self.connected = False
-                                d_reason = "Failed to login"
+                                d_reason = tr.key("disconnect.login.failed")
                                 misc_d = False
                                 break
                             # Encryption request
@@ -1383,50 +1385,17 @@ class World(object):
 class Translation(object):
     def __init__(self, lang):
         self.lang = lang
-
-    def en(self, key):
-        """English translation"""
-        dico = {"disconnect.default": "Disconnected.",
-                "disconnect.server_full": "Server full.",
-                "disconnect.not_premium": "Auth failed : user not premium.",
-                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.",
-                "disconnect.server_closed": "Server closed.",
-                "disconnect.server_crashed": "Server crashed indeed of a critical error."}
-        return dico[key]
-
-    def fr(self, key):
-        """French translation"""
-        dico = {"disconnect.default": "Déconnecté",
-                "disconnect.server_full": "Le serveur est plein.",
-                "disconnect.not_premium": "L'authentification a échouée : utilisateur non premium.",
-                "disconnect.bad_protocol": "Merci de se connecter avec une autre version : protocole incompatioble.",
-                "disconnect.server_closed": "Serveur fermé.",
-                "disconnect.server_crashed": "Le serveur a planté suite à une erreur critique."}
-        return dico[key]
-
-    def es(self, key):
-        """Espagnol translation"""      #TODO
-        dico = {"disconnect.default": "Disconnected.", 
-                "disconnect.server_full": "Server full.",
-                "disconnect.not_premium": "Auth failed : user not premium.",
-                "disconnect.bad_protocol": "Please to connect with an other version : protocol not compatible.",
-                "disconnect.server_closed": "Server closed.",
-                "disconnect.server_crashed": "Server crashed indeed of a critical error."}
-        return dico[key]
+        try:
+            with open(f"utils/locale/{self.lang}.json", "r") as f:
+                self.dico = json.loads(f.read())
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Locale file 'utils/locale/{self.lang}.json' not found.")
 
     def key(self, key):
-        """Auto translate with key"""
-        if self.lang == "en":
-            return self.en(key)
-        elif self.lang == "fr":
-            return self.fr(key)
-        elif self.lang == "es":
-            log("This lang is not translated !", 1)
-            return self.es(key)
-        else:
-            log("Lang not found !", 100)
-            exit(-1)
-
+        try:
+            return self.dico[key]
+        except KeyError as e:
+            raise KeyError(f"Unknown translation key {key} for locale {self.lang}.") from e
 
 ########################################################################################################################################################################################################################
 ########################################################################################################################################################################################################################
