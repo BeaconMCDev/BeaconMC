@@ -763,7 +763,7 @@ class Client(object):
                             self.username += sb.decode("utf-8")
                             i += 1
 
-                        i = 0
+                        #i = 0
                         self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i+1:])
 
 
