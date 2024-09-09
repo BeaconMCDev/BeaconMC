@@ -614,8 +614,10 @@ class Packet(object):
                     out += b"\x00"
             elif isinstance(i, tuple):
                 ...
-            # elif isinstance(i, bytes):
-            #     out += i
+            elif isinstance(i, bytes):
+                 out += i
+            elif isinstance(i, bytearray):
+                out += bytes(i)
             elif isinstance(i, str):
                 out += self.pack_varint(len(i))
                 out += bytes(i, "utf-8")
@@ -850,9 +852,9 @@ class Client(object):
                             verify_token = bytearray()
                             for i in range(4):
                                 verify_token.append(rdm.randint(0, 255))
-                            verify_token = bytes(verify_token)
+                            # verify_token = bytes(verify_token)
                             print(verify_token)
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(self.server.crypto_sys.public_key), self.server.crypto_sys.public_key, 4, verify_token, True))
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(bytearray(self.server.crypto_sys.public_key)), bytearray(self.server.crypto_sys.public_key), 4, verify_token, True))
                             resp_pack.send()
                             print(resp_pack.__repr__())
                             continue
