@@ -53,6 +53,7 @@ MAX_PLAYERS = _CONFIG["max_players"]
 ONLINE_MODE = _CONFIG["online_mode"]
 lang = _CONFIG["lang"]
 DEBUG = _CONFIG["debug_mode"]
+ENFORCE_OFFLINE_PROFILES = _CONFIG["enforce_offline_profiles"]
             
 
 
@@ -774,7 +775,7 @@ class Client(object):
                             if self.username == player.username or self.uuid == player.uuid:
                                 if i == 1:
                                     log(f"{self.username} is already connected !", 1)
-                                    if not(ONLINE_MODE):
+                                    if not(ONLINE_MODE) and ENFORCE_OFFLINE_PROFILES:
                                         if self.info == player.info:
                                             self.connected = False
                                             misc_d = False
