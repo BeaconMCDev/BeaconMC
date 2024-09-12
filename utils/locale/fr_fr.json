@@ -10,5 +10,6 @@
     "disconnect.server.crash": "Le serveur a planté. Veuillez contacter un administrateur",
     "disconnect.server.error": "Exception interne, veuillez contacter un administrateur",
     "disconnect.login.failed": "Échec de la connexion",
-    "disconnect.full": "Serveur plein"
+    "disconnect.full": "Serveur plein",
+    "disconnect.default": "Déconnecté"
 }

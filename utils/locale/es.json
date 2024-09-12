@@ -10,5 +10,6 @@
     "disconnect.server.crash": "El servidor se ha caído. Por favor contacta a un administrador",
     "disconnect.server.error": "Excepción interna, por favor contacta a un administrador",
     "disconnect.login.failed": "Error al iniciar sesión",
-    "disconnect.full": "Servidor lleno"
+    "disconnect.full": "Servidor lleno",
+    "disconnect.default": "Desconectado"
 }

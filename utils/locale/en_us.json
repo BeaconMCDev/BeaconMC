@@ -10,5 +10,6 @@
     "disconnect.server.crash": "The server crashed. Please contact an administrator",
     "disconnect.server.error": "Internal exception, please contact an administrator", 
     "disconnect.login.failed": "Failed to login",
-    "disconnect.full": "Server full"
+    "disconnect.full": "Server full",
+    "disconnect.default": "Disconnected"
 }

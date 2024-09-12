@@ -606,8 +606,8 @@ class Packet(object):
         for i in self.args:
             if isinstance(i, int):
                 out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
-            # elif isinstance(i, UUID):
-            #     out += (self.pack_varint(1) + self.pack_uuid(i))
+            elif isinstance(i, UUID):
+                out += (self.pack_varint(1) + self.pack_uuid(i))
             elif isinstance(i, bool):
                 if i:
                     out += b"\x01"
@@ -675,17 +675,18 @@ class Client(object):
         ...
 
     def load_properties(self):
-        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"))
+        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{self.uuid}").content)
         self.properties = api_response["properties"]
         enc_properties = []
+        print(len(self.properties))
         for p in self.properties:
             enc_properties.append(p["name"])
             enc_properties.append(p["value"])
             enc_properties.append(False)
-        parg = [UUID(self.uuid), self.username, len(self.properties)]
+        parg = [UUID(self.uuid), self.username, len(enc_properties)]
         for p in enc_properties:
             parg.append(p)
-        parg.append(not(DEBUG))
+        # parg.append(not(DEBUG))
         response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
         log(response.__repr__(), 3)
         response.send()
@@ -838,7 +839,6 @@ class Client(object):
                                         log("User is whitelisted more than 1 time !", 1)
                                     continue
                         if ONLINE_MODE:
-                            # TODO Encryption Request
                             api_system = m_api.Accounts()
                             check_result = api_system.authenticate(self.username, self.uuid)
                             if check_result[0]:
@@ -851,6 +851,11 @@ class Client(object):
                                 d_reason = tr.key("disconnect.login.failed")
                                 misc_d = False
                                 break
+                            
+                            # temp
+                            # self.load_properties()
+                            # continue
+
                             # Encryption request
                             verify_token = bytearray()
                             for i in range(4):
@@ -1067,10 +1072,16 @@ class Client(object):
     def disconnect(self, reason=""):
         """Disconnect the player
         !!! not disconnectED !!!"""
-        self.connected = False
         if reason == "":
             reason = tr.key("disconnect.default")
-        self.connexion.send(f"\x0e{reason}".encode("utf-8"))
+        if self.protocol_state == "Login":
+            dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(reason, ))
+        elif self.protocol_state == "Configuration":
+            dp = Packet(self.connexion, "-OUTGOING", typep=2, args=(reason, ))
+        elif self.protocol_state == "Play":
+            dp = Packet(self.connexion, "-OUTGOING", typep=27, args=(reason, ))
+        dp.send()
+        self.connected = False
         self.connexion.close()
         self.server.list_clients.remove(self)
         del(self)
