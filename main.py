@@ -682,7 +682,9 @@ class Client(object):
         for p in self.properties:
             enc_properties.append(p["name"])
             enc_properties.append(p["value"])
-            enc_properties.append(False)
+            enc_properties.append(p["signed"])
+            print(p["signed"])
+            print(type(p["signed"]))
         parg = [UUID(self.uuid), self.username, len(enc_properties)]
         for p in enc_properties:
             parg.append(p)
