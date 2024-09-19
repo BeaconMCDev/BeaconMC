@@ -34,6 +34,9 @@ except ModuleNotFoundError:
 dt_starting_to_start = tm.time()
 lthr = []
 
+if __name__ != "__start__":
+    print("Please start the server with start.py")
+    exit(0)
 
 # BASE ERROR
 class OSNotCompatibleError(OSError):
@@ -1491,7 +1494,7 @@ be_ready_to_log()
 
 
 # MAIN
-if __name__ == "__main__":
+if __name__ == "__start__":
     try:
         log('Starting Plugin APi', 3)
         tr = Translation(lang)
