@@ -851,7 +851,7 @@ class Client(object):
                             api_system = m_api.Accounts()
                             check_result = api_system.authenticate(self.username, self.uuid)
                             if check_result[0]:
-                                log(f"sucessfully authenticated {self.username}.", 3)
+                                log(f"successfully authenticated {self.username}.", 3)
                                 self.authenticated = True
                                 pass
                             else:
@@ -871,7 +871,7 @@ class Client(object):
                                 verify_token.append(rdm.randint(0, 255))
                             # verify_token = bytes(verify_token)
                             print(verify_token)
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv", len(bytearray(self.server.crypto_sys.public_key)), bytearray(self.server.crypto_sys.public_key), 4, verify_token, True))
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv12345", len(bytearray(self.server.crypto_sys.public_key)), bytearray(self.server.crypto_sys.public_key), 4, verify_token, True))
                             resp_pack.send()
                             print(resp_pack.__repr__())
                             continue

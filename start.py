@@ -11,8 +11,7 @@ FILES_TO_CHECK = ["config.json", "main.py", "eula.txt", "LICENCE.md", "banned-ip
                 "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
                 "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
                 "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 
-                "libs/cryptography_system/system.py", "libs/cryptography_system/.private_key.pem", 
-                "libs/cryptography_system/public_key.pem"]
+                "libs/cryptography_system/system.py"]
 FOLDERS_TO_CHECK = ["libs", "libs/cryptography_system", "crash_reports", "logs", "plugins", "utils", "worlds"]
 
 state = "_DEFAULT"

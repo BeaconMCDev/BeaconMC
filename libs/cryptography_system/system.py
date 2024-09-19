@@ -63,6 +63,7 @@ class CryptoSystem(object):
         return False
         
     def stop(self):
+        print("stopping key system")
         with open(self.PATH + ".private_key.pem", "wb") as skf:
             skf.write(self._private_key)
         self._private_key = " "
@@ -78,6 +79,7 @@ class CryptoSystem(object):
         del(self.__public_key__)
         
         del(self)
+        print("stoped")
 
     def generate_keys(self):
         self.__private_key__ = rsa.generate_private_key(
