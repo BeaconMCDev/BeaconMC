@@ -583,7 +583,9 @@ class Packet(object):
                     break
         return o
 
-    def unpack_varint(data):
+    def unpack_varint(data, debug=False):
+        if debug:
+            log(f"Data : {data}", 3)
         d = 0
         for i in range(5):
             b = data[i]
@@ -711,12 +713,14 @@ class Client(object):
                 # Auth loop
                 try:
                     lenth = self.connexion.recv(1)
+                    if lenth == b"":
+                        continue
                     self.request = lenth + self.connexion.recv(Packet.unpack_varint(lenth))
                 except ConnectionResetError:
                     log(f"Client {self.info} disconnected : Connexion reset.")
                 if self.request == "":
                     continue
-                log(self.request, 3)
+                log(f"Receiving serverbound packet : {self.request}", 3)
 
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
 
