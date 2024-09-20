@@ -43,7 +43,7 @@ import os
 
 # DON'T TOUCH
 VERSION = "Alpha-dev"
-dico = """ + dico + """
+dico = """ + dico + r"""
 
 # Check structure
 FILES_TO_CHECK = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
