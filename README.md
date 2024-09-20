@@ -17,6 +17,9 @@ BeaconMC is a Minecraft server written in Python 3 that aims to simplify Minecra
 
 Visit our [website](https://fewerteam.github.io/BeaconMC) to learn more about the project and join our community on [Discord](https://discord.gg/pxkT9dtuN8) to stay updated with the latest news and development progress.
 
+### Installation
+
+Just download start.py and run it ! ;)
 ---
 
 ## Contribution
