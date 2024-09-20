@@ -41,7 +41,7 @@ import os
 
 # DON'T TOUCH
 VERSION = "Alpha-dev"
-dico = {0}
+dico = """ + dico + """
 
 # Check structure
 FILES_TO_CHECK = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
@@ -121,7 +121,7 @@ with open("requirements.txt", "r") as rf:
 with open ("main.py", "r") as f:
     code = f.read()
 
-exec(compile(code, 'main.py', 'exec'), {"__name__":"__start__"})""".format(dico)
+exec(compile(code, 'main.py', 'exec'), {"__name__":"__start__"})"""
 
 with open("start.py", "w") as f:
     f.write(template)
