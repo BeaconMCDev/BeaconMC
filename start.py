@@ -5,6 +5,7 @@ import os
 
 # DON'T TOUCH
 VERSION = "Alpha-dev"
+dico = {"c
 
 # Check structure
 FILES_TO_CHECK = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
@@ -19,6 +20,13 @@ missing_files = []
 missing_folders = []
 i = 0
 j = 0
+
+def install():
+    for d in missing_folders:
+        os.mkdir(d)
+    for f in missing_files:
+        with open(f, "w") as f:
+            f.write(dico[f])
 
 for file in FILES_TO_CHECK:
     if not(os.path.exists(file)):
@@ -41,26 +49,33 @@ if state == "_FILE_MISSING":
     print("WARNING : SOME FILES ARE MISSING !")
     print("PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases")
     print("---------------------------------")
-    print(f"Missing files : {i} (list bellow)\n{missing_files}")
+    print(f"Missing files : {i} (list bellow)
+{missing_files}")
     print("---------------------------------")
 elif state == "_FOLDER_MISSING":
     print("WARNING : SOME FOLDERS ARE MISSING !")
     print("PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases")
-    print(f"Missing folders : {j} (list bellow)\n{missing_folders}")
+    print(f"Missing folders : {j} (list bellow)
+{missing_folders}")
 elif state == "_FILE_AND_FOLDER_MISSING":
     print("WARNING : SOME FILES AND FOLDER ARE MISSING !")
     print("PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases")
-    print(f"Missing files : {i} (list bellow)\n{missing_files}")
-    print(f"Missing folders : {j} (list bellow)\n{missing_folders}")
+    print(f"Missing files : {i} (list bellow)
+{missing_files}")
+    print(f"Missing folders : {j} (list bellow)
+{missing_folders}")
 
 if not(state == "_DEFAULT"):
-    resp = input("Do you want to make this operation automatically ? You will need to restart this script once it will be done. (o/n)\nREQUIRE GIT INSTALLED, INSTALL THE LATEST VERSION AND MAY CAUSE ISSUE.\n-> ")
+    resp = input("Do you want to make this operation automatically ? You will not need to restart this script once it will be done. (o/n)
+
+-> ")
     if resp.lower() == "o":
         print("Installing...")
-        os.system("git clone https://github.com/BeaconMCDev/BeaconMC.git")
+        install()
         print("Done.")
-    print("Process is terminating.")
-    exit(-1)
+    else:
+        print("Process is terminating.")
+        exit(-1)
 
 # Check requirements
 with open("requirements.txt", "r") as rf:
