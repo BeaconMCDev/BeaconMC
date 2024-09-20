@@ -28,11 +28,13 @@ files_content = {
     "libs/cryptography_system/system.py": open("libs/cryptography_system/system.py").read()
 }
 
-dico = "{"
+dico = "{\n"
 
 for f in FILES:
-    dico += f'"{f}":"""{files_content[f]}""", \n'
-dico = dico[:3] + "}"
+    # Utilisation de repr() pour échapper correctement les chaînes et éviter les erreurs avec les guillemets triples
+    dico += f'    "{f}": {repr(files_content[f])}, \n'
+dico += "}\n"
+
 
 template = """# BeaconMC installation and boot file
 
