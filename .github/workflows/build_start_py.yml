@@ -1,0 +1,35 @@
+name: Update start.py
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-start-py:
+    runs-on: ubuntu-latest
+
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Update start.py
+      run: |
+        python .github/scripts/update_start_py.py
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions"
+        git add start.py
+        git commit -m "Build start.py from the lastest commit"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

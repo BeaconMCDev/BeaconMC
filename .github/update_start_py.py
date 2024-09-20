@@ -1,10 +1,47 @@
-# BeaconMC installation and boot file
+import os
+
+FILES = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
+                "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
+                "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
+                "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 
+                "libs/cryptography_system/system.py"]
+
+files_content = {
+    "main.py": open("main.py").read(),
+    "pluginapi.py": open("pluginapi.py").read(),
+    "config.json": open("config.json").read(),
+    "eula.txt": open("eula.txt").read(),
+    "LICENSE.md": open("LICENSE.md").read(),
+    "banned-ips.json": open("banned-ips.json").read(),
+    "banned-players.json": open("banned-players.json").read(),
+    "server-icon.png": open("server-icon.png", "rb").read(),  # Fichier binaire
+    "whitelist.json": open("whitelist.json").read(),
+    "SECURITY.md": open("SECURITY.md").read(),
+    "README.md": open("README.md").read(),
+    "requirements.txt": open("requirements.txt").read(),
+    "utils/plugins/BeaconMCPlugin.py": open("utils/plugins/BeaconMCPlugin.py").read(),
+    "utils/locale/en_us.json": open("utils/locale/en_us.json").read(),
+    "utils/locale/fr_fr.json": open("utils/locale/fr_fr.json").read(),
+    "utils/locale/es.json": open("utils/locale/es.json").read(),
+    "libs/crash_gen.py": open("libs/crash_gen.py").read(),
+    "libs/mojangapi.py": open("libs/mojangapi.py").read(),
+    "libs/cryptography_system/system.py": open("libs/cryptography_system/system.py").read()
+}
+
+dico = "{"
+
+for f in FILES:
+    dico += f'"{f}":"""{files_content[f]}""", \n'
+dico = dico[:3]
+
+template = """# BeaconMC installation and boot file
 
 # Import
 import os
 
 # DON'T TOUCH
 VERSION = "Alpha-dev"
+dico = {0}
 
 # Check structure
 FILES_TO_CHECK = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
@@ -19,6 +56,13 @@ missing_files = []
 missing_folders = []
 i = 0
 j = 0
+
+def install():
+    for d in missing_folders:
+        os.mkdir(d)
+    for f in missing_files:
+        with open(f, "w") as f:
+            f.write(dico[f])
 
 for file in FILES_TO_CHECK:
     if not(os.path.exists(file)):
@@ -54,13 +98,14 @@ elif state == "_FILE_AND_FOLDER_MISSING":
     print(f"Missing folders : {j} (list bellow)\n{missing_folders}")
 
 if not(state == "_DEFAULT"):
-    resp = input("Do you want to make this operation automatically ? You will need to restart this script once it will be done. (o/n)\nREQUIRE GIT INSTALLED, INSTALL THE LATEST VERSION AND MAY CAUSE ISSUE.\n-> ")
+    resp = input("Do you want to make this operation automatically ? You will not need to restart this script once it will be done. (o/n)\n\n-> ")
     if resp.lower() == "o":
         print("Installing...")
-        os.system("git clone https://github.com/BeaconMCDev/BeaconMC.git")
+        install()
         print("Done.")
-    print("Process is terminating.")
-    exit(-1)
+    else:
+        print("Process is terminating.")
+        exit(-1)
 
 # Check requirements
 with open("requirements.txt", "r") as rf:
@@ -76,4 +121,7 @@ with open("requirements.txt", "r") as rf:
 with open ("main.py", "r") as f:
     code = f.read()
 
-exec(compile(code, 'main.py', 'exec'), {"__name__":"__start__"})
+exec(compile(code, 'main.py', 'exec'), {"__name__":"__start__"})""".format(dico)
+
+with open("start.py", "w") as f:
+    f.write(template)
