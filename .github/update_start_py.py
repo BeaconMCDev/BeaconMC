@@ -32,7 +32,7 @@ dico = "{"
 
 for f in FILES:
     dico += f'"{f}":"""{files_content[f]}""", \n'
-dico = dico[:3]
+dico = dico[:3] + "}"
 
 template = """# BeaconMC installation and boot file
 
