@@ -11,7 +11,7 @@ files_content = {
     "pluginapi.py": open("pluginapi.py").read(),
     "config.json": open("config.json").read(),
     "eula.txt": open("eula.txt").read(),
-    "LICENSE.md": open("LICENSE.md").read(),
+    "LICENSE.md": open("LICENCE.md").read(),
     "banned-ips.json": open("banned-ips.json").read(),
     "banned-players.json": open("banned-players.json").read(),
     "server-icon.png": open("server-icon.png", "rb").read(),  # Fichier binaire
