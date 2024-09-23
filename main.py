@@ -736,6 +736,10 @@ class Client(object):
                         elif self.packet.args[-1] == 2:
                             # Switch protocol state to login
                             self.protocol_state = "Login"
+                            if self.packet.args[0] != PROTOCOL_VERSION:
+                                log("Invalid protocol version", 3)
+                                self.disconnect(f"Please try to connect using Minecraft {CLIENT_VERSION}")
+                                return
                             log(f"Switching to login state for {self.info}", 3)
                             continue
 
