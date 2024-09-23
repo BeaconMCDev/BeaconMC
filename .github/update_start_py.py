@@ -1,6 +1,6 @@
 import os
 
-FILES = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
+FILES = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENSE.md", "banned-ips.json", 
                 "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
                 "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
                 "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 
@@ -11,7 +11,7 @@ files_content = {
     "pluginapi.py": open("pluginapi.py").read(),
     "config.json": open("config.json").read(),
     "eula.txt": open("eula.txt").read(),
-    "LICENCE.md": open("LICENCE.md").read(),
+    "LICENSE.md": open("LICENSE.md").read(),
     "banned-ips.json": open("banned-ips.json").read(),
     "banned-players.json": open("banned-players.json").read(),
     "server-icon.png": open("server-icon.png", "rb").read(),  # Fichier binaire
