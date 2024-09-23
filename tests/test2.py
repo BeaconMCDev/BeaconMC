@@ -66,12 +66,12 @@ def get_info2(host='localhost', port=25565):
     s.connect((host, port))
 
     # Send handshake + status request
-    s.send(pack_data(b"\x00\x00" + pack_data(host.encode('utf8')) + pack_port(port) + b"\x01"))
-    s.send(pack_data("\x00"))
+    s.send(pack_data(b"\x00\x00" + pack_data(host.encode('utf8')) + pack_port(port) + b"\x02"))
+    #s.send(pack_data("\x00"))
 
     a = s.recv(10000)
     
     return f"{len(a)} --> {a}"
 
 
-print(get_info(host="localhost", port=25565))
+print(get_info2(host="localhost", port=25565))

@@ -625,8 +625,7 @@ class Packet(object):
             elif isinstance(i, bytearray):
                 out += bytes(i)
             elif isinstance(i, str):
-                out += self.pack_varint(len(bytes(i, "utf-8")))
-                out += bytes(i, "utf-8")
+                out += self.pack_data(i)
             else:
                 out += self.pack_data(i)
         out = self.pack_varint(len(out)) + out
@@ -736,7 +735,7 @@ class Client(object):
                         elif self.packet.args[-1] == 2:
                             # Switch protocol state to login
                             self.protocol_state = "Login"
-                            if self.packet.args[0] != PROTOCOL_VERSION:
+                            if Packet.unpack_varint(self.packet.args[0:2], True) != PROTOCOL_VERSION:
                                 log("Invalid protocol version", 3)
                                 self.disconnect(f"Please try to connect using Minecraft {CLIENT_VERSION}")
                                 return
@@ -1087,16 +1086,20 @@ class Client(object):
         !!! not disconnectED !!!"""
         if reason == "":
             reason = tr.key("disconnect.default")
+        reason = "{'login_disconnect':'" + reason + "'}"
         if self.protocol_state == "Login":
             dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(reason, ))
+            print(dp.__repr__())
         elif self.protocol_state == "Configuration":
             dp = Packet(self.connexion, "-OUTGOING", typep=2, args=(reason, ))
         elif self.protocol_state == "Play":
             dp = Packet(self.connexion, "-OUTGOING", typep=27, args=(reason, ))
         dp.send()
         self.connected = False
+        tm.sleep(1)
         self.connexion.close()
-        self.server.list_clients.remove(self)
+        if self in self.server.list_clients:
+            self.server.list_clients.remove(self)
         del(self)
 
     def do_spawn(self):
