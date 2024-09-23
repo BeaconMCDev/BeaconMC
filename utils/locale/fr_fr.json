@@ -11,5 +11,7 @@
     "disconnect.server.error": "Exception interne, veuillez contacter un administrateur",
     "disconnect.login.failed": "Échec de la connexion",
     "disconnect.full": "Serveur plein",
-    "disconnect.default": "Déconnecté"
+    "disconnect.default": "Déconnecté", 
+    "disconnect.version.outdated.server": "Le serveur est obsolète, merci de vous connecter en {0}", 
+    "disconnect.version.outdated.client": "Le serveur est dans une version supérieur à la votre, merci de vous connecter en {0}"
 }
