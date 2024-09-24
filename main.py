@@ -1086,7 +1086,7 @@ class Client(object):
         !!! not disconnectED !!!"""
         if reason == "":
             reason = tr.key("disconnect.default")
-        reason = "{'login_disconnect':'" + reason + "'}"
+        reason = "{'reason':'" + reason + "'}"
         if self.protocol_state == "Login":
             dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(reason, ))
             print(dp.__repr__())
