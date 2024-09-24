@@ -874,7 +874,7 @@ class Client(object):
                                 verify_token.append(rdm.randint(0, 255))
                             # verify_token = bytes(verify_token)
                             print(verify_token)
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv12345", len(bytearray(self.server.crypto_sys.public_key)), bytearray(self.server.crypto_sys.public_key), 4, verify_token, True))
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv12345", len(bytearray(self.server.crypto_sys.public_key)), bytearray(self.server.crypto_sys.public_key), 4, verify_token))
                             resp_pack.send()
                             print(resp_pack.__repr__())
                             continue
