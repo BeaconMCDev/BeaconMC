@@ -46,7 +46,7 @@ VERSION = "Alpha-dev"
 dico = """ + dico + r"""
 
 # Check structure
-FILES_TO_CHECK = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENCE.md", "banned-ips.json", 
+FILES_TO_CHECK = ["config.json", "pluginapi.py", "main.py", "eula.txt", "LICENSE.md", "banned-ips.json", 
                 "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
                 "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
                 "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 

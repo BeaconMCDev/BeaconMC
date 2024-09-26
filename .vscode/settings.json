@@ -1,4 +1,17 @@
 {
     "python.analysis.typeCheckingMode": "off",
-    "python.analysis.autoImportCompletions": false
+    "python.analysis.autoImportCompletions": false,
+    "vscord.status.buttons.button1.active.label": "View on GitHub",
+    "vscord.status.buttons.button1.active.url": "https://github.com/BeaconMCDev/BeaconMC",
+    "vscord.status.buttons.button1.active.enabled": true,
+    "vscord.status.buttons.button1.idle.enabled": true,
+    "vscord.status.buttons.button1.idle.label": "View on GitHub",
+    "vscord.status.buttons.button1.idle.url": "https://github.com/BeaconMCDev/BeaconMC",
+    "vscord.status.buttons.button1.inactive.enabled": true,
+    "vscord.status.buttons.button2.active.enabled": true,
+    "vscord.status.buttons.button1.inactive.label": "Join us on Discord",
+    "vscord.status.buttons.button1.inactive.url": "https://discord.gg/pxkT9dtuN8",
+    "vscord.status.buttons.button2.enabled": true,
+    "vscord.status.buttons.button2.active.url": "https://discord.gg/pxkT9dtuN8",
+    "vscord.status.buttons.button2.active.label": "Join us on Discord"
 }
