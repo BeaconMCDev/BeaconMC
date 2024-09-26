@@ -735,10 +735,7 @@ class Client(object):
                         elif self.packet.args[-1] == 2:
                             # Switch protocol state to login
                             self.protocol_state = "Login"
-                            if Packet.unpack_varint(self.packet.args[0:2], True) != PROTOCOL_VERSION:
-                                log("Invalid protocol version", 3)
-                                self.disconnect(f"Please try to connect using Minecraft {CLIENT_VERSION}")
-                                return
+                            self.protocol_version = Packet.unpack_varint(self.packet.args[0:2])
                             log(f"Switching to login state for {self.info}", 3)
                             continue
 
@@ -769,6 +766,9 @@ class Client(object):
 
                 elif self.protocol_state == "Login":
                     if self.packet.type == 0:
+                        if self.protocol_version != PROTOCOL_VERSION:
+                            self.disconnect(f"Please try to connect using Minecraft {CLIENT_VERSION}")
+                            return
                         unamelenth = self.packet.args[0]
                         i = 1
                         self.username = ""
@@ -1086,7 +1086,7 @@ class Client(object):
         !!! not disconnectED !!!"""
         if reason == "":
             reason = tr.key("disconnect.default")
-        reason = "{'reason':'" + reason + "'}"
+        reason = '{"text":"' + reason + '"}'
         if self.protocol_state == "Login":
             dp = Packet(self.connexion, "-OUTGOING", typep=0, args=(reason, ))
             print(dp.__repr__())
