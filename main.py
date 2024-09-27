@@ -610,7 +610,7 @@ class Packet(object):
         out = self.pack_varint(self.type)   # pack the type
         for i in self.args:
             if isinstance(i, int):
-                out += self.pack_varint(len(self.pack_varint(i))) + self.pack_varint(i)
+                out += self.pack_varint(i)
             elif isinstance(i, UUID):
                 out += (self.pack_varint(1) + self.pack_uuid(i))
             elif isinstance(i, bool):
@@ -621,9 +621,9 @@ class Packet(object):
             elif isinstance(i, tuple):
                 ...
             elif isinstance(i, bytes):
-                 out += i
+                 out += self.unpack_varint(len(i)) + i
             elif isinstance(i, bytearray):
-                out += bytes(i)
+                out += self.unpack_varint(len(bytes(i))) + bytes(i)
             elif isinstance(i, str):
                 out += self.pack_data(i)
             else:
@@ -874,7 +874,7 @@ class Client(object):
                                 verify_token.append(rdm.randint(0, 255))
                             # verify_token = bytes(verify_token)
                             print(verify_token)
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv12345", len(bytearray(self.server.crypto_sys.public_key)), bytearray(self.server.crypto_sys.public_key), 4, verify_token))
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv12345", bytearray(self.server.crypto_sys.public_key), verify_token))
                             resp_pack.send()
                             print(resp_pack.__repr__())
                             continue
