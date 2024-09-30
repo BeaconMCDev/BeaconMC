@@ -9,6 +9,7 @@ import time as tm
 import random as rdm
 from typing import Literal
 from libs.cryptography_system.system import CryptoSystem as Crypto
+from cryptography.hazmat.primitives import serialization
 import threading as thread
 import os
 import hashlib  # for md5 auth system
@@ -872,9 +873,9 @@ class Client(object):
                             verify_token = bytearray()
                             for i in range(4):
                                 verify_token.append(rdm.randint(0, 255))
-                            # verify_token = bytes(verify_token)
-                            print(verify_token)
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("Beaconmcrdmserv12345", bytearray(self.server.crypto_sys.public_key), verify_token, ONLINE_MODE))
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("", 
+                                bytearray(self.server.crypto_sys.__public_key__.public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)), 
+                                verify_token))
                             resp_pack.send()
                             print(resp_pack.__repr__())
                             continue
