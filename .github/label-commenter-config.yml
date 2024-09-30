@@ -28,7 +28,7 @@ labels:
           This issue will be automatically closed.
         action: close
         locking: lock
-        lock_reason: EULA not respectes
+        lock_reason: EULA not respected
   - name: 'duplicate'
     labeled:
       issue:
