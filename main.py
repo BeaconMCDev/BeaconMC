@@ -583,7 +583,7 @@ class Packet(object):
                     break
         return o
 
-    def unpack_varint(data, debug=False):
+    def unpack_varint(self, data, debug=False):
         if debug:
             log(f"Data : {data}", 3)
         d = 0
@@ -621,9 +621,9 @@ class Packet(object):
             elif isinstance(i, tuple):
                 ...
             elif isinstance(i, bytes):
-                 out += self.unpack_varint(len(i)) + i
+                 out += self.pack_varint(len(i)) + i
             elif isinstance(i, bytearray):
-                out += self.unpack_varint(len(bytes(i))) + bytes(i)
+                out += self.pack_varint(len(bytes(i))) + bytes(i)
             elif isinstance(i, str):
                 out += self.pack_data(i)
             else:
@@ -714,7 +714,7 @@ class Client(object):
                     lenth = self.connexion.recv(1)
                     if lenth == b"":
                         continue
-                    self.request = lenth + self.connexion.recv(Packet.unpack_varint(lenth))
+                    self.request = lenth + self.connexion.recv(Packet.unpack_varint(None, lenth))
                 except ConnectionResetError:
                     log(f"Client {self.info} disconnected : Connexion reset.")
                 if self.request == "":
@@ -735,7 +735,7 @@ class Client(object):
                         elif self.packet.args[-1] == 2:
                             # Switch protocol state to login
                             self.protocol_state = "Login"
-                            self.protocol_version = Packet.unpack_varint(self.packet.args[0:2])
+                            self.protocol_version = Packet.unpack_varint(None, self.packet.args[0:2])
                             log(f"Switching to login state for {self.info}", 3)
                             continue
 
