@@ -712,7 +712,7 @@ class Client(object):
             while self.connected and state == "ON":
                 # Auth loop
                 try:
-                    lenth = self.connexion.recv(1)
+                    lenth = self.connexion.recv()
                     if lenth == b"":
                         continue
                     self.request = lenth + self.connexion.recv(Packet.unpack_varint(None, lenth))
