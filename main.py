@@ -906,7 +906,7 @@ class Client(object):
                             self.load_properties()
                             break
 
-                    elif self.packet.type == 4:
+                    elif self.packet.type == 2:
                         self.shared_secret = b""
                         for i in range(self.packet.args[0] + 1):
                             if i == 0:
@@ -941,6 +941,7 @@ class Client(object):
                     elif self.packet.type == 3 and self.authenticated:
                         self.server.log("switching protocol state to Configuration.", 3)
                         self.protocol_state = "Configuration"
+                    
                     elif self.packet.type == 4 and self.encrypted and self.authenticated:
                         ...
                 
