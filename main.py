@@ -685,15 +685,15 @@ class Client(object):
         enc_properties = []
         print(len(self.properties))
         for p in self.properties:
-            enc_properties.append(p["name"])
-            enc_properties.append(p["value"])
-            enc_properties.append(p["signed"])
+            enc_properties.append(["name"])
+            enc_properties.append(["value"])
+            enc_properties.append(["signed"])
             print(p["signed"])
             print(type(p["signed"]))
         parg = [UUID(self.uuid), self.username, len(enc_properties)]
         for p in enc_properties:
             parg.append(p)
-        # parg.append(not(DEBUG))
+        
         response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
         log(response.__repr__(), 3)
         response.send()
@@ -738,6 +738,9 @@ class Client(object):
                 log(f"Receiving serverbound packet : {self.request}", 3)
 
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
+
+                log(f"Packet ID : {self.packet.type}", 3)
+                log(f"Protocol state : {self.protocol_state}", 3)
 
                 if self.protocol_state == "Handshaking":
 
@@ -892,7 +895,6 @@ class Client(object):
                                 bytearray(self.server.crypto_sys.__public_key__.public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)), 
                                 verify_token))
                             resp_pack.send()
-                            print(resp_pack.__repr__())
                             continue
                             
 
@@ -904,15 +906,19 @@ class Client(object):
                             self.load_properties()
                             break
 
-                    elif self.packet.type == 1:
+                    elif self.packet.type == 4:
                         self.shared_secret = b""
-                        for i in range(Packet.unpack_varint(self.packet.args[0])):
-                            self.shared_secret += self.packet.args[i]
+                        for i in range(self.packet.args[0] + 1):
+                            if i == 0:
+                                continue
+                            self.shared_secret += bytes(self.packet.args[i])
                             j = i
                         verify_token2_lenth = self.packet.args[j+1]
                         verify_token2 = b""
-                        for i in range(Packet.unpack_varint(verify_token2_lenth)):
-                            verify_token2 += self.packet.args[j + i + 1]
+
+                        for i in range(verify_token2_lenth):
+                            verify_token2 += bytes(self.packet.args[j + i + 1])
+
                         try:
                             self.shared_secret = self.server.crypto_sys.decode(self.shared_secret)
                         except Exception as e:
@@ -926,13 +932,17 @@ class Client(object):
                         else:
                              log("An exception occured with encryption, disconnecting...", 2)
                              self.disconnect("Encryption error, try to restart your game !")
+                             return
                         self.encrypted = True
-                        
+                        self.server.log("Connexion encrypted successfully.", 3)
+
                         self.load_properties()
                         continue
                     elif self.packet.type == 3 and self.authenticated:
                         self.server.log("switching protocol state to Configuration.", 3)
                         self.protocol_state = "Configuration"
+                    elif self.packet.type == 4 and self.encrypted and self.authenticated:
+                        ...
                 
                 elif self.protocol_state == "Configuration" and self.configured:
                     if self.packet.type == 3:
@@ -1000,13 +1010,7 @@ class Client(object):
         except Exception as e:
             import traceback
             log(f"{traceback.format_exc()}", 2)
-            self.connected = False
-            dp = Packet(self.connexion, "-OUTGOING", typep=27, args=('{"text":"Internal server error"}', ))
-            dp.send()
-            self.connexion.close()
-            if self in self.server.list_clients:
-                self.server.list_clients.remove(self)
-            del(self)
+            self.disconnect(f"Server internal Exception : {type(e)}.")
 
     def ping_response(self, payload):
         """Send a response to a ping to make the client get the ping in ms of the server."""
