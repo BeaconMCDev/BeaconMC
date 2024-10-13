@@ -28,7 +28,7 @@ Feel free to contribute to BeaconMC! Whether it's reporting bugs, suggesting fea
 
 ## License
 
-This project is licensed under a license - see the [LICENSE](LICENSE) file for details.
+This project is licensed under a license - see the [LICENSE](LICENSE.md) file for details.
 
 ## Special thanks
 - Website design: [Liam-gens](https://github.com/liam-gen)
