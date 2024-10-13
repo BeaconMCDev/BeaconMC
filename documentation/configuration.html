@@ -50,8 +50,8 @@
 
         <div class="docs">
             <h2>1 - Config file</h2>
-            <p>In your BeaconMC folder, open the "<code>config.txt</code>" file. If it doesn't exist, you should reinstall the server. The content should looks like this :
-                <pre>whitelist=true<br>max_players=5<br>motd=§aMy%20Server<br>debug_mode=true<br>lang=en</pre>
+            <p>In your BeaconMC folder, open the "<code>config.json</code>" file. If it doesn't exist, you should reinstall the server. The content should looks like this :
+                <pre>{<br>"whitelist": false,<br>"max_players": 10,<br>"motd": "Welcome to BeaconMC !",<br>"online_mode": true,<br>"enforce_offline_profiles": true,<br>"lang": "en_us",<br>"debug_mode": true, <br>"ip": "0.0.0.0", <br>"port": 25565, <br>"prevent_proxy_connexion": true<br>}</pre>
             </p>
             <p>Each line has the settings name, the "=" symbol and the value. Following the settings descriptions.</p>
             <h4>1.1 - whitelist</h4>
