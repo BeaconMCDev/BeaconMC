@@ -9,10 +9,10 @@ import time as tm
 import random as rdm
 from typing import Literal
 from libs.cryptography_system.system import CryptoSystem as Crypto
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import serialization, hashes
 import threading as thread
 import os
-import hashlib  # for md5 auth system
+import hashlib
 import platform
 import pluginapi
 import json
@@ -23,6 +23,7 @@ import traceback
 import requests
 from base64 import b64encode
 from libs import crash_gen
+import string
 try:
     import nbtlib
 except ModuleNotFoundError:
@@ -42,27 +43,32 @@ if __name__ != "__start__":
 # BASE ERROR
 class OSNotCompatibleError(OSError):
     pass
-print(r"""  ____  ______          _____ ____  _   _ __  __  _____ 
+
+print(r"""
+  ____  ______          _____ ____  _   _ __  __  _____ 
  |  _ \|  ____|   /\   / ____/ __ \| \ | |  \/  |/ ____|
  | |_) | |__     /  \ | |   | |  | |  \| | \  / | |     
  |  _ <|  __|   / /\ \| |   | |  | | . ` | |\/| | |     
  | |_) | |____ / ____ \ |___| |__| | |\  | |  | | |____ 
  |____/|______/_/    \_\_____\____/|_| \_|_|  |_|\_____|
 """)
-print("         (c) BeaconMC Team 2024")
+print("         (c) BeaconMCDev 2024")
+
+# Load configuration
 _CONFIG = json.loads(open("config.json", "r").read())
 whitelist = _CONFIG["whitelist"]
 MOTD = _CONFIG["motd"]
+PORT = _CONFIG["port"]
+IP = _CONFIG["ip"]
 MAX_PLAYERS = _CONFIG["max_players"]
 ONLINE_MODE = _CONFIG["online_mode"]
 lang = _CONFIG["lang"]
 DEBUG = _CONFIG["debug_mode"]
 ENFORCE_OFFLINE_PROFILES = _CONFIG["enforce_offline_profiles"]
-            
-
-
+PREVENT_PROXY_CONNEXION = _CONFIG["prevent_proxy_connexion"]
 COMPATIBLE_OS = ["Windows", "Linux"]
 OS = platform.system()
+SERVER_ID = "BeaconMC-" + "".join(rdm.choice(string.ascii_letters + string.digits) for _ in range(10))
 if OS in COMPATIBLE_OS:
     if OS == "Linux":
         SEP = '/'
@@ -90,9 +96,6 @@ state = "OFF"
 SERVER_VERSION = "Alpha-dev"    # Version of the server. For debug
 CLIENT_VERSION = "1.19.4"       # Which version the client must have to connect
 PROTOCOL_VERSION = 762          # Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
-PORT = 25565                    # Normal MC port
-IP = "0.0.0.0"
-# MAX_PLAYERS = 5
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
 CONFIG_TO_REQUEST = {"\u00A7": "\xc2\xa7", "§": "\xc2\xa7"}
@@ -193,12 +196,14 @@ class MCServer(object):
         self.list_clients = []
         self.list_worlds = []
         self.crypto_sys = Crypto(self)
+        # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
         try:
             with open("eula.txt", "r") as eula_file:
                 eula = eula_file.read().split()
                 if "eula=true" in eula:
                     pass
                 else:
+                    # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
                     log("You need to agree the Minecraft EULA to continue.", 1)
                     log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
                     log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
@@ -206,8 +211,9 @@ class MCServer(object):
                 return
         except Exception as e:
             log(traceback.format_exc(e), 2)
+            # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
             log("The eula.txt file was not found, or the server was modified !", 1)
-            log("You need to agree the Minecraft EULA to continue.", 2)
+            log("You need to agree the Minecraft EULA to continue.", 1)
             log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
             log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
             self.stop(False, reason="You need to agree eula to continue.")
@@ -679,8 +685,27 @@ class Client(object):
         self.request
         ...
 
+    def sha1_hash_digest(self, hash):
+        number_representation = self._number_from_bytes(hash.digest(), signed=True)
+        return format(number_representation, 'x')
+    
+    def _number_from_bytes(self, b, signed=False):
+        try:
+            return int.from_bytes(b, byteorder='big', signed=signed)
+        except AttributeError: 
+            if len(b) == 0:
+                b = b'\x00'
+            num = int(str(b).encode('hex'), 16)
+            if signed and (ord(b[0]) & 0x80):
+                num -= 2 ** (len(b) * 8)
+            return num
+
     def load_properties(self):
-        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{self.uuid}").content)
+        if PREVENT_PROXY_CONNEXION:
+            ip_field = self.info
+        else:
+            ip_field = ""
+        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/hasJoined?username={self.username}&serverId={self.sha1_hash_digest(SERVER_ID)}&ip={ip_field}").content)
         self.properties = api_response["properties"]
         enc_properties = []
         print(len(self.properties))
