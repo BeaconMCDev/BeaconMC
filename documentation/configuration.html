@@ -55,7 +55,6 @@
             </p>
             <p>Each line has the settings name, the "=" symbol and the value. Following the settings descriptions.</p>
             <h4>1.1 - whitelist</h4>
-                <p>Possible values: </p>
                 <ul>
                     <li><u style="color:green;">true</u>: if you want to allow to connect only the specified people. (not implemented) (default)</li>
                     <li><u style="color:red;">false</u>: if you want to allow everyone to connect</li>
@@ -63,9 +62,8 @@
             <h4>1.2 - max_players</h4>
                 <p>Define how much players can be connected on the server. Can be any positive and entier number. Note that if a too big value is set, it can impact the server performances.</p>
             <h4>1.2 - motd</h4>
-                <p>This option let you choose the text displayed on the players server list. Works as vanilla servers.</p>
+                <p>This option let you choose the text displayed on the players server list. Works as vanilla servers. You can use <a href="https://minecraft.tools/en/motd.php">minecraft.tools</a> to generate your motd.</p>
             <h4>1.3 - online_mode</h4>
-            <p>Possible values: </p>
             <ul>
                 <li><u style="color:green;">true</u>: Verify connecting players using the Mojang's authentification schem. Forbid cracked players to connect, but prevent identity thief and man-in-the-middle hack with encryption.</li>
                 <li><u style="color:red;">false</u>: Anyone can connect to the server, <b>but is a huge security flaw for your server.</b></li>
@@ -73,11 +71,11 @@
             <h4>1.4 - enforce_offline_profiles</h4>
                 <p>An option implemented for trying to limit the flaw of the offline mode, using IP adresses.</p>
             <h4>1.5 - lang</h4>
-                <p>Change the messages lang <b>for the clients only, not for the console !</b></p>
+                <p>A string representing the lang <b>for messages sent to players, not to the console !</b></p>
             <h4>1.6 - debug_mode</h4>
-                <p>Active or not the debug mode (more informations in the console and in the logs file.</p>
+                <p>A boolean activing or not the debug mode (more informations in the console and in the logs file.</p>
             <h4>1.7 - ip</h4>
-                <p>The IP address of the server used by clients to connect. Used for the prevent_proxy_connections settings.</p>
+                <p>A string for the IP address of the server used by clients to connect. Used for the prevent_proxy_connections settings.</p>
             <h4>1.7 - port</h4>
                 <p>An integer that represents the port used by clients to connect to the server. Default and recommended value is 25565. <b>Don't modify this setting except if you know what you are doing !</b></p>
             <h4>1.8 - soon</h4>
