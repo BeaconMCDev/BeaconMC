@@ -705,7 +705,16 @@ class Client(object):
             ip_field = self.info
         else:
             ip_field = ""
-        api_response = json.loads(requests.get(f"https://sessionserver.mojang.com/session/minecraft/hasJoined?username={self.username}&serverId={self.sha1_hash_digest(SERVER_ID)}&ip={ip_field}").content)
+        response = requests.get(f"https://sessionserver.mojang.com/session/minecraft/hasJoined?username={self.username}&serverId={self.sha1_hash_digest(SERVER_ID)}&ip={ip_field}")
+        assert isinstance(response, requests.Response)
+        api_response = response.content
+        if response.status_code != 200:
+            if response.status_code == 403:
+                self.disconnect(f"Failed to login: {api_response["error"]}.")
+            else:
+                self.disconnect("Failed to login.")
+            return
+        
         self.properties = api_response["properties"]
         enc_properties = []
         print(len(self.properties))
