@@ -732,7 +732,7 @@ class Client(object):
         api_response = json.loads(response.content)
         if response.status_code != 200:
             if response.status_code == 403:
-                self.disconnect(f"Failed to login: {api_response["error"]}.")
+                self.disconnect(f"Failed to login: {api_response['error']}.")
             else:
                 self.disconnect("Failed to login.")
             return
