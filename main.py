@@ -705,9 +705,31 @@ class Client(object):
             ip_field = self.info
         else:
             ip_field = ""
-        response = requests.get(f"https://sessionserver.mojang.com/session/minecraft/hasJoined?username={self.username}&serverId={self.sha1_hash_digest(SERVER_ID)}&ip={ip_field}")
+        try:
+            response = requests.get(url="https://sessionserver.mojang.com/session/minecraft/hasJoined", params={"username": self.username, "serverId": SERVER_ID, "ip": ip_field})
+        except TimeoutError:
+            self.log("Authentification servers didn't responded on time !", 1)
+            self.disconnect("Time out with mojang auth servers. Are they online ?")
+            return
+        except requests.HTTPError as e:
+            log("An unexcepted exception occured with authentification servers !", 2)
+            log(traceback.format_exc(e), 2)
+            self.disconnect("HTTP Exception with auth servers, are they online ?")
+            return
+        except ConnectionError:
+            log("Exception while connecting to auth servers.", 2)
+            self.disconnect("Exception while connecting to the mojang auth servers.")
+            return
+        except Exception as e:
+            log("Unknow exception while contacting auth servers.", 2)
+            log(traceback.format_exc(e), 2)
+            self.disconnect("Failed to login with auth servers (internal exception).")
         assert isinstance(response, requests.Response)
-        api_response = response.content
+        if response.status_code == 204:
+            self.log("Mojang authentification server responded by 204 http status !", 1)
+            self.disconnect("Invalid response from authentifications servers.")
+            return
+        api_response = json.loads(response.content)
         if response.status_code != 200:
             if response.status_code == 403:
                 self.disconnect(f"Failed to login: {api_response["error"]}.")
