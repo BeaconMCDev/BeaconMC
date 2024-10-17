@@ -44,6 +44,9 @@ if __name__ != "__start__":
 class OSNotCompatibleError(OSError):
     pass
 
+class ConfigurationError(Exception):
+    pass
+
 print(r"""
   ____  ______          _____ ____  _   _ __  __  _____ 
  |  _ \|  ____|   /\   / ____/ __ \| \ | |  \/  |/ ____|
@@ -66,6 +69,8 @@ lang = _CONFIG["lang"]
 DEBUG = _CONFIG["debug_mode"]
 ENFORCE_OFFLINE_PROFILES = _CONFIG["enforce_offline_profiles"]
 PREVENT_PROXY_CONNEXION = _CONFIG["prevent_proxy_connexion"]
+SERVER_LINKS = _CONFIG["links"]
+
 COMPATIBLE_OS = ["Windows", "Linux"]
 OS = platform.system()
 SERVER_ID = "BeaconMC-" + "".join(rdm.choice(string.ascii_letters + string.digits) for _ in range(10))
@@ -994,6 +999,7 @@ class Client(object):
 
                         self.load_properties()
                         continue
+
                     elif self.packet.type == 3 and self.authenticated:
                         self.server.log("switching protocol state to Configuration.", 3)
                         self.protocol_state = "Configuration"
@@ -1187,8 +1193,40 @@ class Client(object):
     def send_links(self):
         # Send server links
         assert self.protocol_state == "Configuration"
-        resp = Packet(self.connexion, "-OUTGOING", typep=10, args=())
-        ...
+        sl = []
+        type_dict = {
+            "bug_report": 0, 
+            "community_guideline": 1, 
+            "support": 2,
+            "status": 3, 
+            "feedback": 4, 
+            "community": 5, 
+            "website": 6, 
+            "forums": 7, 
+            "news": 8, 
+            "announcements": 9
+        }
+        assert isinstance(SERVER_LINKS, dict)
+        links = 0
+        for link in SERVER_LINKS.items():
+            try:
+                if SERVER_LINKS[link[0]] == "":
+                    continue
+                else:
+                    # Protocol misc
+                    sl.append(True)
+
+                    # add the type of the link
+                    sl.append(type_dict[link[0]])
+
+                    # add the content of the link
+                    sl.append(link[1])
+
+                    links += 1
+            except KeyError as e:
+                raise ConfigurationError from e
+        resp = Packet(self.connexion, "-OUTGOING", typep=10, args=(links, sl))
+        resp.send()
 
     def do_spawn(self):
         """Make THIS CLIENT spawn"""

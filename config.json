@@ -8,13 +8,17 @@
     "debug_mode": true, 
     "ip": "0.0.0.0", 
     "port": 25565, 
-    "prevent_proxy_connexion": true
+    "prevent_proxy_connexion": true,
     "links": {
         "bug_report": "https://github.com/BeaconMCDev/BeaconMC/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=",
-        "commu_guideline": "", 
+        "community_guideline": "", 
         "support": "https://discord.gg/pxkT9dtuN8", 
         "status": "", 
         "feedback": "",
-        "community": ""
+        "community": "https://discord.gg/pxkT9dtuN8", 
+        "website": "https://beaconmcdev.github.io/BeaconMC",
+        "forums": "https://discord.gg/pxkT9dtuN8", 
+        "news": "https://discord.gg/pxkT9dtuN8", 
+        "announcements": "https://discord.gg/pxkT9dtuN8"
     }
 }
