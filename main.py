@@ -1183,6 +1183,12 @@ class Client(object):
         if self in self.server.list_clients:
             self.server.list_clients.remove(self)
         del(self)
+        
+    def send_links(self):
+        # Send server links
+        assert self.protocol_state == "Configuration"
+        resp = Packet(self.connexion, "-OUTGOING", typep=10, args=())
+        ...
 
     def do_spawn(self):
         """Make THIS CLIENT spawn"""
