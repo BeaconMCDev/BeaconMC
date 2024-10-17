@@ -617,29 +617,35 @@ class Packet(object):
             self.socket.send(self.__repr__())
         else:
             raise PacketException("Incoming packet tryied to be sended")
+        
+    def pack(self, i) -> bytes:
+        if isinstance(i, int):
+            return self.pack_varint(i)
+        elif isinstance(i, UUID):
+            return (self.pack_varint(1) + self.pack_uuid(i))
+        elif isinstance(i, bool):
+            if i:
+                return b"\x01"
+            else:
+                return b"\x00"
+        elif isinstance(i, tuple) or isinstance(i, list):
+            x = b""
+            for j in i:
+                x += self.pack(j)
+            return x
+        elif isinstance(i, bytes):
+             return self.pack_varint(len(i)) + i
+        elif isinstance(i, bytearray):
+            return self.pack_varint(len(bytes(i))) + bytes(i)
+        elif isinstance(i, str):
+            return self.pack_data(i)
+        else:
+            return self.pack_data(i)
 
     def __repr__(self) -> bytes:
         out = self.pack_varint(self.type)   # pack the type
         for i in self.args:
-            if isinstance(i, int):
-                out += self.pack_varint(i)
-            elif isinstance(i, UUID):
-                out += (self.pack_varint(1) + self.pack_uuid(i))
-            elif isinstance(i, bool):
-                if i:
-                    out += b"\x01"
-                else:
-                    out += b"\x00"
-            elif isinstance(i, tuple):
-                ...
-            elif isinstance(i, bytes):
-                 out += self.pack_varint(len(i)) + i
-            elif isinstance(i, bytearray):
-                out += self.pack_varint(len(bytes(i))) + bytes(i)
-            elif isinstance(i, str):
-                out += self.pack_data(i)
-            else:
-                out += self.pack_data(i)
+            out += self.pack(i)
         out = self.pack_varint(len(out)) + out
         return out
 
@@ -706,54 +712,57 @@ class Client(object):
             return num
 
     def load_properties(self):
-        if PREVENT_PROXY_CONNEXION:
-            ip_field = self.info
-        else:
-            ip_field = ""
-        try:
-            response = requests.get(url="https://sessionserver.mojang.com/session/minecraft/hasJoined", params={"username": self.username, "serverId": SERVER_ID, "ip": ip_field})
-        except TimeoutError:
-            self.log("Authentification servers didn't responded on time !", 1)
-            self.disconnect("Time out with mojang auth servers. Are they online ?")
-            return
-        except requests.HTTPError as e:
-            log("An unexcepted exception occured with authentification servers !", 2)
-            log(traceback.format_exc(e), 2)
-            self.disconnect("HTTP Exception with auth servers, are they online ?")
-            return
-        except ConnectionError:
-            log("Exception while connecting to auth servers.", 2)
-            self.disconnect("Exception while connecting to the mojang auth servers.")
-            return
-        except Exception as e:
-            log("Unknow exception while contacting auth servers.", 2)
-            log(traceback.format_exc(e), 2)
-            self.disconnect("Failed to login with auth servers (internal exception).")
-        assert isinstance(response, requests.Response)
-        if response.status_code == 204:
-            self.log("Mojang authentification server responded by 204 http status !", 1)
-            self.disconnect("Invalid response from authentifications servers.")
-            return
-        api_response = json.loads(response.content)
-        if response.status_code != 200:
-            if response.status_code == 403:
-                self.disconnect(f"Failed to login: {api_response['error']}.")
+        if ONLINE_MODE:
+            if PREVENT_PROXY_CONNEXION:
+                ip_field = self.info
             else:
-                self.disconnect("Failed to login.")
-            return
-        
-        self.properties = api_response["properties"]
-        enc_properties = []
-        print(len(self.properties))
-        for p in self.properties:
-            enc_properties.append(["name"])
-            enc_properties.append(["value"])
-            enc_properties.append(["signed"])
-            print(p["signed"])
-            print(type(p["signed"]))
-        parg = [UUID(self.uuid), self.username, len(enc_properties)]
-        for p in enc_properties:
-            parg.append(p)
+                ip_field = ""
+            try:
+                response = requests.get(url="https://sessionserver.mojang.com/session/minecraft/hasJoined", params={"username": self.username, "serverId": SERVER_ID, "ip": ip_field})
+            except TimeoutError:
+                self.log("Authentification servers didn't responded on time !", 1)
+                self.disconnect("Time out with mojang auth servers. Are they online ?")
+                return
+            except requests.HTTPError as e:
+                log("An unexcepted exception occured with authentification servers !", 2)
+                log(traceback.format_exc(e), 2)
+                self.disconnect("HTTP Exception with auth servers, are they online ?")
+                return
+            except ConnectionError:
+                log("Exception while connecting to auth servers.", 2)
+                self.disconnect("Exception while connecting to the mojang auth servers.")
+                return
+            except Exception as e:
+                log("Unknow exception while contacting auth servers.", 2)
+                log(traceback.format_exc(e), 2)
+                self.disconnect("Failed to login with auth servers (internal exception).")
+            assert isinstance(response, requests.Response)
+            if response.status_code == 204:
+                log("Mojang authentification server responded by 204 http status !", 1)
+                self.disconnect("Invalid response from authentifications servers.")
+                return
+            api_response = json.loads(response.content)
+            if response.status_code != 200:
+                if response.status_code == 403:
+                    self.disconnect(f"Failed to login: {api_response['error']}.")
+                else:
+                    self.disconnect("Failed to login.")
+                return
+
+            self.properties = api_response["properties"]
+            enc_properties = []
+            print(len(self.properties))
+            for p in self.properties:
+                enc_properties.append(["name"])
+                enc_properties.append(["value"])
+                enc_properties.append(["signed"])
+                print(p["signed"])
+                print(type(p["signed"]))
+            parg = [UUID(self.uuid), self.username, len(enc_properties)]
+            for p in enc_properties:
+                parg.append(p)
+        else:
+            parg = [UUID(self.uuid), self.username, 0, []]
         
         response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
         log(response.__repr__(), 3)
@@ -965,7 +974,7 @@ class Client(object):
                             log("WARNING! YOUR SERVER IS RUNNING OFFLINE MODE, SO CRACKED AND UNVERIFIED USERS CAN CONNECT. MOREOVER, IDENTITY THEFT IS POSSIBLE AND NOT DETECTABLE.", 1)
                             # load player properties
                             self.load_properties()
-                            break
+                            continue
 
                     elif self.packet.type == 2:
                         self.shared_secret = b""
@@ -1000,7 +1009,7 @@ class Client(object):
                         self.load_properties()
                         continue
 
-                    elif self.packet.type == 3 and self.authenticated:
+                    elif self.packet.type == 3 and (self.authenticated or not(ONLINE_MODE)):
                         self.server.log("switching protocol state to Configuration.", 3)
                         self.protocol_state = "Configuration"
                     
@@ -1010,6 +1019,7 @@ class Client(object):
                 elif self.protocol_state == "Configuration" and self.configured:
                     if self.packet.type == 3:
                         self.protocol_state = "Play"
+                        log("Switching protocol state to play", 3)
                         break
 
             ###############################################################################
@@ -1032,9 +1042,10 @@ class Client(object):
 
             ###############################################################################
 
-            log(f"{self.username} joined the game.", 0)
-            self.server.post_to_chat(f"{self.username} joined the game")
+            
             while self.connected and state == "ON" and self.protocol_state == "Play":
+                log(f"{self.username} joined the game.", 0)
+                self.server.post_to_chat(f"{self.username} joined the game")
                 # to clean
 
                 l = self.connexion.recv(1)
@@ -1073,7 +1084,7 @@ class Client(object):
         except Exception as e:
             import traceback
             log(f"{traceback.format_exc()}", 2)
-            self.disconnect(f"Server internal Exception : {type(e)}.")
+            self.disconnect(f"Server internal Exception : {e}.")
 
     def ping_response(self, payload):
         """Send a response to a ping to make the client get the ping in ms of the server."""
@@ -1282,7 +1293,9 @@ class Client(object):
         """Post a message in the player's chat.
         Argument:
         - msg:str --> the message to post on the chat"""
-        packet = Packet(self.connexion, "-OUTGOING", 108, args=("{'color':'#FFDE59', 'text':'" + self.username + "joined the game.}", False))
+        if self.protocol_state != "Play":
+            return
+        packet = Packet(self.connexion, "-OUTGOING", 108, args=("{'text': '" + msg + "}", False))
         print(packet.__repr__())
         packet.send()
 
