@@ -1,6 +1,5 @@
 User-agent: *
 Disallow: /404.html
-Disallow: /creation.html
 Allow: /
 
 Sitemap: https://beaconmcdev.github.io/BeaconMC/sitemap.xml
