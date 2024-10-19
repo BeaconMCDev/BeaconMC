@@ -2,48 +2,56 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <!-- Page d'accueil -->
     <url>
-        <loc>https://beaconmcdev.github.io/BeaconMC/</loc>
-        <lastmod>2024-08-18</lastmod>
+        <loc>https://beaconmcdev.github.io/BeaconMC</loc>
+        <lastmod>2024-10-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
 
     <!-- Page 404 -->
     <url>
-        <loc>https://beaconmcdev.github.io/BeaconMC/404.html</loc>
-        <lastmod>2024-08-18</lastmod>
+        <loc>https://beaconmcdev.github.io/BeaconMC/404</loc>
+        <lastmod>2024-10-19</lastmod>
         <changefreq>never</changefreq>
         <priority>0.1</priority>
     </url>
 
     <!-- Page de création -->
     <url>
-        <loc>https://beaconmcdev.github.io/BeaconMC/creation.html</loc>
-        <lastmod>2024-08-18</lastmod>
+        <loc>https://beaconmcdev.github.io/BeaconMC/creation</loc>
+        <lastmod>2024-10-19</lastmod>
         <changefreq>never</changefreq>
         <priority>0.1</priority>
     </url>
 
     <!-- Documentation - Index -->
     <url>
-        <loc>https://beaconmcdev.github.io/BeaconMC/documentation/</loc>
-        <lastmod>2024-08-18</lastmod>
+        <loc>https://beaconmcdev.github.io/BeaconMC/documentation</loc>
+        <lastmod>2024-10-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <!-- Documentation - Configuration -->
     <url>
-        <loc>https://beaconmcdev.github.io/BeaconMC/documentation/configuration.html</loc>
-        <lastmod>2024-08-18</lastmod>
+        <loc>https://beaconmcdev.github.io/BeaconMC/documentation/configuration</loc>
+        <lastmod>2024-10-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <!-- Documentation - Installation -->
     <url>
-        <loc>https://beaconmcdev.github.io/BeaconMC/documentation/installation.html</loc>
-        <lastmod>2024-08-18</lastmod>
+        <loc>https://beaconmcdev.github.io/BeaconMC/documentation/installation</loc>
+        <lastmod>2024-10-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+		<!-- Documentation - Plugins -->
+    <url>
+        <loc>https://beaconmcdev.github.io/BeaconMC/documentation/plugins</loc>
+        <lastmod>2024-10-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
