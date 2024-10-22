@@ -20,6 +20,7 @@ Visit our [website](https://beaconmcdev.github.io/BeaconMC) to learn more about 
 ### Installation
 
 Just download start.py and run it ! ;)
+
 ---
 
 ## Contribution
