@@ -7,6 +7,16 @@ comment:
     "
 
 labels:
+  - name: 'Outdated'
+    labeled:
+      issue:
+        body: |-
+          Hello @{{ issue.user.login }},
+          
+          It seems that you are using an old version of the project, causing this issue. To solve it you have to download the latest release via the release page.
+          
+          This issue will be automatically closed.
+        action: close
   - name: 'EULA: Not accepted'
     labeled:
       issue:
