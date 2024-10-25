@@ -1,6 +1,7 @@
 """ BeaconMC - Python 3
     Source for dev :
-    - https://wiki.vg"""
+    - https://wiki.vg
+This project is under the LICENSE.md license."""
 
 # IMPORTS - LIBRAIRIES
 import math
