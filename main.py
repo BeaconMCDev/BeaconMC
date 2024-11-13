@@ -1022,6 +1022,8 @@ class Client(object):
                         self.protocol_state = "Play"
                         log("Switching protocol state to play", 3)
                         break
+                    elif self.packet.type == 4:
+                        ...
 
             ###############################################################################
 
