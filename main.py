@@ -633,7 +633,7 @@ class Packet(object):
             x = b""
             for j in i:
                 x += self.pack(j)
-            return x
+            return self.pack(len(i)) + x
         elif isinstance(i, bytes):
              return self.pack_varint(len(i)) + i
         elif isinstance(i, bytearray):
