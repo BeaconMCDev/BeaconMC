@@ -2,7 +2,7 @@
     "whitelist": false,
     "max_players": 10,
     "motd": "Welcome to BeaconMC !",
-    "online_mode": true,
+    "online_mode": false,
     "enforce_offline_profiles": true,
     "lang": "en_us",
     "debug_mode": true, 
