@@ -868,7 +868,7 @@ class Client(object):
                             i += 1
 
                         #i = 0
-                        self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i+1:])
+                        self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i:])
 
 
                         log(f"UUID of {self.username} is {self.uuid}.", 0)
