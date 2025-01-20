@@ -56,7 +56,7 @@ print(r"""
  | |_) | |____ / ____ \ |___| |__| | |\  | |  | | |____ 
  |____/|______/_/    \_\_____\____/|_| \_|_|  |_|\_____|
 """)
-print("         (c) BeaconMCDev 2024")
+print("         (c) BeaconMCDev 2024-2025")
 
 # Load configuration
 _CONFIG = json.loads(open("config.json", "r").read())
@@ -100,8 +100,8 @@ state = "OFF"
 # ################################
 
 SERVER_VERSION = "Alpha-dev"    # Version of the server. For debug
-CLIENT_VERSION = "1.19.4"       # Which version the client must have to connect
-PROTOCOL_VERSION = 762          # Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
+CLIENT_VERSION = "1.21.3"       # Which version the client must have to connect
+PROTOCOL_VERSION = 768          # Protocol version beetween server and client. See https://minecraft.fandom.com/wiki/Protocol_version?so=search for details.
 SALT_CHAR = "a-z-e-r-t-y-u-i-o-p-q-s-d-f-g-h-j-k-l-m-w-x-c-v-b-n-A-Z-E-R-T-Y-U-I-O-P-Q-S-D-F-G-H-J-K-L-M-W-X-C-V-B-N-0-1-2-3-4-5-6-7-8-9".split("-")
 SALT = ''.join(rdm.choice(SALT_CHAR) for i in range(15))
 CONFIG_TO_REQUEST = {"\u00A7": "\xc2\xa7", "§": "\xc2\xa7"}
