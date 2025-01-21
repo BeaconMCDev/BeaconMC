@@ -623,7 +623,7 @@ class Packet(object):
         if isinstance(i, int):
             return self.pack_varint(i)
         elif isinstance(i, UUID):
-            return self.pack_uuid(i)
+            return self.pack_uuid(i.uuid)
         elif isinstance(i, bool):
             if i:
                 return b"\x01"
