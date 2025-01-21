@@ -43,7 +43,7 @@ https://github.com/BeaconMCDev/BeaconMC/issues/new?assignees=&labels=bug&project
 Traceback :
 {traceback.format_exc()}
 =========================================
-OS : {platform.system}
+OS : {platform.system()}
 Python Version : {sys.version}
 BeaconMC Version : {SERVER_VERSION} 
 Plugins List : 
