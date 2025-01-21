@@ -623,7 +623,8 @@ class Packet(object):
         if isinstance(i, int):
             return self.pack_varint(i)
         elif isinstance(i, UUID):
-            return (self.pack_varint(1) + self.pack_uuid(i))
+            u = self.pack_uuid(i.uuid)
+            return (u)
         elif isinstance(i, bool):
             if i:
                 return b"\x01"
@@ -650,14 +651,8 @@ class Packet(object):
         out = self.pack_varint(len(out)) + out
         return out
 
-    def pack_uuid(self, uuidObject):
-        uuid = uuidObject.uuid
-
-        hex_uuid = uuid.replace('-', '')
-
-        binaire_uuid = bytes.fromhex(hex_uuid)
-
-        return binaire_uuid
+    def pack_uuid(self, uuid_to_pack):
+        return uuid.UUID(uuid_to_pack).bytes
 
     def __str__(self):
         return self.__repr__().decode()
