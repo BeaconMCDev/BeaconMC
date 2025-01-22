@@ -87,7 +87,7 @@ elif state == "_FILE_AND_FOLDER_MISSING":
     print(missing_folders)
 
 if not(state == "_DEFAULT"):
-    resp = input("Do you want to make this operation automatically ? You will not need to restart this script once it will be done. (o/n)\n\n-> ")
+    resp = input("Do you want to make this operation automatically ? You will not need to restart this script once it will be done. (y/n)\n\n-> ")
     if resp.lower() == "o":
         print("Installing...")
         install()
