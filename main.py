@@ -520,6 +520,24 @@ class MCServer(object):
 class PacketException(Exception):
     pass
 
+class PrefixedArray(object):
+    def __init__(self, array:tuple|list):
+        self.data = []
+        for i in array:
+            self.data.append(i)
+        self.lenth = len(self.data)
+        
+    def happend(self, data):
+        self.data.happend(data)
+        
+    def encode(self):
+        self.lenth = len(self.data)
+        elenth = Packet.pack_varint(self.lenth)
+        prefixlenth = Packet.pack_varint(len(elenth))
+        end = prefixlenth + elenth
+        for i in self.data:
+            end += Packet.pack(i)
+        return end
 
 class Packet(object):
     # DANGER | DO NOT TOUCH
