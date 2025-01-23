@@ -780,8 +780,7 @@ class Client(object):
                     pass
             array = PrefixedArray(list_prop)
             parg = [UUID(self.uuid), self.username, array]
-            for p in enc_properties:
-                parg.append(p)
+            
         else:
             parg = [UUID(self.uuid), self.username, PrefixedArray(["name", "textures", "value", "eyJ0aW1lc3RhbXAiOjE1OTAwMDAwMDAsInByb2ZpbGVJZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAiLCJwcm9wZXJ0aWVzIjpbeyJrZXkiOiJUZXh0dXJlcyIsInZhbHVlIjoieyJTS0lOIjp7InVybCI6Imh0dHBzOi8vc2Vzc2lvbnMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzE2YTQ4Njc0YzMwMmRjM2VhNzZjZmZhZjMyMmQ5MmJmZjBjMDI5ZTZhOGY4MTk4ZDczZjMzYjRhZDdkMzY2ZjAifX19"])]
         
