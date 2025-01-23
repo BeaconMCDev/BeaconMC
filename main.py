@@ -372,6 +372,10 @@ class MCServer(object):
         try:
             while state == "ON":
                 tm.sleep(0.1)
+                for p in self.list_clients:
+                    p: Client
+                    if not p.connected:
+                        self.list_clients.remove(p)
         except KeyboardInterrupt:
             self.stop()
             exit(0)
