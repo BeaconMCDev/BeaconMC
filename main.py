@@ -765,19 +765,25 @@ class Client(object):
                 return
 
             self.properties = api_response["properties"]
-            enc_properties = []
-            print(len(self.properties))
+            
+            list_prop = []
             for p in self.properties:
-                enc_properties.append(["name"])
-                enc_properties.append(["value"])
-                enc_properties.append(["signed"])
-                print(p["signed"])
-                print(type(p["signed"]))
-            parg = [UUID(self.uuid), self.username, len(enc_properties)]
+                list_prop.append("name")
+                list_prop.append(p["name"])
+                list_prop.append("value")
+                list_prop.append(p["value"])
+                try:
+                    sig = p["signature"] # potential kry error
+                    list_prop.append("signature") 
+                    list_prop.append(sig)
+                except KeyError:
+                    pass
+            array = PrefixedArray(list_prop)
+            parg = [UUID(self.uuid), self.username, array]
             for p in enc_properties:
                 parg.append(p)
         else:
-            parg = [UUID(self.uuid), self.username, 0, []]
+            parg = [UUID(self.uuid), self.username, PrefixedArray([])]
         
         response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
         log(response.__repr__(), 3)
