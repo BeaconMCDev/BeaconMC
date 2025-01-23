@@ -11,6 +11,7 @@ import sys
 import random
 from datetime import datetime
 import json
+import platform
 
 TOTAL_PLUGIN = 0
 def gen_crash_report(SERVER_VERSION):
@@ -42,7 +43,7 @@ https://github.com/BeaconMCDev/BeaconMC/issues/new?assignees=&labels=bug&project
 Traceback :
 {traceback.format_exc()}
 =========================================
-OS : {os.name}
+OS : {platform.system()}
 Python Version : {sys.version}
 BeaconMC Version : {SERVER_VERSION} 
 Plugins List : 
