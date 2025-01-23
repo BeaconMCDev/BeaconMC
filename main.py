@@ -640,6 +640,8 @@ class Packet(object):
     def pack(self, i) -> bytes:
         if isinstance(i, int):
             return self.pack_varint(i)
+        elif isinstance(i, PrefixedArray):
+            return i.encode()
         elif isinstance(i, UUID):
             return self.pack_uuid(i.uuid)
         elif isinstance(i, bool):
