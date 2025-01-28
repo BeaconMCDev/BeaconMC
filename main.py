@@ -420,6 +420,15 @@ class MCServer(object):
         """Generate a crash report
         Arg:
         - reason: str --> The crash message"""
+        if e == None:
+            try:
+                raise Exception(reason)
+            except Exception as e:
+                pass
+        crash_gen(CLIENT_VERSION, SERVER_VERSION, e)
+        
+        return
+        raise DepreciationWarning("This code should be unreachable, please report us this.")
         c = 0
         try:
             import datetime
