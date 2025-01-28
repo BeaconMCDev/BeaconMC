@@ -1,17 +1,10 @@
-document.getElementById('fileInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const crashData = JSON.parse(e.target.result);
-            displayCrashReport(crashData);
-        } catch (error) {
-            document.getElementById('report').innerText = "Error : Failed to read JSON data.";
-        }
-    };
-    reader.readAsText(file);
+document.getElementById('analyse').addEventListener('click', function(event) {
+    try {
+        const crashData = JSON.parse(document.getElementById('crashData').value);
+        displayCrashReport(crashData);
+    } catch (error) {
+        document.getElementById('report').innerText = "Error: Failed to read JSON data: " + error;
+    }
 });
 
 function displayCrashReport(data) {

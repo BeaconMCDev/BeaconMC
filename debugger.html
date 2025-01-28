@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeaconMC - Crash analyser</title>
-    <link rel="stylesheet" href="styles.css">
+    <!---<link rel="stylesheet" href="styles.css">-->
 </head>
 <body>
     <div class="container">
         <h1>BeaconMC crash analyser</h1>
-        <input type="file" id="fileInput" accept=".json">
+        <textarea id="crashData"  rows="5" cols="40" placeholder="Paste the crash report here"></textarea>
+        <button id="analyse">Analyse</button>
         <div id="report"></div>
     </div>
     <script src="script.js"></script>
