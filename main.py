@@ -536,11 +536,11 @@ class PrefixedArray(object):
         
     def encode(self):
         self.lenth = len(self.data)
-        elenth = Packet.pack_varint(self.lenth)
-        prefixlenth = Packet.pack_varint(len(elenth))
+        elenth = Packet(None, None).pack_varint(self.lenth)
+        prefixlenth = Packet(None, None).pack_varint(len(elenth))
         end = prefixlenth + elenth
         for i in self.data:
-            end += Packet.pack(i)
+            end += Packet(None, None).pack(i)
         return end
 
 class Packet(object):
