@@ -14,7 +14,7 @@ import json
 import platform
 
 TOTAL_PLUGIN = 0
-def gen_crash_report(SERVER_VERSION):
+def gen_crash_report(SERVER_VERSION, BMC_VERSION):
     global TOTAL_PLUGIN
     with open("config.json", "r") as f:
         config = json.loads(f.read())
@@ -33,7 +33,7 @@ def gen_crash_report(SERVER_VERSION):
         for p in os.listdir("plugins"):
             plugin_list += f"- {p}\n"
             TOTAL_PLUGIN += 1
-        json_info = json.dumps({"beaconmc_version": SERVER_VERSION,"os_name": os.name,"date": datetime.now().isoformat(),"python_version": sys.version,"total_plugin": TOTAL_PLUGIN, "online_mode": online_mode,"traceback_error": traceback.format_exc()})
+        json_info = json.dumps({"mc_version": SERVER_VERSION,"bmc_version": BMC_VERSION, "os_name": os.name,"date": datetime.now().isoformat(),"python_version": sys.version,"total_plugin": TOTAL_PLUGIN, "online_mode": online_mode,"traceback_error": traceback.format_exc()})
         f.write(f"""
 =========================================
         BEACON-MC CRASH REPORT
@@ -45,7 +45,8 @@ Traceback :
 =========================================
 OS : {platform.system()}
 Python Version : {sys.version}
-BeaconMC Version : {SERVER_VERSION} 
+BeaconMC Version : {BMC_VERSION}
+Minecraft Version : {SERVER_VERSION} 
 Plugins List : 
 {plugin_list}
 Date : {datetime.now()}
