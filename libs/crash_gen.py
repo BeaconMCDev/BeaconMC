@@ -33,7 +33,7 @@ def gen_crash_report(SERVER_VERSION):
         for p in os.listdir("plugins"):
             plugin_list += f"- {p}\n"
             TOTAL_PLUGIN += 1
-        json_info = json.dumps({"beaconmc_version": SERVER_VERSION,"os_name": os.name,"date": datetime.now().isoformat(),"python_version": sys.version,"total_plugin": TOTAL_PLUGIN,"traceback_error": traceback.format_exc()})
+        json_info = json.dumps({"beaconmc_version": SERVER_VERSION,"os_name": os.name,"date": datetime.now().isoformat(),"python_version": sys.version,"total_plugin": TOTAL_PLUGIN, "online_mode": online_mode,"traceback_error": traceback.format_exc()})
         f.write(f"""
 =========================================
         BEACON-MC CRASH REPORT
@@ -57,12 +57,12 @@ JSON Info :
         """)
     f.close()
     print("\n")
-    print("==========================================")
+    print("================================================================")
     print("BEACON-MC CRASH REPORT")
-    print("> A crash report has been generated in the logs folder.")
+    print("> A crash report has been generated in the crash_reports folder.")
     print("> Please submit the report on the issue tracker.")
     print("> Thank ^^")
-    print("==========================================")
+    print("================================================================")
     print(f"Crash report saved on logs/{datetime.timestamp(datetime.now())}")
 
     print(f"ERR : {traceback.format_exc()}")
