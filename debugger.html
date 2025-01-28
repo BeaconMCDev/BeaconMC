@@ -8,11 +8,20 @@
     <!---<link rel="stylesheet" href="styles.css">-->
 </head>
 <body>
-    <div class="container">
+    <div class="container" align="center">
         <h1>BeaconMC crash analyser</h1>
         <textarea id="crashData"  rows="5" cols="40" placeholder="Paste the crash report json here"></textarea>
         <button id="analyse">Analyse</button>
         <div id="report"><p>No analyse available</p></div>
+    </div>
+    <hr>
+    <div id="faq">
+        <h2>Where can I find my crash report files ?</h2>
+        <p>You can find the crash files in the <code>crash_reports</code> folder</p>
+        <hr>
+        <h2>What have I to paste in the analyser ?</h2>
+        <p>You have to paste the JSON info contained in the crash report. It contains all the crash informations, but they are instantly traited and not conserved.</p>
+        <!-- ... -->
     </div>
     <footer>This tools is under development, it may be disfunctionnal or provide wrong informations.</footer>
     <script src="script.js"></script>
