@@ -4,15 +4,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeaconMC - Crash analyser</title>
-    <!---<link rel="stylesheet" href="styles.css">-->
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: rgb(255, 255, 255);
+            background-color: rgb(26, 30, 34);
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        code {
+        display: block;
+        padding: 10px;
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 5px;
+        font-family: "Courier New", Courier, monospace;
+        white-space: pre-wrap; /* Garde la mise en forme des retours à la ligne */
+        overflow-x: auto; /* Permet un défilement horizontal si nécessaire */
+    }
+        p {
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: #0073e6;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }-a
+        button:hover {
+            background-color: #005bb5;
+        }
+        footer{
+            /* footer alway at the bottom of the page */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>BeaconMC crash analyser</h1>
-        <textarea id="crashData"  rows="5" cols="40" placeholder="Paste the crash report here"></textarea>
-        <button id="analyse">Analyse</button>
-        <div id="report"></div>
+    <h1>BeaconMC Crash Analyzer</h1>
+    <p>A simple tool for analysing our crash reports.</p>
+    <div id="input-c">
+        <div class="input-container">
+            <input type="text" placeholder="Enter crash data...">
+            <button onclick="parse_crashfile(document.querySelector('input').value)">Analyze</button>
+        </div>
     </div>
-    <script src="script.js"></script>
+    <div id="output-c">
+        <h1>Output : </h1>
+        <hr>    
+        <p>BeaconMC Version : <span id="beaconmc_version"></span></p>
+        <p>Minecraft Version : <span id="mc_version"></span></p>
+        <p>OS Name : <span id="os_name"></span></p>
+        <p>Date : <span id="date"></span></p>
+        <p>Python Version : <span id="python_version"></span></p>
+        <p>Total Plugin : <span id="total_plugin"></span></p>
+        <p>Traceback Error : <span id="traceback_error"></span></p>
+        <h1>What to do ?</h1>
+        <hr>
+        <p id="whoatotod"></p>
+    </div>
+    <div id="faq">
+        <h2>Where can I find my crash report files ?</h2>
+        <p>You can find the crash files in the <code>crash_reports</code> folder</p>
+        <hr>
+        <h2>What have I to paste in the analyser ?</h2>
+        <p>You have to paste the JSON info contained in the crash report. It contains all the crash informations, but they are instantly traited and not conserved.</p>
+        <!-- ... -->
+    </div>
+    <footer>This tools is under development, it may be disfunctionnal or provide wrong informations.</footer>
 </body>
+<script>
+    LATEST_VERSION = "Alpha-dev"
+    LATEST_MC_VERSION = "1.21.3"
+    STABLE_PYTHON_VERSION = "3.10.9"
+
+    document.getElementById("input-c").style.display = "block";
+    // hide the output container
+    document.getElementById("output-c").style.display = "none";
+
+    function parse_crashfile(content) {
+        const jsonStartIndex = content.lastIndexOf('{');
+        if (jsonStartIndex === -1) {
+            alert("No data provided.");
+            return;
+        }
+
+        const jsonString = content.slice(jsonStartIndex);
+        let crashData;
+
+        try {
+            crashData = JSON.parse(jsonString);
+        } catch (error) {
+            alert("Invalid JSON data provided.");
+            return;
+        }
+
+        const beaconmc_version = crashData.bmc_version;
+        const mc_version = crashData.mc_version;
+        const os_name = crashData.os_name;
+        const date = crashData.date;
+        const python_version = crashData.python_version;
+        const total_plugin = crashData.total_plugin;
+        const traceback_error = crashData.traceback_error;
+
+        // Hide the input container
+        document.getElementById("input-c").style.display = "none";
+        document.getElementById("output-c").style.display = "block"; 
+
+        document.getElementById("beaconmc_version").innerHTML = beaconmc_version;
+        document.getElementById("mc_version").innerHTML = mc_version;
+        document.getElementById("os_name").innerHTML = os_name;
+        document.getElementById("date").innerHTML = date;
+        document.getElementById("python_version").innerHTML = python_version;
+        document.getElementById("total_plugin").innerHTML = total_plugin;
+        document.getElementById("traceback_error").innerHTML = "<code>" +
+            traceback_error.replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\n/g, "<br>") 
+                .replace(" ", "&nbsp;")
+                .replace("\n", "<br>")+
+            "</code>";
+        if (beaconmc_version != LATEST_VERSION) {
+            document.getElementById("beaconmc_version").innerHTML += " (outdated)";
+            document.getElementById("whoatotod").innerHTML = "<br>- Please update BeaconMC to the latest version.";
+        }
+        if (mc_version != LATEST_MC_VERSION) {
+            document.getElementById("mc_version").innerHTML += " (not supported)";
+            document.getElementById("whoatotod").innerHTML = "<br>- Please use a supported client version.";
+        }
+        if (python_version <= "3.8") {
+            document.getElementById("python_version").innerHTML += " (unsupported)";
+            document.getElementById("whoatotod").innerHTML += "<br> - This version of python is not supported and may cause crashes.";
+        }
+        if (python_version != STABLE_PYTHON_VERSION) {
+            document.getElementById("python_version").innerHTML += " (unstable)";
+            document.getElementById("whoatotod").innerHTML += "<br> - Please use a stable Python version. (" + STABLE_PYTHON_VERSION + ")";
+        }
+    }
+</script>
 </html>
