@@ -425,7 +425,7 @@ class MCServer(object):
                 raise Exception(reason)
             except Exception as e:
                 pass
-        crash_gen(CLIENT_VERSION, SERVER_VERSION, e)
+        crash_gen.gen_crash_report(CLIENT_VERSION, SERVER_VERSION, e)
         
         return
         raise DepreciationWarning("This code should be unreachable, please report us this.")
@@ -1687,5 +1687,4 @@ if __name__ == "__start__":
     except Exception as e:
         log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
         #log(f"{traceback.format_exc(e)}", 100) > Cause a error 
-        crash_gen.gen_crash_report(SERVER_VERSION)
         srv.stop(critical_stop=True, reason=f"{e}", e=e)
