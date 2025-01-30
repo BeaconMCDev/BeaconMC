@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeaconMC - Crash analyser</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta name="title" content="BeaconMC - Crash analyser">
+    <meta name="description" content="A simple tool for analysing our crash reports.">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="generator" content="LiveInGround">
+    <meta name="keywords" content="BeaconMC, Minecraft, Minecraft server, Python, Python Minecraft server, lightweight server, open source, plugins, plugin system, plugin creation, mods, Minecraft mods, GitHub, BeaconMC GitHub, server plugins, modding, developer tools, game development, server management, Discord, Minecraft customization, open-source project, server customization, game server, coding, programming, server mods, automation, lightweight, Python plugins, Python mods, Python game development, Python tools, Minecraft API, server plugins Python, event-driven, mods Python, spigot python, serveur minecraft python, minecraft python, spigot python minecraft, plugins python, spigot plugins">
+    <meta name="theme-color" content="#121212" />
+    <meta property="og:title" content="BeaconMC - Crash analyser" />
+    <meta property="og:description" content="A simple tool for analysing our crash reports." />
+    <meta property="og:image" content="https://beaconmcdev.github.io/BeaconMC/assets/logo.png" />
+    <meta property="og:site_name" content="BeaconMC" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://beaconmcdev.github.io/BeaconMC/debugger" />
+    <link rel="shortcut icon" href="../assets/logo.png" type="image/png">
+
     <style>
         body {
             margin: 0;
@@ -68,9 +87,31 @@
             color: #d4d4d4;
             text-align: center;
         }
+        .yellow {
+            color: #f1c40f;
+        }
+        .red {
+            color: #e74c3c;
+        }
+        #faq {
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
+    <header>
+
+        <ul>
+            <li>
+                <a href="https://beaconmcdev.github.io/BeaconMC/">Home</a>
+            </li>
+            <li>
+                <a href="https://beaconmcdev.github.io/BeaconMC/debugger">Crash analyser</a>
+            </li>
+        </ul>
+    </header>
     <h1>BeaconMC Crash Analyzer</h1>
     <p>A simple tool for analysing our crash reports.</p>
     <div id="input-c">
@@ -80,22 +121,24 @@
         </div>
     </div>
     <div id="output-c">
-        <h1>Output : </h1>
+        <h1>Output: </h1>
         <hr>    
-        <p>BeaconMC Version : <span id="beaconmc_version"></span></p>
-        <p>Minecraft Version : <span id="mc_version"></span></p>
-        <p>OS Name : <span id="os_name"></span></p>
-        <p>Date : <span id="date"></span></p>
-        <p>Python Version : <span id="python_version"></span></p>
-        <p>Total Plugin : <span id="total_plugin"></span></p>
-        <p>Traceback Error : <span id="traceback_error"></span></p>
-        <h1>What to do ?</h1>
+        <p><b>BeaconMC Version:</b> <span id="beaconmc_version"></span></p>
+        <p><b>Minecraft Version:</b> <span id="mc_version"></span></p>
+        <p><b>OS Name:</b> <span id="os_name"></span></p>
+        <p><b>Date:</b> <span id="date"></span></p>
+        <p><b>Python Version:</b> <span id="python_version"></span></p>
+        <p><b>Online mode:</b> <span id="online_mode"></span></p>
+        <p><b>Total Plugin:</b> <span id="total_plugin"></span></p>
+        <p><b>Traceback Error:</b> <span id="traceback_error"></span></p>
+        <h1>Quick fixes / recommendations</h1>
         <hr>
         <p id="whoatotod"></p>
     </div>
     <div id="faq">
+        <h1 align="center">FAQ</h1>
         <h2>Where can I find my crash report files ?</h2>
-        <p>You can find the crash files in the <code>crash_reports</code> folder</p>
+        <p>You can find the crash files in the crash_reports folder.</p>
         <hr>
         <h2>What have I to paste in the analyser ?</h2>
         <p>You have to paste the JSON info contained in the crash report. It contains all the crash informations, but they are instantly traited and not conserved.</p>
@@ -105,7 +148,9 @@
 </body>
 <script>
     LATEST_VERSION = "Alpha-dev"
+    EXISTING_BMC_VERSIONS = ("Alpha-dev", "Alpha");
     LATEST_MC_VERSION = "1.21.3"
+    EXISTING_MC_VERSIONS = ("1.21.3", "1.21")
     STABLE_PYTHON_VERSION = "3.10.9"
 
     document.getElementById("input-c").style.display = "block";
@@ -135,7 +180,8 @@
         const date = crashData.date;
         const python_version = crashData.python_version;
         const total_plugin = crashData.total_plugin;
-        const traceback_error = crashData.traceback_error;
+        const traceback_error = crashData.traceback;
+        const online_mode = crashData.online_mode;
 
         // Hide the input container
         document.getElementById("input-c").style.display = "none";
@@ -144,6 +190,7 @@
         document.getElementById("beaconmc_version").innerHTML = beaconmc_version;
         document.getElementById("mc_version").innerHTML = mc_version;
         document.getElementById("os_name").innerHTML = os_name;
+        document.getElementById("online_mode").innerHTML = online_mode;
         document.getElementById("date").innerHTML = date;
         document.getElementById("python_version").innerHTML = python_version;
         document.getElementById("total_plugin").innerHTML = total_plugin;
@@ -155,20 +202,34 @@
                 .replace("\n", "<br>")+
             "</code>";
         if (beaconmc_version != LATEST_VERSION) {
-            document.getElementById("beaconmc_version").innerHTML += " (outdated)";
-            document.getElementById("whoatotod").innerHTML = "<br>- Please update BeaconMC to the latest version.";
-        }
+            if (beaconmc_version in EXISTING_BMC_VERSIONS) {
+                document.getElementById("beaconmc_version").innerHTML += " (<b class='yellow'>outdated</b>)";
+                document.getElementById("whoatotod").innerHTML = "<br>- Please update BeaconMC to the latest version.";
+            } else {
+                document.getElementById("beaconmc_version").innerHTML += " (<b class='red'>unknown</b>)";
+                document.getElementById("whoatotod").innerHTML = "<br>- This version of BeaconMC is not recognized. Please reinstall BeaconMC from our GitHub without editing it.";
+            }
+        } 
         if (mc_version != LATEST_MC_VERSION) {
-            document.getElementById("mc_version").innerHTML += " (not supported)";
-            document.getElementById("whoatotod").innerHTML = "<br>- Please use a supported client version.";
+            if (mc_version in EXISTING_MC_VERSIONS) {
+                document.getElementById("mc_version").innerHTML += " (<b class='yellow'>outdated</b>)";
+                document.getElementById("whoatotod").innerHTML = "<br>- Please update Minecraft to the latest version.";
+            } else {
+                document.getElementById("mc_version").innerHTML += " (<b class='red'>unsupported</b>)";
+                document.getElementById("whoatotod").innerHTML = "<br>- This version of Minecraft is not supported.";
+            }
         }
         if (python_version <= "3.8") {
-            document.getElementById("python_version").innerHTML += " (unsupported)";
+            document.getElementById("python_version").innerHTML += " (<b class='red'>unsupported</b>)";
             document.getElementById("whoatotod").innerHTML += "<br> - This version of python is not supported and may cause crashes.";
         }
         if (python_version != STABLE_PYTHON_VERSION) {
-            document.getElementById("python_version").innerHTML += " (unstable)";
+            document.getElementById("python_version").innerHTML += " (<b class='yellow'>unstable</b>)";
             document.getElementById("whoatotod").innerHTML += "<br> - Please use a stable Python version. (" + STABLE_PYTHON_VERSION + ")";
+        }
+        if (!online_mode) {
+            document.getElementById("online_mode").innerHTML += " (<b class='red'>WARNING: NOT SECURE</b>)";
+            document.getElementById("whoatotod").innerHTML += "<br>- Please enable online mode in the server.properties file. This will prevent cracked clients from joining and enforce your server safety.";
         }
     }
 </script>
