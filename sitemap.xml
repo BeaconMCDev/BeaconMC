@@ -3,11 +3,16 @@
     <!-- Page d'accueil -->
     <url>
         <loc>https://beaconmcdev.github.io/BeaconMC</loc>
-        <lastmod>2025-01-23</lastmod>
+        <lastmod>2025-01-30</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
 
+    <url>
+        <loc>https://beaconmcdev.github.io/BeaconMC/debugger</loc>
+        <lastmod>2025-01-30</lastmod>
+        <changefreq>monthly</changefreq>
+        priority>0.8</priority>
     <!-- Page 404 -->
     <url>
         <loc>https://beaconmcdev.github.io/BeaconMC/404</loc>
