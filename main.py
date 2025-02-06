@@ -1700,10 +1700,11 @@ class Console(object):
         time = gettime()
         text = f"[{time}] [Server/{t}]: {msg}"
         with self.lock:
-            sys.stdout.write("\033[F")  # move cursor up
-            sys.stdout.write("\033[K")  # clear line 
-            print(text)
-            sys.stdout.write("> " + input_buffer)
+            sys.stdout.write("\033[F")  # Move cursor up one line
+            sys.stdout.write("\033[K")  # Clear the line
+            sys.stdout.write(text + "\n")  # Write the log message with a newline
+            sys.stdout.write("\033[K")  # Clear the line again to ensure it's clean
+            sys.stdout.write("> " + input_buffer)  # Reprint the input prompt and buffer
             sys.stdout.flush()
         try:
             with open(logfile, "+a") as file:
@@ -1723,6 +1724,7 @@ be_ready_to_log()
 if __name__ == "__start__":
     try:
         tr = Translation(lang)
+        state = "ON"
         srv = MCServer()
         srv.start()
     except Exception as e:
