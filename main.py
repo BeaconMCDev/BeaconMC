@@ -1,4 +1,15 @@
-""" BeaconMC - Python 3
+r""" BeaconMC - Python 3
+
+____________________________________________________________
+  ____  ______          _____ ____  _   _ __  __  _____     |
+ |  _ \|  ____|   /\   / ____/ __ \| \ | |  \/  |/ ____|    |
+ | |_) | |__     /  \ | |   | |  | |  \| | \  / | |    |    |
+ |  _ <|  __|   / /\ \| |   | |  | | . ` | |\/| | |    |    |
+ | |_) | |____ / ____ \ |___| |__| | |\  | |  | | |____|    |
+ |____/|______/_/    \_\_____\____/|_| \_|_|  |_|\_____|    |
+                                                            |
+____________________________________________________________|
+
     Source for dev :
     - https://wiki.vg
 This project is under the LICENSE.md license."""
@@ -49,6 +60,8 @@ class ConfigurationError(Exception):
     pass
 
 print(r"""
+      
+
   ____  ______          _____ ____  _   _ __  __  _____ 
  |  _ \|  ____|   /\   / ____/ __ \| \ | |  \/  |/ ____|
  | |_) | |__     /  \ | |   | |  | |  \| | \  / | |     
@@ -56,7 +69,7 @@ print(r"""
  | |_) | |____ / ____ \ |___| |__| | |\  | |  | | |____ 
  |____/|______/_/    \_\_____\____/|_| \_|_|  |_|\_____|
 """)
-print("         (c) BeaconMCDev 2024-2025")
+print("       (c) BeaconMCDev 2024-2025\n\n")
 
 # Load configuration
 _CONFIG = json.loads(open("config.json", "r").read())
@@ -831,7 +844,7 @@ class Client(object):
                     if lenth == b"":
                         continue
                     if self.encrypted:
-                        self.request = Packet.pack_varint(None, lenth)  + self.server.crypto_sys.decode(self.connexion.recv(lenth), self.shared_secret)
+                        self.request = self.server.crypto_sys.decode(self.connexion.recv(lenth), self.shared_secret)
                     else:
                         self.request = Packet.pack_varint(None, lenth)  + self.connexion.recv(lenth)
                 except ConnectionResetError:

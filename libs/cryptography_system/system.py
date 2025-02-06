@@ -144,7 +144,7 @@ class CryptoSystem(object):
 
     def decode(self, data: bytes, secret: bytes = None) -> bytes:
         """
-        Decode data using RSA (if secret is None) ou AES (si secret est fourni).
+        Decode data using RSA (if secret is None) ou AES (if secret found).
 
         :param data: Data to decode.
         :param secret: Secret key for AES decoding.
@@ -154,7 +154,6 @@ class CryptoSystem(object):
             if secret is None:
                 if not self.__private_key__:
                     raise ValueError("Private key not loaded.")
-                # Déchiffrement RSA avec OAEP padding
                 decrypted = self.__private_key__.decrypt(
                     data,
                     padding.OAEP(
@@ -165,7 +164,6 @@ class CryptoSystem(object):
                 )
                 return decrypted
             else:
-                # Déchiffrement AES en mode CBC avec PKCS7 padding
                 if len(secret) not in (16, 24, 32):
                     raise ValueError("Private key must be 16, 24 or 32 octets lenth.")
                 
