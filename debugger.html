@@ -173,62 +173,112 @@
             return;
         }
 
+        function parseVersion(versionString) {
+    
+            let match = versionString.match(/\d+\.\d+(\.\d+)?/);
+            return match ? match[0] : "unknown";
+        }
+
+        function parsePythonVersion(versionString) {
+            let cleanVersion = parseVersion(versionString);
+            let pythonLink = `https://docs.python.org/${cleanVersion.split('.')[0]}.${cleanVersion.split('.')[1]}/`;
+            return { cleanVersion, pythonLink };
+        }
+
+        function formatDate(isoDate) {
+            let date = new Date(isoDate);
+            return date.toLocaleString();
+        }
+
         const beaconmc_version = crashData.bmc_version;
-        const mc_version = crashData.mc_version;
+        const mc_version = parseVersion(crashData.mc_version);
         const os_name = crashData.os_name;
-        const date = crashData.date;
-        const python_version = crashData.python_version;
+        const date = formatDate(crashData.date);
+        const { cleanVersion: python_version, pythonLink } = parsePythonVersion(crashData.python_version);
         const total_plugin = crashData.total_plugin;
         const traceback_error = crashData.traceback;
         const online_mode = crashData.online_mode;
 
-        // Hide the input container
         document.getElementById("input-c").style.display = "none";
         document.getElementById("output-c").style.display = "block"; 
+
 
         document.getElementById("beaconmc_version").innerHTML = beaconmc_version;
         document.getElementById("mc_version").innerHTML = mc_version;
         document.getElementById("os_name").innerHTML = os_name;
         document.getElementById("online_mode").innerHTML = online_mode;
         document.getElementById("date").innerHTML = date;
-        document.getElementById("python_version").innerHTML = python_version;
+        document.getElementById("python_version").innerHTML = `<a href="${pythonLink}" target="_blank">${python_version}</a>`;
         document.getElementById("total_plugin").innerHTML = total_plugin;
         document.getElementById("traceback_error").innerHTML = "<code>" +
             traceback_error.replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/\n/g, "<br>") 
                 .replace(" ", "&nbsp;")
-                .replace("\n", "<br>")+
+                .replace("\n", "<br>") +
             "</code>";
+        
         if (beaconmc_version != LATEST_VERSION) {
-            if (beaconmc_version in EXISTING_BMC_VERSIONS) {
+            if (EXISTING_BMC_VERSIONS.includes(beaconmc_version)) {
                 document.getElementById("beaconmc_version").innerHTML += " (<b class='yellow'>outdated</b>)";
                 document.getElementById("whoatotod").innerHTML = "<br>- Please update BeaconMC to the latest version.";
             } else {
                 document.getElementById("beaconmc_version").innerHTML += " (<b class='red'>unknown</b>)";
                 document.getElementById("whoatotod").innerHTML = "<br>- This version of BeaconMC is not recognized. Please reinstall BeaconMC from our GitHub without editing it.";
             }
-        } 
-        if (mc_version != LATEST_MC_VERSION) {
-            if (mc_version in EXISTING_MC_VERSIONS) {
+        }
+
+        if (!LATEST_MC_VERSION.includes(mc_version)) {
+            if (EXISTING_MC_VERSIONS.includes(mc_version)) {
                 document.getElementById("mc_version").innerHTML += " (<b class='yellow'>outdated</b>)";
                 document.getElementById("whoatotod").innerHTML = "<br>- Please update Minecraft to the latest version.";
             } else {
                 document.getElementById("mc_version").innerHTML += " (<b class='red'>unsupported</b>)";
                 document.getElementById("whoatotod").innerHTML = "<br>- This version of Minecraft is not supported.";
             }
+
+            document.getElementById("mc_version").innerHTML += " (<b class='red'>unsupported</b>)";
+            document.getElementById("whoatotod").innerHTML = "<br>- This version of Minecraft is not supported.";
         }
-        if (python_version <= "3.8") {
-            document.getElementById("python_version").innerHTML += " (<b class='red'>unsupported</b>)";
-            document.getElementById("whoatotod").innerHTML += "<br> - This version of python is not supported and may cause crashes.";
+
+
+        function comparePythonVersion(version, target) {
+            let versionParts = version.split('.');
+            let versionFloat = parseFloat(versionParts[0] + '.' + versionParts[1]);
+            return versionFloat <= target;
         }
-        if (python_version != STABLE_PYTHON_VERSION) {
-            document.getElementById("python_version").innerHTML += " (<b class='yellow'>unstable</b>)";
-            document.getElementById("whoatotod").innerHTML += "<br> - Please use a stable Python version. (" + STABLE_PYTHON_VERSION + ")";
+
+        if (comparePythonVersion(python_version, 3.10)) {
+            if (parseFloat(python_version) <= 3.8) {
+                document.getElementById("python_version").innerHTML += " (<b class='yellow'>outdated</b>)";
+                document.getElementById("whoatotod").innerHTML += "<br> - This version of python is outdated and may cause crashes. Please update to a better version of python (" + STABLE_PYTHON_VERSION + ").";
+            }
         }
+
+        if (comparePythonVersion(python_version, 3.0)) {
+            document.getElementById("python_version").innerHTML += " (<b class='red'>not supported</b>)";
+            document.getElementById("whoatotod").innerHTML += "<br> - BeaconMC uses python 3, python 2 will not work. Please use a recent version of python (" + STABLE_PYTHON_VERSION + ").";
+        }
+
         if (!online_mode) {
             document.getElementById("online_mode").innerHTML += " (<b class='red'>WARNING: NOT SECURE</b>)";
             document.getElementById("whoatotod").innerHTML += "<br>- Please enable online mode in the server.properties file. This will prevent cracked clients from joining and enforce your server safety.";
+        }
+        if (traceback_error.includes("ModuleNotFoundError")) {
+            document.getElementById("traceback_error").innerHTML += "<br><b class='red'>ModuleNotFoundError detected</b>";
+            document.getElementById("whoatotod").innerHTML += "<br>- Please try reinstalling beaconmc, without modifications.";
+        }
+        if (traceback_error.includes("DeprecationWarning")) {
+            document.getElementById("traceback_error").innerHTML += "<br><b class='yellow'>DeprecationWarning detected</b>";
+            document.getElementById("whoatotod").innerHTML += "<br>- Please update your plugins to the latest version. Are you a plugin developper ? Please use the latest api methods.";
+        }
+        if (traceback_error.includes("SyntaxError")) {
+            document.getElementById("traceback_error").innerHTML += "<br><b class='red'>SyntaxError detected</b>";
+            document.getElementById("whoatotod").innerHTML += "<br>- Please check your plugins for syntax errors.";
+        }
+
+        if (document.getElementById("whoatotod").innerHTML === "") {
+            document.getElementById("whoatotod").innerHTML = "<br>No quick fixes or recommendations found. Please open an issue on our GitHub if you need help.";
         }
     }
 </script>
