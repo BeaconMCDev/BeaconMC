@@ -24,6 +24,8 @@ from libs.cryptography_system.system import CryptoSystem as Crypto
 from cryptography.hazmat.primitives import serialization, hashes
 import threading as thread
 import os
+import sys
+import subprocess
 import hashlib
 import platform
 import pluginapi
@@ -40,7 +42,7 @@ try:
     import nbtlib
 except ModuleNotFoundError:
     print("Installing missing library...")
-    os.system("pip install nbtlib")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "nbtlib"])
     import nbtlib
     print("Done")
 
@@ -441,7 +443,7 @@ class MCServer(object):
         crash_gen.gen_crash_report(CLIENT_VERSION, SERVER_VERSION, e)
         
         return
-        raise DepreciationWarning("This code should be unreachable, please report us this.")
+        raise DeprecationWarning("This code should be unreachable, please report us this.")
         c = 0
         try:
             import datetime
