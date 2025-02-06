@@ -140,43 +140,8 @@ def log(msg: str, type: int = -1):
     - 4: chat
     - 100: critical
     - other: unknow"""
-    global errors, warnings, debug, info, critical, unknow
-
-    if type == 0:
-        t = "INFO"
-        info += 1
-    elif type == 1:
-        t = "WARN"
-        warnings += 1
-    elif type == 2:
-        t = "ERROR"
-        errors += 1
-    elif type == 3:
-        t = "DEBUG"
-        if not (DEBUG):
-            return
-        else:
-            debug += 1
-    elif type == 4:
-        t = "CHAT"
-    elif type == 100:
-        t = "CRITICAL"
-        critical += 1
-    else:
-        unknow += 1
-        t = "UNKNOW"
-    time = gettime()
-    text = f"[{time}] [Server/{t}]: {msg}"
-    print(text)
-    try:
-        with open(logfile, "+a") as file:
-            file.write(text + "\n")
-    except Exception:
-        print('Error in log system! Creating file... ')
-        os.mkdir('logs')
-        with open(logfile, "+w") as file:
-            file.write(text + "\n")
-    return
+    global srv
+    srv.getConsole().log(msg, type)
 
 
 def gettime():
@@ -211,6 +176,11 @@ class MCServer(object):
 
     def __init__(self):
         """Init the server"""
+        self._console = Console()
+
+        self.gui_thr = thread.Thread(target=self._console.mainthread)
+        self.gui_thr.start()
+        lthr.append(self.gui_thr)
         self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  # socket creation
         self.socket.bind((IP, PORT))            # bind the socket
         self.list_info = []
@@ -258,7 +228,7 @@ class MCServer(object):
 
     def log(self, msg: str, type: int = -1):
         """An alternative of main.log(). Don't delete, used by plugins."""
-        log(msg, type)
+        self.getConsole().log(msg, type)
         
     def kick(self, client, reason="Kicked by an operator"):
         if isinstance(client, Client):
@@ -348,13 +318,6 @@ class MCServer(object):
         log("Loading plugins... (REMOVED)", 0)
         self.load_plugins()
 
-        log("Starting console GUI...", 0)
-        self.gui = ConsoleGUI()
-
-        self.gui_thr = thread.Thread(target=self.gui.mainthread)
-        self.gui_thr.start()
-        lthr.append(self.gui_thr)
-
         log("Starting listening...", 0)
         self.socket.listen(MAX_PLAYERS + 1)  # +1 is for the temp connexions
 
@@ -365,6 +328,9 @@ class MCServer(object):
         lthr.append(self.act)
 
         self.main()
+
+    def getConsole(self):
+        return self._console
 
     def load_plugins(self):
         """Load the plugins"""
@@ -1680,13 +1646,74 @@ class Command(object):
         return True
 
 
-class ConsoleGUI(object):
+class Console(object):
     def __init__(self):
-        ...
+        self.lock = thread.Lock()
 
     def mainthread(self):
-        ...
+        global input_buffer
+        input_buffer = ""
+        while state == "ON":
+            try:
+                input_buffer = input("> ")
+                if input_buffer.startswith("/"):
+                    Command(input_buffer, None, srv)
+                else:
+                    log(f"Unknown command: {input_buffer}", 1)
+            except KeyboardInterrupt:
+                srv.stop()
+                break
 
+    def log(self, msg: str, type: int = -1):
+        """Types:
+        - 0: info
+        - 1: warning
+        - 2: error
+        - 3: debug
+        - 4: chat
+        - 100: critical
+        - other: unknow"""
+        global errors, warnings, debug, info, critical, unknow
+        if type == 0:
+            t = "INFO"
+            info += 1
+        elif type == 1:
+            t = "WARN"
+            warnings += 1
+        elif type == 2:
+            t = "ERROR"
+            errors += 1
+        elif type == 3:
+            t = "DEBUG"
+            if not (DEBUG):
+                return
+            else:
+                debug += 1
+        elif type == 4:
+            t = "CHAT"
+        elif type == 100:
+            t = "CRITICAL"
+            critical += 1
+        else:
+            unknow += 1
+            t = "UNKNOW"
+        time = gettime()
+        text = f"[{time}] [Server/{t}]: {msg}"
+        with self.lock:
+            sys.stdout.write("\033[F")  # move cursor up
+            sys.stdout.write("\033[K")  # clear line 
+            print(text)
+            sys.stdout.write("> " + input_buffer)
+            sys.stdout.flush()
+        try:
+            with open(logfile, "+a") as file:
+                file.write(text + "\n")
+        except Exception:
+            print('Error in log system! Creating file... ')
+            os.mkdir('logs')
+            with open(logfile, "+w") as file:
+                file.write(text + "\n")
+        return
 
 # PRE MAIN INSTRUCTIONS
 be_ready_to_log()
@@ -1695,7 +1722,6 @@ be_ready_to_log()
 # MAIN
 if __name__ == "__start__":
     try:
-        log('Starting Plugin APi', 3)
         tr = Translation(lang)
         srv = MCServer()
         srv.start()
