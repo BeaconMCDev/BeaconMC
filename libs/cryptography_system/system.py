@@ -28,7 +28,7 @@ class CryptoSystem(object):
                         backend=default_backend()
                     )
                 except Exception as e:
-                    self.server.log(traceback.format_exc(), 2)
+                    self.server.getConsole().log(traceback.format_exc(), 2)
                     self.__private_key__ = None
 
             with open(self.PATH + ".private_key.pem", "wb") as skf:

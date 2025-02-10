@@ -288,50 +288,53 @@ class MCServer(object):
                 f.write(json.dumps(data))
 
     def start(self):
-        global state
-        """Start the server"""
-        self.getConsole().log("Starting Minecraft server...", 0)
-        state = "ON"
-        self.getConsole().log(f"Server version: {SERVER_VERSION}", 3)
-        self.getConsole().log(f"MC version: {CLIENT_VERSION}", 3)
-        self.getConsole().log(f"Protocol version: {PROTOCOL_VERSION}", 3)
-        # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
         try:
-            with open("eula.txt", "r") as eula_file:
-                eula = eula_file.read().split()
-                if "eula=true" in eula:
-                    pass
-                else:
-                    # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
-                    self.getConsole().log("You need to agree the Minecraft EULA to continue.", 1)
-                    self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
-                    self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-                    self.stop(False, reason="You need to accept Minecraft eula to continue.")
-                return
-        except Exception as e:
-            self.getConsole().log(traceback.format_exc(e), 2)
+            global state
+            """Start the server"""
+            self.getConsole().log("Starting Minecraft server...", 0)
+            state = "ON"
+            self.getConsole().log(f"Server version: {SERVER_VERSION}", 3)
+            self.getConsole().log(f"MC version: {CLIENT_VERSION}", 3)
+            self.getConsole().log(f"Protocol version: {PROTOCOL_VERSION}", 3)
             # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
-            self.getConsole().log("The eula.txt file was not found, or the server was modified !", 1)
-            self.getConsole().log("You need to agree the Minecraft EULA to continue.", 1)
-            self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
-            self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-            self.stop(False, reason="You need to agree eula to continue.")
-            return
-        # self.heartbeat()
+            try:
+                with open("eula.txt", "r") as eula_file:
+                    eula = eula_file.read().split()
+                    if "eula=true" in eula:
+                        pass
+                    else:
+                        # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
+                        self.getConsole().log("You need to agree the Minecraft EULA to continue.", 1)
+                        self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
+                        self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
+                        self.stop(False, reason="You need to accept Minecraft eula to continue.")
+                    return
+            except Exception as e:
+                self.getConsole().log(traceback.format_exc(e), 2)
+                # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
+                self.getConsole().log("The eula.txt file was not found, or the server was modified !", 1)
+                self.getConsole().log("You need to agree the Minecraft EULA to continue.", 1)
+                self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
+                self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
+                self.stop(False, reason="You need to agree eula to continue.")
+                return
+            # self.heartbeat()
 
-        self.getConsole().log("Loading plugins... (REMOVED)", 0)
-        self.load_plugins()
+            self.getConsole().log("Loading plugins... (REMOVED)", 0)
+            self.load_plugins()
 
-        self.getConsole().log("Starting listening...", 0)
-        self.socket.listen(MAX_PLAYERS + 1)  # +1 is for the temp connexions
+            self.getConsole().log("Starting listening...", 0)
+            self.socket.listen(MAX_PLAYERS + 1)  # +1 is for the temp connexions
 
-        self.load_worlds()
+            self.load_worlds()
 
-        self.act = thread.Thread(target=self.add_client_thread)
-        self.act.start()
-        lthr.append(self.act)
+            self.act = thread.Thread(target=self.add_client_thread)
+            self.act.start()
+            lthr.append(self.act)
 
-        self.main()
+            self.main()
+        except Exception as e:
+            self.stop(critical=True, reason="An unknow exception occured.", e=e)
 
     def getConsole(self):
         return self._console
@@ -1677,7 +1680,7 @@ class Console(object):
             except KeyboardInterrupt:
                 srv.stop()
                 break
-            except EOself.server.getConsole().FError:
+            except EOFError:
                 self.log("EOFError: Input stream closed, stopping main thread.", 2)
                 break
 
@@ -1798,7 +1801,7 @@ class Console2(object):
                 self.log("Using the legacy stop command. It will be changed in the future.", 1)
                 self.stop()
             else:
-                Command(input_buffer, None, srv)
+                Command(input_buffer, None, None)
 
     def stop(self):
         """Stop the console and join the thread"""
@@ -1817,6 +1820,6 @@ if __name__ == "__start__":
         srv = MCServer()
         srv.start()
     except Exception as e:
-        srv.getConsole().log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
+        print("FATAL ERROR : An error occured while running the server : uncaught exception (even out the main class).")
         #log(f"{traceback.format_exc(e)}", 100) > Cause a error 
-        srv.stop(critical_stop=True, reason=f"{e}", e=e)
+        #srv.stop(critical_stop=True, reason=f"{e}", e=e)
