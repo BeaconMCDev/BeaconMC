@@ -38,6 +38,7 @@ import requests
 from base64 import b64encode
 from libs import crash_gen
 import string
+import select
 try:
     import nbtlib
 except ModuleNotFoundError:
@@ -140,6 +141,7 @@ def log(msg: str, type: int = -1):
     - 4: chat
     - 100: critical
     - other: unknow"""
+    raise DeprecationWarning("This function is deprecated, please use <server>.getConsole().log() instead.")
     global srv
     srv.getConsole().log(msg, type)
 
@@ -176,7 +178,7 @@ class MCServer(object):
 
     def __init__(self):
         """Init the server"""
-        self._console = Console()
+        self._console = Console2()
 
         self.gui_thr = thread.Thread(target=self._console.mainthread)
         self.gui_thr.start()
@@ -187,33 +189,12 @@ class MCServer(object):
         self.list_clients = []
         self.list_worlds = []
         self.crypto_sys = Crypto(self)
-        # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
-        try:
-            with open("eula.txt", "r") as eula_file:
-                eula = eula_file.read().split()
-                if "eula=true" in eula:
-                    pass
-                else:
-                    # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
-                    log("You need to agree the Minecraft EULA to continue.", 1)
-                    log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
-                    log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-                    self.stop(False, reason="You need to accept Minecraft eula to continue.")
-                return
-        except Exception as e:
-            log(traceback.format_exc(e), 2)
-            # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
-            log("The eula.txt file was not found, or the server was modified !", 1)
-            log("You need to agree the Minecraft EULA to continue.", 1)
-            log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
-            log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
-            self.stop(False, reason="You need to agree eula to continue.")
-            return
+        
 
     def worlds_analyse(self):
         """Search for worlds in the worlds folder.
         Return a list str that are the world name."""
-        log("Analysing worlds...", 3)
+        self.getConsole().log("Analysing worlds...", 3)
         items_list = os.listdir(f"{os.getcwd()}{SEP}worlds")
         lst_world = []
         for item in items_list:
@@ -223,28 +204,29 @@ class MCServer(object):
                 continue
             if extention == ".mcworld":
                 lst_world.append(name)
-        log(f"{len(lst_world)} worlds found !", 3)
+        self.getConsole().log(f"{len(lst_world)} worlds found !", 3)
         return lst_world
 
     def log(self, msg: str, type: int = -1):
         """An alternative of main.log(). Don't delete, used by plugins."""
+        raise DeprecationWarning("This function is deprecated, please use <server>.getConsole().log() instead.")
         self.getConsole().log(msg, type)
         
     def kick(self, client, reason="Kicked by an operator"):
         if isinstance(client, Client):
             if client in self.list_clients:
                 if client.connected:
-                    log(f"Kicking {client.username} ({client.uuid}): {reason}")
+                    self.getConsole().log(f"Kicking {client.username} ({client.uuid}): {reason}")
                     client.disconnect(reason)
                     return True
                 else:
-                    log(f"Failed to kick {client.username}: client not connected.", 1)
+                    self.getConsole().log(f"Failed to kick {client.username}: client not connected.", 1)
                     return False
             else:
-                log(f"Failed to kick {client.username}: client not registered.", 1)
+                self.getConsole().log(f"Failed to kick {client.username}: client not registered.", 1)
                 return False
         else:
-            log(f"Failed to kick {client}: not a Client instance.", 2)
+            self.getConsole().log(f"Failed to kick {client}: not a Client instance.", 2)
             return False
 
     def banip(self, ip:str=None, client:object=None, username:str=None, reason:str="Banned by an operator"):
@@ -287,7 +269,7 @@ class MCServer(object):
             if i > 1:
                 raise TwoPlayerWithSameUsernameException()
             elif i == 0:
-                log(f"Failed to kick {username}: player not found.", 1)
+                self.getConsole().log(f"Failed to kick {username}: player not found.", 1)
                 return
             elif i == 1:
                 pass
@@ -308,17 +290,39 @@ class MCServer(object):
     def start(self):
         global state
         """Start the server"""
-        log("Starting Minecraft server...", 0)
+        self.getConsole().log("Starting Minecraft server...", 0)
         state = "ON"
-        log(f"Server version: {SERVER_VERSION}", 3)
-        log(f"MC version: {CLIENT_VERSION}", 3)
-        log(f"Protocol version: {PROTOCOL_VERSION}", 3)
+        self.getConsole().log(f"Server version: {SERVER_VERSION}", 3)
+        self.getConsole().log(f"MC version: {CLIENT_VERSION}", 3)
+        self.getConsole().log(f"Protocol version: {PROTOCOL_VERSION}", 3)
+        # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
+        try:
+            with open("eula.txt", "r") as eula_file:
+                eula = eula_file.read().split()
+                if "eula=true" in eula:
+                    pass
+                else:
+                    # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
+                    self.getConsole().log("You need to agree the Minecraft EULA to continue.", 1)
+                    self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
+                    self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
+                    self.stop(False, reason="You need to accept Minecraft eula to continue.")
+                return
+        except Exception as e:
+            self.getConsole().log(traceback.format_exc(e), 2)
+            # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
+            self.getConsole().log("The eula.txt file was not found, or the server was modified !", 1)
+            self.getConsole().log("You need to agree the Minecraft EULA to continue.", 1)
+            self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
+            self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
+            self.stop(False, reason="You need to agree eula to continue.")
+            return
         # self.heartbeat()
 
-        log("Loading plugins... (REMOVED)", 0)
+        self.getConsole().log("Loading plugins... (REMOVED)", 0)
         self.load_plugins()
 
-        log("Starting listening...", 0)
+        self.getConsole().log("Starting listening...", 0)
         self.socket.listen(MAX_PLAYERS + 1)  # +1 is for the temp connexions
 
         self.load_worlds()
@@ -339,13 +343,13 @@ class MCServer(object):
 
     def load_worlds(self):
         """Load all of the server's worlds"""
-        log("Loading worlds...", 0)
+        self.getConsole().log("Loading worlds...", 0)
         pre_list_worlds = self.worlds_analyse()
         for world in pre_list_worlds:
             w_class = World(world)
             w_class.load()
             self.list_worlds.append(w_class)
-        log(f"DONE ! Server successfully started on {round(tm.time() - dt_starting_to_start, 2)} seconds.", 0)
+        self.getConsole().log(f"DONE ! Server successfully started on {round(tm.time() - dt_starting_to_start, 2)} seconds.", 0)
 
     def main(self):
         """Main"""
@@ -364,12 +368,12 @@ class MCServer(object):
     def stop(self, critical_stop=False, reason="Server closed", e: Exception=None):
         """stop the server"""
         if critical_stop:
-            log("Critical server stop trigered !", 100)
-        log("Stopping the server...", 0)
+            self.getConsole().log("Critical server stop trigered !", 100)
+        self.getConsole().log("Stopping the server...", 0)
         global state
         state = "OFF"
         global lthr
-        log("Disconnecting all the clients...", 0)
+        self.getConsole().log("Disconnecting all the clients...", 0)
         if critical_stop:
             for i in self.list_clients:
                 i: Client
@@ -377,12 +381,13 @@ class MCServer(object):
         else:
             for i in self.list_clients:
                 i.disconnect(reason=tr.key("disconnect.server.closed"))
-        log("Closing socket...", 0)
+        self.getConsole().log("Closing socket...", 0)
         self.socket.close()
-        log("Stopping all tasks...", 0)
+        self.getConsole().log("Stopping all tasks...", 0)
         for t in lthr:
             t: thread.Thread
-            t.join()
+            t.join(timeout=1) if t is not thread.current_thread() else None
+            lthr.remove(t)
         ...
         # Stop plugins
         ...
@@ -390,10 +395,10 @@ class MCServer(object):
         # Save and clear sensitive cryptographic data
         self.crypto_sys.stop()
         if not (critical_stop):
-            log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
+            self.getConsole().log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
             exit()
         else:
-            log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
+            self.getConsole().log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
             self.crash(reason, e)
             exit(-1)
 
@@ -456,7 +461,7 @@ class MCServer(object):
         block = base_request[8]
         # check the request
         if id != "\x05":
-            log("A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !", 100)
+            self.getConsole().log("A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !", 100)
             self.stop(critical=True, reason="A non-setblock request was sent to the bad method. Something went wrong. Please leave an issue on GitHub or on Discord !")
             raise RequestAnalyseException("Exception on analysing a request : bad method used (setblock andnot unknow).")
         # TODO: Modify the block in the world
@@ -476,7 +481,7 @@ class MCServer(object):
         for p in self.list_clients:
             p: Client
             p.send_msg_to_chat(msg)
-        log(msg, 4)
+        self.getConsole().log(msg, 4)
 
     def mp(self, message: str, addressee: str, author: str):
         """Send a mp to 1 player
@@ -488,7 +493,7 @@ class MCServer(object):
         pl = self.find_player_by_username(addressee)
         msg = f"{author} --> you: {message}"
         pl.send_msg_to_chat(msg)
-        log(f"{author} --> {pl}: {message}", 4)
+        self.getConsole().log(f"{author} --> {pl}: {message}", 4)
         for pl in self.PLUGIN_LIST:
             pl.on_mp(message=message, source=author, addressee=addressee)
 
@@ -610,7 +615,7 @@ class Packet(object):
 
     def unpack_varint(self, data, debug=False):
         if debug:
-            log(f"Data : {data}", 3)
+            srv.getConsole().log(f"Data : {data}", 3)
         d = 0
         for i in range(5):
             b = data[i]
@@ -729,25 +734,25 @@ class Client(object):
             try:
                 response = requests.get(url="https://sessionserver.mojang.com/session/minecraft/hasJoined", params={"username": self.username, "serverId": SERVER_ID, "ip": ip_field})
             except TimeoutError:
-                self.log("Authentification servers didn't responded on time !", 1)
+                self.server.getConsole().log("Authentification servers didn't responded on time !", 1)
                 self.disconnect("Time out with mojang auth servers. Are they online ?")
                 return
             except requests.HTTPError as e:
-                log("An unexcepted exception occured with authentification servers !", 2)
-                log(traceback.format_exc(e), 2)
+                self.server.getConsole().log("An unexcepted exception occured with authentification servers !", 2)
+                self.server.getConsole().log(traceback.format_exc(e), 2)
                 self.disconnect("HTTP Exception with auth servers, are they online ?")
                 return
             except ConnectionError:
-                log("Exception while connecting to auth servers.", 2)
+                self.server.getConsole().log("Exception while connecting to auth servers.", 2)
                 self.disconnect("Exception while connecting to the mojang auth servers.")
                 return
             except Exception as e:
-                log("Unknow exception while contacting auth servers.", 2)
-                log(traceback.format_exc(e), 2)
+                self.server.getConsole().log("Unknow exception while contacting auth servers.", 2)
+                self.server.getConsole().log(traceback.format_exc(e), 2)
                 self.disconnect("Failed to login with auth servers (internal exception).")
             assert isinstance(response, requests.Response)
             if response.status_code == 204:
-                log("Mojang authentification server responded by 204 http status !", 1)
+                self.server.getConsole().log("Mojang authentification server responded by 204 http status !", 1)
                 self.disconnect("Invalid response from authentifications servers.")
                 return
             api_response = json.loads(response.content)
@@ -779,7 +784,7 @@ class Client(object):
             parg = [UUID(self.uuid), self.username, PrefixedArray(["name", "textures", "value", "eyJ0aW1lc3RhbXAiOjE1OTAwMDAwMDAsInByb2ZpbGVJZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAiLCJwcm9wZXJ0aWVzIjpbeyJrZXkiOiJUZXh0dXJlcyIsInZhbHVlIjoieyJTS0lOIjp7InVybCI6Imh0dHBzOi8vc2Vzc2lvbnMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzE2YTQ4Njc0YzMwMmRjM2VhNzZjZmZhZjMyMmQ5MmJmZjBjMDI5ZTZhOGY4MTk4ZDczZjMzYjRhZDdkMzY2ZjAifX19"])]
         
         response = Packet(self.connexion, "-OUTGOING", 2, args=parg)
-        log(response.__repr__(), 3)
+        self.server.getConsole().log(response.__repr__(), 3)
         response.send()
         self.server.list_clients.append(self)
 
@@ -787,8 +792,8 @@ class Client(object):
         """Per client thread"""
         self.id = id
         try:
-            log(f"New client from {self.info}", 3)
-            log("Starting listening loop in Handshaking state", 3)
+            self.server.getConsole().log(f"New client from {self.info}", 3)
+            self.server.getConsole().log("Starting listening loop in Handshaking state", 3)
 
             # Ping / Auth loop (to developp)
             d_reason = "None"
@@ -816,15 +821,15 @@ class Client(object):
                     else:
                         self.request = Packet.pack_varint(None, lenth)  + self.connexion.recv(lenth)
                 except ConnectionResetError:
-                    log(f"Client {self.info} disconnected : Connexion reset.")
+                    self.server.getConsole().log(f"Client {self.info} disconnected : Connexion reset.")
                 if self.request == "":
                     continue
-                log(f"Receiving serverbound packet : {self.request}", 3)
+                self.server.getConsole().log(f"Receiving serverbound packet : {self.request}", 3)
 
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
 
-                log(f"Packet ID : {self.packet.type}", 3)
-                log(f"Protocol state : {self.protocol_state}", 3)
+                self.server.getConsole().log(f"Packet ID : {self.packet.type}", 3)
+                self.server.getConsole().log(f"Protocol state : {self.protocol_state}", 3)
 
                 if self.protocol_state == "Handshaking":
 
@@ -832,25 +837,25 @@ class Client(object):
                         if self.packet.args[-1] == 1:
                             # Switch protocol state to status
                             self.protocol_state = "Status"
-                            log(f"Switching to Status state for {self.info}", 3)
+                            self.server.getConsole().log(f"Switching to Status state for {self.info}", 3)
                             continue
 
                         elif self.packet.args[-1] == 2:
                             # Switch protocol state to login
                             self.protocol_state = "Login"
                             self.protocol_version = Packet.unpack_varint(None, self.packet.args[0:2])
-                            log(f"Switching to login state for {self.info}", 3)
+                            self.server.getConsole().log(f"Switching to login state for {self.info}", 3)
                             continue
 
                         elif self.packet.args[-1] == 3:
                             # Switch protocol state to transfer
                             self.protocol_state = "Transfer"
-                            log(f"Switching to transfer state for {self.info}", 3)
+                            self.server.getConsole().log(f"Switching to transfer state for {self.info}", 3)
                             continue
                         else:
                             self.connected = False
                             self.connected = False
-                            log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
+                            self.server.getConsole().log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
                             break
 
                 elif self.protocol_state == "Status":
@@ -884,20 +889,20 @@ class Client(object):
                         self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i:])
 
 
-                        log(f"UUID of {self.username} is {self.uuid}.", 0)
-                        log(f"{self.username} is logging in from {self.info}.", 0)
+                        self.server.getConsole().log(f"UUID of {self.username} is {self.uuid}.", 0)
+                        self.server.getConsole().log(f"{self.username} is logging in from {self.info}.", 0)
 
                         for player in self.server.list_clients:
                             if self.username == player.username or self.uuid == player.uuid:
                                 if i == 1:
-                                    log(f"{self.username} is already connected !", 1)
+                                    self.server.getConsole().log(f"{self.username} is already connected !", 1)
                                     if not(ONLINE_MODE) and ENFORCE_OFFLINE_PROFILES:
                                         if self.info == player.info:
                                             self.connected = False
                                             misc_d = False
                                             d_reason = tr.key("disconnect.username.conflict.offline.sameip")
                                         else:
-                                            log("Banning the player for security reason: the server is running offline mode.", 1)
+                                            self.server.getConsole().log("Banning the player for security reason: the server is running offline mode.", 1)
                                             self.server.banip(ip=self.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
                                             self.server.banip(ip=player.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
                                             self.server.kick(player, tr.key("disconnect.username.conflict.offline.dif_ip"))
@@ -917,7 +922,7 @@ class Client(object):
                                     misc_d = False
                                     reason = {bip['reason']}
                                     d_reason = tr.key("disconnect.ban.ip")
-                                    log(f"{self.username}'s IP is banned. Disconnecting...", 0)
+                                    self.server.getConsole().log(f"{self.username}'s IP is banned. Disconnecting...", 0)
                                     break
                         with open("banned-players.json", "r") as f:
                             banedacc = json.loads(f.read())
@@ -927,7 +932,7 @@ class Client(object):
                                     misc_d = False
                                     reason = {bacc['reason']}
                                     d_reason = tr.key("disconnect.ban.account")
-                                    log(f"{self.username} is banned. Disconnecting...", 0)
+                                    self.server.getConsole().log(f"{self.username} is banned. Disconnecting...", 0)
                                     break
                         
 
@@ -951,17 +956,17 @@ class Client(object):
                                     misc_d = False
 
                                     if o > 1:
-                                        log("User is whitelisted more than 1 time !", 1)
+                                        self.server.getConsole().log("User is whitelisted more than 1 time !", 1)
                                     continue
                         if ONLINE_MODE:
                             api_system = m_api.Accounts()
                             check_result = api_system.authenticate(self.username, self.uuid)
                             if check_result[0]:
-                                log(f"successfully authenticated {self.username}.", 3)
+                                self.server.getConsole().log(f"successfully authenticated {self.username}.", 3)
                                 self.authenticated = True
                                 pass
                             else:
-                                log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
+                                self.server.getConsole().log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
                                 self.connected = False
                                 d_reason = tr.key("disconnect.login.failed")
                                 misc_d = False
@@ -985,7 +990,7 @@ class Client(object):
                             # TODO Enable compression (would be optional) (in other "if" fork)
                             ...
                         else:
-                            log("WARNING! YOUR SERVER IS RUNNING OFFLINE MODE, SO CRACKED AND UNVERIFIED USERS CAN CONNECT. MOREOVER, IDENTITY THEFT IS POSSIBLE AND NOT DETECTABLE.", 1)
+                            self.server.getConsole().log("WARNING! YOUR SERVER IS RUNNING OFFLINE MODE, SO CRACKED AND UNVERIFIED USERS CAN CONNECT. MOREOVER, IDENTITY THEFT IS POSSIBLE AND NOT DETECTABLE.", 1)
                             # load player properties
                             self.load_properties()
                             continue
@@ -1006,25 +1011,25 @@ class Client(object):
                         try:
                             self.shared_secret = self.server.crypto_sys.decode(self.shared_secret)
                         except Exception as e:
-                            log(f"Exception during encryption for {self.username} ({self.uuid}) !", 2)
-                            log(traceback.format_exc(e), 2)
+                            self.server.getConsole().log(f"Exception during encryption for {self.username} ({self.uuid}) !", 2)
+                            self.server.getConsole().log(traceback.format_exc(e), 2)
                             self.disconnect("Encryption error. If the error is persistent, please report the bug to BeaconMC issue tracker.")
 
                         # decrypt token
                         if verify_token == self.server.crypto_sys.decode(verify_token2, self.shared_secret):
-                            log(f"Encryption check done successfully for {self.info}", 3)
+                            self.server.getConsole().log(f"Encryption check done successfully for {self.info}", 3)
                         else:
-                             log("An exception occured with encryption, disconnecting...", 2)
+                             self.server.getConsole().log("An exception occured with encryption, disconnecting...", 2)
                              self.disconnect("Encryption error, try to restart your game !")
                              return
                         self.encrypted = True
-                        self.server.log("Connexion encrypted successfully.", 3)
+                        self.server.getConsole().log("Connexion encrypted successfully.", 3)
 
                         self.load_properties()
                         continue
 
                     elif self.packet.type == 3 and (self.authenticated or not(ONLINE_MODE)):
-                        self.server.log("switching protocol state to Configuration.", 3)
+                        self.server.getConsole().log("switching protocol state to Configuration.", 3)
                         self.protocol_state = "Configuration"
                     
                     elif self.packet.type == 4 and self.encrypted and self.authenticated:
@@ -1033,7 +1038,7 @@ class Client(object):
                 elif self.protocol_state == "Configuration" and self.configured:
                     if self.packet.type == 3:
                         self.protocol_state = "Play"
-                        log("Switching protocol state to play", 3)
+                        self.server.getConsole().log("Switching protocol state to play", 3)
                         break
                     elif self.packet.type == 4:
                         ...
@@ -1044,7 +1049,7 @@ class Client(object):
             if not(self.connected and state == "ON"):
                 # If server is stopping or the client is disconnecting (usefull ?)
                 if misc_d:
-                    log(f"Disconnecting {self.info} for some misc reasons.", 3)
+                    self.server.getConsole().log(f"Disconnecting {self.info} for some misc reasons.", 3)
                 else:
                     message = "{'text': '" + d_reason + "'}"
                     if self.protocol_state == "Login":
@@ -1052,7 +1057,7 @@ class Client(object):
                     elif self.protocol_state == "Configuration":
                         dp = Packet(self.connexion, "-OUTGOING", typep=2, args=(message, ))
                     dp.send()
-                    log(f"{self.username} lost connexion: {d_reason}.", 0)
+                    self.server.getConsole().log(f"{self.username} lost connexion: {d_reason}.", 0)
                 self.connexion.close()
                 return
 
@@ -1060,7 +1065,7 @@ class Client(object):
 
             
             while self.connected and state == "ON" and self.protocol_state == "Play":
-                log(f"{self.username} joined the game.", 0)
+                self.server.getConsole().log(f"{self.username} joined the game.", 0)
                 self.server.post_to_chat(f"{self.username} joined the game")
                 # to clean
 
@@ -1094,12 +1099,12 @@ class Client(object):
                 #        self.joining()
             self.server.list_clients.remove(self)
         except ConnectionAbortedError:
-            log(f"Connexion aborted by client {self.info} ({self.username})", 0)
+            self.server.getConsole().log(f"Connexion aborted by client {self.info} ({self.username})", 0)
             self.connexion.close()
             self.connected = False
         except Exception as e:
             import traceback
-            log(f"{traceback.format_exc()}", 2)
+            self.server.getConsole().log(f"{traceback.format_exc()}", 2)
             self.disconnect(f"Server internal Exception : {e}.")
 
     def ping_response(self, payload):
@@ -1113,12 +1118,12 @@ class Client(object):
 
     def bad_version(self):
         """Called to disconnect the connecting client that has a bad protocol version"""
-        log("A client used a bad version. Disconnecting this client...", 0)
+        self.server.getConsole().log("A client used a bad version. Disconnecting this client...", 0)
         self.connexion.send(encode(f'E\x00C{"translate":"multiplayer.disconnect.incompatible","with":["{CLIENT_VERSION}"]}'))
         self.connected = False
         self.connexion.close()
         self.server.list_client.remove(self)
-        log("Client disconnected: bad Minecraft version", 0)
+        self.server.getConsole().log("Client disconnected: bad Minecraft version", 0)
         del(self)
 
     def treat(self, msg):
@@ -1144,32 +1149,32 @@ class Client(object):
         """When the request is a joining request"""
         self.username = self.packet.args[0]
         self.uuid = self.packet.args[1]
-        log(f"Player {self.username} with uuid {self.uuid} is loging in !")
+        self.server.getConsole().log(f"Player {self.username} with uuid {self.uuid} is loging in !")
 
         if connected_players >= MAX_PLAYERS:
             r = tr.key("disconnect.server_full")
-            log(f"Disconnecting {self.username}: {r}", 0)
+            self.server.getConsole().log(f"Disconnecting {self.username}: {r}", 0)
             self.disconnect(tr.key("disconnect.server_full"))
             return
         # HOW TO GET THE PROTOCOL VERSION ?
         if not(PROTOCOL_VERSION == PROTOCOL_VERSION):
             r = tr.key("disconnect.bad_protocol")
-            log(f"Disconnecting {self.username} : {r}.", 0)
+            self.server.getConsole().log(f"Disconnecting {self.username} : {r}.", 0)
             self.bad_version()
             return
         if not(self.server.is_premium(self.username)):
             r = tr.key("disconnect.not_premium")
-            log(f"Disconnecting {self.username} : {r}.", 0)
+            self.server.getConsole().log(f"Disconnecting {self.username} : {r}.", 0)
             self.disconnect(tr.key("disconnect.not_premium"))
             return
 
         if ONLINE_MODE:
             p_response = Packet(self.connexion, direction="-OUTGOING", typep=1, args=("serverid", b"publick key", "verify token", ONLINE_MODE))
-            log(p_response, 3)
+            self.server.getConsole().log(p_response, 3)
             p_response.send()
 
         packet_r = Packet(self.connexion, "-OUTGOING", typep=2, args=(self.uuid, self.username, 0, False))
-        log(packet_r, 0)
+        self.server.getConsole().log(packet_r, 0)
         packet_r.send()
 
 
@@ -1282,7 +1287,7 @@ class Client(object):
             with open('server-icon.png', 'rb') as image_file :
                 favicon = b64encode(image_file.read()).decode('utf-8')
         except FileNotFoundError:
-            log("Server icon not found, using default BeaconMC icon", 1)
+            self.server.getConsole().log("Server icon not found, using default BeaconMC icon", 1)
             favicon = "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"
         response = {
         "version": {"name": CLIENT_VERSION, "protocol": PROTOCOL_VERSION},
@@ -1299,7 +1304,7 @@ class Client(object):
         packet_response.send()
 
     def on_SLP(self):
-        log("Event 'on server list ping' triggered !", 3)
+        self.server.getConsole().log("Event 'on server list ping' triggered !", 3)
         request = f'\xca\x01\x00\xc7\x01\u007b"previewsChat":false,"description":\u007b"text":"{MOTD}"\u007d,"players":\u007b"max":{MAX_PLAYERS},"online":{len(self.server.list_clients)}\u007d,"version":\u007b"name":"{CLIENT_VERSION}","protocol":{PROTOCOL_VERSION}\u007d\u007d'        
         request = encode(request)
         self.connexion.send(request, 1024)
@@ -1478,7 +1483,7 @@ class World(object):
         """Read a world file and return a World List.
         Return data with the correct python server convention."""
         if not(self.check_generation):
-            log("Trying to load an ungenerated world ! Please generate it before loading !Starting generation...", 2)
+            self.server.getConsole().log("Trying to load an ungenerated world ! Please generate it before loading !Starting generation...", 2)
             self.generate()
         with open(self.BASE + self.name, "r") as file:
             data = file.read()
@@ -1494,14 +1499,14 @@ class World(object):
         name, level = infos.split("::::")
         if name != self.name:
             # something went wrong
-            log("Reading a world name different of the gived name !", 2)
+            self.server.getConsole().log("Reading a world name different of the gived name !", 2)
             self.name = name
-            log("Name modified.", 0)
+            self.server.getConsole().log("Name modified.", 0)
         if self.level != level and self.level != None:
             # something went wrong
-            log("Reading a world level different of the gived level !", 2)
+            self.server.getConsole().log("Reading a world level different of the gived level !", 2)
             self.level = level
-            log("Level modified.", 0)
+            self.server.getConsole().log("Level modified.", 0)
         if self.level == None:
             self.level = level
 
@@ -1533,7 +1538,7 @@ class World(object):
         dt = self.encode(self.data)
         with open(self.BASE + self.name + ".mcworld", "w") as file:
             file.write(dt)
-        log("Saved !")
+        self.server.getConsole().log("Saved !")
 
     def encode(self, data: list):
         """Encode the world that will be saved.
@@ -1603,6 +1608,7 @@ class Command(object):
         self.splited = self.command.split(" ")
         self.base = self.splited[0]
         self.args = self.splited[1:]
+        self.server = server
 
         if self.pre_cmd():
             self.execute()
@@ -1624,11 +1630,11 @@ class Command(object):
         return True
 
     def pre_cmd(self):
-        log(f"{self.source.username} used a player command : {self.command}.", 4)
+        self.server.getConsole().log(f"{self.source.username} used a player command : {self.command}.", 4)
         if self.check_perm(self.base, self.source):
             return True
         else:
-            log(f"Denied acces for the command {self.base} runned by {self.source.username} !", 4)
+            self.server.getConsole().log(f"Denied acces for the command {self.base} runned by {self.source.username} !", 4)
             return False
 
     def msg(self, args):
@@ -1639,7 +1645,7 @@ class Command(object):
 
     def stop(self, args):
         if len(args) != 0:
-            log("Too much arguments !", 1)
+            self.server.getConsole().log("Too much arguments !", 1)
             self.srv.mp("Too many arguments !", self.source, )
             return False
         self.srv.stop()
@@ -1648,20 +1654,31 @@ class Command(object):
 
 class Console(object):
     def __init__(self):
+        raise DeprecationWarning("This class is deprecated. Use Console2 instead.")
         self.lock = thread.Lock()
+        self.stop_event = thread.Event()
 
     def mainthread(self):
         global input_buffer
         input_buffer = ""
-        while state == "ON":
+        while not(self.stop_event.is_set()):
             try:
-                input_buffer = input("> ")
+                #input_buffer = input("> ")
+                with self.lock:
+                    sys.stdout.write("\n> ")
+                    sys.stdout.flush()
+
+                    input_buffer = sys.stdin.readline().strip()
+
                 if input_buffer.startswith("/"):
                     Command(input_buffer, None, srv)
                 else:
-                    log(f"Unknown command: {input_buffer}", 1)
+                    self.server.getConsole().log(f"Unknown command: {input_buffer}", 1)
             except KeyboardInterrupt:
                 srv.stop()
+                break
+            except EOself.server.getConsole().FError:
+                self.log("EOFError: Input stream closed, stopping main thread.", 2)
                 break
 
     def log(self, msg: str, type: int = -1):
@@ -1700,11 +1717,9 @@ class Console(object):
         time = gettime()
         text = f"[{time}] [Server/{t}]: {msg}"
         with self.lock:
-            sys.stdout.write("\033[F")  # Move cursor up one line
-            sys.stdout.write("\033[K")  # Clear the line
-            sys.stdout.write(text + "\n")  # Write the log message with a newline
-            sys.stdout.write("\033[K")  # Clear the line again to ensure it's clean
-            sys.stdout.write("> " + input_buffer)  # Reprint the input prompt and buffer
+            sys.stdout.write("\r\033[K")
+            sys.stdout.write(text + "\n")
+            sys.stdout.write("\r\033[K> " + input_buffer)
             sys.stdout.flush()
         try:
             with open(logfile, "+a") as file:
@@ -1715,10 +1730,84 @@ class Console(object):
             with open(logfile, "+w") as file:
                 file.write(text + "\n")
         return
+    
+    def stop(self):
+        self.stop_event.set()
+        sys.stdout.write("\nStopping console...\n")
+        sys.stdout.flush()
+
+class Console2(object):
+    """This is designed to be a fix for the current console system, that doesn't work."""
+    def __init__(self):
+        self.running = True
+        self.lock = thread.Lock()
+
+    def log(self, msg: str, type: int = -1):
+        """Log method with different types of log levels"""
+        global errors, warnings, debug, info, critical, unknow
+        if type == 0:
+            t = "INFO"
+            info += 1
+        elif type == 1:
+            t = "WARN"
+            warnings += 1
+        elif type == 2:
+            t = "ERROR"
+            errors += 1
+        elif type == 3:
+            t = "DEBUG"
+            if not DEBUG:
+                return
+            else:
+                debug += 1
+        elif type == 4:
+            t = "CHAT"
+        elif type == 100:
+            t = "CRITICAL"
+            critical += 1
+        else:
+            unknow += 1
+            t = "UNKNOW"
+        
+        time_str = gettime()
+        text = f"[{time_str}] [Server/{t}]: {msg}"
+
+        try:
+            with open(logfile, "+a") as file:
+                file.write(text + "\n")
+        except Exception:
+            print('Error in log system! Creating file...')
+            os.makedirs('logs', exist_ok=True)
+            with open(logfile, "+w") as file:
+                file.write(text + "\n")
+        
+        with self.lock:
+            sys.stdout.write(f"\r\033[K{msg}\n")
+            sys.stdout.write("\r\033[K> ")
+            sys.stdout.flush()
+
+    def mainthread(self):
+        """Process user input on the command line"""
+        input_buffer = ""
+        while self.running:
+            with self.lock:
+                #sys.stdout.write("> ")
+                sys.stdout.flush()
+            input_buffer = sys.stdin.readline().strip()
+            if input_buffer == "stop":
+                self.log("Using the legacy stop command. It will be changed in the future.", 1)
+                self.stop()
+            else:
+                Command(input_buffer, None, srv)
+
+    def stop(self):
+        """Stop the console and join the thread"""
+        global srv
+        srv.stop()
+        self.log("Console stopped", 0)
 
 # PRE MAIN INSTRUCTIONS
 be_ready_to_log()
-
 
 # MAIN
 if __name__ == "__start__":
@@ -1728,6 +1817,6 @@ if __name__ == "__start__":
         srv = MCServer()
         srv.start()
     except Exception as e:
-        log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
+        srv.getConsole().log("FATAL ERROR : An error occured while running the server : uncaught exception.", 100)
         #log(f"{traceback.format_exc(e)}", 100) > Cause a error 
         srv.stop(critical_stop=True, reason=f"{e}", e=e)

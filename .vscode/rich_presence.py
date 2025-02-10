@@ -2,7 +2,7 @@ from pypresence import Presence
 import time
 
 
-client_id = '1293976601129910332'
+client_id = '1338551378242699374'
 
 # Connexion avec Discord
 rpc = Presence(client_id)
