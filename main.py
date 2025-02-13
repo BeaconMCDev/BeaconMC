@@ -308,7 +308,7 @@ class MCServer(object):
                         self.getConsole().log("The conditions are readable here : https://www.minecraft.net/fr-ca/eula. To accept it, go to eula.txt and write 'eula=true'.", 1)
                         self.getConsole().log("The server will not start until the EULA is not accepted, and if this script is modified we will not support or help you.", 1)
                         self.stop(False, reason="You need to accept Minecraft eula to continue.")
-                    return
+                        return
             except Exception as e:
                 self.getConsole().log(traceback.format_exc(e), 2)
                 # WARNING - ANY MODIFICATION IN THIS SECTION WILL GET YOU NOT HELPABLE, PLEASE READ LICENSE.md.
