@@ -27,6 +27,16 @@ class CryptoSystem(object):
                         password=None,
                         backend=default_backend()
                     )
+                except ValueError as e:
+                    self.server.getConsole().log(f"Failed to load private key: {e}", 2)
+                    self.server.getConsole().log("Do you want to create a new one ? (y/n)", 2)
+                    r = input()
+                    if r == "y":
+                        self.generate_keys()
+                    else:
+                        self.server.getConsole().log("Failed to secure the network.", 1)
+                        self.server.getConsole().log("Please ensure this is quickly fix to prevent security flaws.", 1)
+                    raise
                 except Exception as e:
                     self.server.getConsole().log(traceback.format_exc(), 2)
                     self.__private_key__ = None
