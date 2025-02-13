@@ -1853,5 +1853,6 @@ if __name__ == "__start__":
         srv.start()
     except Exception as e:
         print("FATAL ERROR : An error occured while running the server : uncaught exception (even out the main class).")
+        print(f"{e} ({type(e)})")
         #log(f"{traceback.format_exc(e)}", 100) > Cause a error 
         #srv.stop(critical_stop=True, reason=f"{e}", e=e)

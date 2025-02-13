@@ -34,10 +34,10 @@ class Plugin(BeaconMCPlugin):
     def onEnable(self):
         """Similar to Java plugins"""
         # In this exemple the plugin will log into the console "Hello World"
-        self.server.log("Hello World", 0)
+        self.server.getConsole().log("Hello World", 0)
 
     def onDisable(self):
-        self.server.log("GoodBye !", 0)
+        self.server.getConsole().log("GoodBye !", 0)
 
     def onPlayerJoinEvent(self, player):
         self.server.post_to_chat(f"Welcome {player.username} !")

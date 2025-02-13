@@ -29,13 +29,13 @@ class PluginLoader:
             try:
                 pi = plugin_instance
                 if hasattr(pi, "AUTHOR"):
-                    self.server.log(f"Loading {pi.NAME} v{pi.VERSION} from {pi.AUTHOR}", 0)
+                    self.server.getConsole().log(f"Loading {pi.NAME} v{pi.VERSION} from {pi.AUTHOR}", 0)
                 else:
                     authors = ""
                     for a in pi.AUTHORS:
                         authors += a + ", "
                     authors = authors[:2]
-                    self.server.log(f"Loading {pi.NAME} v{pi.VERSION} from {authors}", 0)
+                    self.server.getConsole().log(f"Loading {pi.NAME} v{pi.VERSION} from {authors}", 0)
                 plugin_instance.onEnable()
                 plugin_instance.enabled = True
                 self.plugins.append(plugin_instance)
@@ -44,7 +44,7 @@ class PluginLoader:
                     plugin_instance.disabled = True
                 else:
                     self.plugins.remove(plugin_instance)
-                self.server.log("Plugin disabled due to issue when loading.", 2)
-                self.server.log(f"{type(e)}: {e}", 2)
+                self.server.getConsole().log("Plugin disabled due to issue when loading.", 2)
+                self.server.getConsole().log(f"{type(e)}: {e}", 2)
         else:
-            self.server.log(f"File {plugin_path} does not contain the Plugin class ! Skipping...", 1)
+            self.server.getConsole().log(f"File {plugin_path} does not contain the Plugin class ! Skipping...", 1)
