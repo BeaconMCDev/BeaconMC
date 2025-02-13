@@ -180,7 +180,7 @@ class MCServer(object):
         """Init the server"""
         self._console = Console2(self)
 
-        self.gui_thr = thread.Thread(target=self._console.mainthread)
+        self.gui_thr = thread.Thread(target=self._console.mainthread, daemon=True)
         self.gui_thr.start()
         lthr.append(self.gui_thr)
         self.socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)  # socket creation
@@ -393,7 +393,7 @@ class MCServer(object):
                 t.running = False  # stop console
             except AttributeError:
                 pass
-            t.join() if t is not thread.current_thread() else None
+            t.join(timeout=1) if t is not thread.current_thread() else None
             lthr.remove(t)
         ...
         # Stop plugins
@@ -403,11 +403,13 @@ class MCServer(object):
         self.crypto_sys.stop()
         if not (critical_stop):
             self.getConsole().log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
+            self.getConsole().log("[Press enter to exit]")
             self.getConsole().running = False
             exit()
         else:
             self.getConsole().log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
             self.crash(reason, e)
+            self.getConsole().log("[Press enter to exit]")
             self.getConsole().running = False
             exit(-1)
 
