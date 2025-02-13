@@ -178,7 +178,7 @@ class MCServer(object):
 
     def __init__(self):
         """Init the server"""
-        self._console = Console2(self)
+        self._console = Console(self)
 
         self.gui_thr = thread.Thread(target=self._console.mainthread, daemon=True)
         self.gui_thr.start()
@@ -1622,7 +1622,7 @@ class Command(object):
         self.server = server
 
         if self.pre_cmd():
-            if isinstance(source, Console2):
+            if isinstance(source, Console):
                 source.log(self.execute(), 0)
             elif isinstance(source, Client):
                 source.send_msg_to_chat(self.execute())
@@ -1671,92 +1671,7 @@ class Command(object):
         self.srv.stop()
         return True
 
-
 class Console(object):
-    def __init__(self):
-        raise DeprecationWarning("This class is deprecated. Use Console2 instead.")
-        self.lock = thread.Lock()
-        self.stop_event = thread.Event()
-
-    def mainthread(self):
-        global input_buffer
-        input_buffer = ""
-        while not(self.stop_event.is_set()):
-            try:
-                #input_buffer = input("> ")
-                with self.lock:
-                    sys.stdout.write("\n> ")
-                    sys.stdout.flush()
-
-                    input_buffer = sys.stdin.readline().strip()
-
-                if input_buffer.startswith("/"):
-                    Command(input_buffer, None, srv)
-                else:
-                    self.server.getConsole().log(f"Unknown command: {input_buffer}", 1)
-            except KeyboardInterrupt:
-                srv.stop()
-                break
-            except EOFError:
-                self.log("EOFError: Input stream closed, stopping main thread.", 2)
-                break
-
-    def log(self, msg: str, type: int = -1):
-        """Types:
-        - 0: info
-        - 1: warning
-        - 2: error
-        - 3: debug
-        - 4: chat
-        - 100: critical
-        - other: unknow"""
-        global errors, warnings, debug, info, critical, unknow
-        if type == 0:
-            t = "INFO"
-            info += 1
-        elif type == 1:
-            t = "WARN"
-            warnings += 1
-        elif type == 2:
-            t = "ERROR"
-            errors += 1
-        elif type == 3:
-            t = "DEBUG"
-            if not (DEBUG):
-                return
-            else:
-                debug += 1
-        elif type == 4:
-            t = "CHAT"
-        elif type == 100:
-            t = "CRITICAL"
-            critical += 1
-        else:
-            unknow += 1
-            t = "UNKNOW"
-        time = gettime()
-        text = f"[{time}] [Server/{t}]: {msg}"
-        with self.lock:
-            sys.stdout.write("\r\033[K")
-            sys.stdout.write(text + "\n")
-            sys.stdout.write("\r\033[K> " + input_buffer)
-            sys.stdout.flush()
-        try:
-            with open(logfile, "+a") as file:
-                file.write(text + "\n")
-        except Exception:
-            print('Error in log system! Creating file... ')
-            os.mkdir('logs')
-            with open(logfile, "+w") as file:
-                file.write(text + "\n")
-        return
-    
-    def stop(self):
-        self.stop_event.set()
-        sys.stdout.write("\nStopping console...\n")
-        sys.stdout.flush()
-
-class Console2(object):
     """This is designed to be a fix for the current console system, that doesn't work."""
     def __init__(self, server: MCServer):
         self.running = True
