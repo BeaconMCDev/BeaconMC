@@ -1801,7 +1801,7 @@ class Console2(object):
                 file.write(text + "\n")
         
         with self.lock:
-            sys.stdout.write(f"\r\033[K{msg}\n")
+            sys.stdout.write(f"\r\033[K{text}\n")
             sys.stdout.write("\r\033[K> ")
             sys.stdout.flush()
 
