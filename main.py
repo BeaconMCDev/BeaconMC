@@ -178,7 +178,7 @@ class MCServer(object):
 
     def __init__(self):
         """Init the server"""
-        self._console = Console2()
+        self._console = Console2(self)
 
         self.gui_thr = thread.Thread(target=self._console.mainthread)
         self.gui_thr.start()
@@ -389,7 +389,11 @@ class MCServer(object):
         self.getConsole().log("Stopping all tasks...", 0)
         for t in lthr:
             t: thread.Thread
-            t.join(timeout=1) if t is not thread.current_thread() else None
+            try:
+                t.running = False  # stop console
+            except AttributeError:
+                pass
+            t.join() if t is not thread.current_thread() else None
             lthr.remove(t)
         ...
         # Stop plugins
@@ -399,10 +403,12 @@ class MCServer(object):
         self.crypto_sys.stop()
         if not (critical_stop):
             self.getConsole().log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 0)
+            self.getConsole().running = False
             exit()
         else:
             self.getConsole().log(f"Server closed with {critical} criticals, {errors} errors, {warnings} warnings, {info} infos and {unknow} unknown logs : {reason}", 100)
             self.crash(reason, e)
+            self.getConsole().running = False
             exit(-1)
 
     def crash(self, reason, e: Exception = None):
@@ -1614,18 +1620,24 @@ class Command(object):
         self.server = server
 
         if self.pre_cmd():
-            self.execute()
+            if isinstance(source, Console2):
+                source.log(self.execute(), 0)
+            elif isinstance(source, Client):
+                source.send_msg_to_chat(self.execute())
         else:
             self.__del__()
 
     def execute(self):
-        cmdf = self.COMMANDS[self.base]
+        try:
+            cmdf = self.COMMANDS[self.base]
+        except KeyError:
+            return "Unknown command."
         if cmdf():
             ...  # ok
         else:
             ...  # error
 
-    def check_perm(self):
+    def check_perm(self, base, source):
         # if self.base in self.source.perms:
         #   return True
         # else:
@@ -1633,11 +1645,14 @@ class Command(object):
         return True
 
     def pre_cmd(self):
-        self.server.getConsole().log(f"{self.source.username} used a player command : {self.command}.", 4)
+        if self.source:
+            self.server.getConsole().log(f"{self.source.username} used a player command : {self.command}.", 4)
+        else:
+            self.server.getConsole().log(f"Console runned a command: {self.command}", 0)
         if self.check_perm(self.base, self.source):
             return True
         else:
-            self.server.getConsole().log(f"Denied acces for the command {self.base} runned by {self.source.username} !", 4)
+            self.server.getConsole().log(f"Denied access for the command {self.base} run by {self.source.username if self.source else 'Console'}!", 4)
             return False
 
     def msg(self, args):
@@ -1741,9 +1756,10 @@ class Console(object):
 
 class Console2(object):
     """This is designed to be a fix for the current console system, that doesn't work."""
-    def __init__(self):
+    def __init__(self, server: MCServer):
         self.running = True
         self.lock = thread.Lock()
+        self.server = server
 
     def log(self, msg: str, type: int = -1):
         """Log method with different types of log levels"""
@@ -1793,20 +1809,34 @@ class Console2(object):
         """Process user input on the command line"""
         input_buffer = ""
         while self.running:
+            if not(self.running):
+                break
             with self.lock:
                 #sys.stdout.write("> ")
                 sys.stdout.flush()
-            input_buffer = sys.stdin.readline().strip()
-            if input_buffer == "stop":
-                self.log("Using the legacy stop command. It will be changed in the future.", 1)
+            try:
+                input_buffer = sys.stdin.readline().strip()
+                if not(self.running):
+                    break
+            except KeyboardInterrupt:
                 self.stop()
+                break
+            try:
+                if input_buffer == "stop" or input_buffer == "exit" or "^C" in input_buffer:
+                    self.log("Using the legacy stop command. It will be changed in the future.", 1) # Pass srv instead of None
+                    self.stop()
+                    break
+            except KeyboardInterrupt:
+                self.log("Using the legacy stop command. It will be changed in the future.", 1) # Pass srv instead of None
+                self.stop()
+                break
             else:
-                Command(input_buffer, None, None)
+                Command(input_buffer, None, self.server)
 
     def stop(self):
         """Stop the console and join the thread"""
         global srv
-        srv.stop()
+        self.server.stop()
         self.log("Console stopped", 0)
 
 # PRE MAIN INSTRUCTIONS
