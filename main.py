@@ -131,21 +131,6 @@ unknow = 0
 
 print("")
 
-
-def log(msg: str, type: int = -1):
-    """Types:
-    - 0: info
-    - 1: warning
-    - 2: error
-    - 3: debug
-    - 4: chat
-    - 100: critical
-    - other: unknow"""
-    raise DeprecationWarning("This function is deprecated, please use <server>.getConsole().log() instead.")
-    global srv
-    srv.getConsole().log(msg, type)
-
-
 def gettime():
     return tm.asctime(tm.localtime(tm.time())).split(" ")[-2]
 
