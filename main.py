@@ -1530,7 +1530,7 @@ class World(object):
 
     def save(self):
         """Save the world"""
-        log(f"Saving world {self.name} (level {self.level})...")
+        self.log(f"Saving world {self.name} (level {self.level})...")
         dt = self.encode(self.data)
         with open(self.BASE + self.name + ".mcworld", "w") as file:
             file.write(dt)
