@@ -846,11 +846,14 @@ class Client(object):
 
                         elif self.packet.args[-1] == 3:
                             # Switch protocol state to transfer
+                            if PREVENT_PROXY_CONNEXION:
+                                self.connected = False
+                                self.server.getConsole().log(f"Disconnecting {self.info} : Unauthorised proxy connexion.", 3)
+                                break
                             self.protocol_state = "Transfer"
                             self.server.getConsole().log(f"Switching to transfer state for {self.info}", 3)
                             continue
                         else:
-                            self.connected = False
                             self.connected = False
                             self.server.getConsole().log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
                             break
