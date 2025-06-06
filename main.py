@@ -87,6 +87,7 @@ DEBUG = _CONFIG["debug_mode"]
 ENFORCE_OFFLINE_PROFILES = _CONFIG["enforce_offline_profiles"]
 PREVENT_PROXY_CONNEXION = _CONFIG["prevent_proxy_connexion"]
 SERVER_LINKS = _CONFIG["links"]
+SERVER_ID = _CONFIG["server_id"]
 
 COMPATIBLE_OS = ["Windows", "Linux"]
 OS = platform.system()
@@ -976,7 +977,7 @@ class Client(object):
                             verify_token = bytearray()
                             for i in range(4):
                                 verify_token.append(rdm.randint(0, 255))
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=("", 
+                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=(SERVER_ID, 
                                 bytearray(self.server.crypto_sys.__public_key__.public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)), 
                                 verify_token))
                             resp_pack.send()
