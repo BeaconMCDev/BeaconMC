@@ -176,6 +176,11 @@ class MCServer(object):
         self.list_worlds = []
         self.crypto_sys = Crypto(self)
         
+    def is_op(self, uuid):
+        # todo
+        ...
+        return False
+        
 
     def worlds_analyse(self):
         """Search for worlds in the worlds folder.
@@ -891,6 +896,8 @@ class Client(object):
 
                         self.server.getConsole().log(f"UUID of {self.username} is {self.uuid}.", 0)
                         self.server.getConsole().log(f"{self.username} is logging in from {self.info}.", 0)
+                        
+                        self.is_op = self.server.is_op(self.uuid)
 
                         for player in self.server.list_clients:
                             if self.username == player.username or self.uuid == player.uuid:
@@ -1073,6 +1080,13 @@ class Client(object):
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
                 ...
+                if self.request.type == 1:
+                  # query block debug info
+                  if not(self.is_op):
+                    # deny
+                    ...
+                    continue
+                  ...
 
                 # if self.request[0] == "\x05":
                 #    #setblock message
