@@ -705,6 +705,7 @@ class Client(object):
         self.info = info
         self.server = server
         self.is_op = False
+        self.op_level = None
         self.x = None
         self.y = None
         self.z = None
@@ -909,7 +910,10 @@ class Client(object):
                         self.server.getConsole().log(f"UUID of {self.username} is {self.uuid}.", 0)
                         self.server.getConsole().log(f"{self.username} is logging in from {self.info}.", 0)
                         
-                        self.is_op = True if self.server.is_op(self.uuid) != -1 else False
+                        op = self.server.is_op(self.uuid, self.username)
+                        
+                        self.is_op = True if op != -1 else False
+                        self.op_level = op if self.is_op else None
 
                         for player in self.server.list_clients:
                             if self.username == player.username or self.uuid == player.uuid:
