@@ -176,10 +176,22 @@ class MCServer(object):
         self.list_worlds = []
         self.crypto_sys = Crypto(self)
         
-    def is_op(self, uuid):
-        # todo
-        ...
-        return False
+    def is_op(self, uuid:str, username:str=None):
+        """Checks if a user is an operator.
+        Returns the operator level or -1 if the player isn't an operator."""
+        
+        with open("ops.json", "r") as opFile:
+            data = json.loads(opFile.read())
+        for op in data:
+            if op["uuid"] == uuid:
+                if not(op["name"] == username) and not(username == None):
+                     data.remove(op)
+                     op["name"] = username
+                     data.append(op)
+                     with open("ops.json", "w") as opFile:
+                        opFile.write(json.dumps(data))
+                return op["level"]
+        return -1
         
 
     def worlds_analyse(self):
@@ -897,7 +909,7 @@ class Client(object):
                         self.server.getConsole().log(f"UUID of {self.username} is {self.uuid}.", 0)
                         self.server.getConsole().log(f"{self.username} is logging in from {self.info}.", 0)
                         
-                        self.is_op = self.server.is_op(self.uuid)
+                        self.is_op = True if self.server.is_op(self.uuid) != -1 else False
 
                         for player in self.server.list_clients:
                             if self.username == player.username or self.uuid == player.uuid:
