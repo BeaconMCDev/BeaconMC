@@ -1135,9 +1135,11 @@ class Client(object):
                   
                 elif self.packet.type == 4:
                     if self.is_op and self.op_level >= 2:
-                        ... # change gamemode
+                        self._send_game_event_packet(3, self.packet.args[0])
+                        self.server.getConsole().info(f"Changing gamemode to {self.packet.args[0]} for {self.username}.", 3)
                     else:
                         ... # deny
+                     continue
 
                 # if self.request[0] == "\x05":
                 #    #setblock message
