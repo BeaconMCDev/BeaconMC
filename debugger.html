@@ -276,6 +276,9 @@
             document.getElementById("traceback_error").innerHTML += "<br><b class='red'>SyntaxError detected</b>";
             document.getElementById("whoatotod").innerHTML += "<br>- Please check your plugins for syntax errors.";
         }
+        
+        if (traceback_error.includes("ConfigurationError")) {
+            document.getElementByIf(whoatotod").innerHTML += "<br>- Your configuration contains error. Please check it using the documentation.";
 
         if (document.getElementById("whoatotod").innerHTML === "") {
             document.getElementById("whoatotod").innerHTML = "<br>No quick fixes or recommendations found. Please open an issue on our GitHub if you need help.";
