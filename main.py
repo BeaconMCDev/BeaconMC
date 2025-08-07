@@ -88,6 +88,18 @@ ENFORCE_OFFLINE_PROFILES = _CONFIG["enforce_offline_profiles"]
 PREVENT_PROXY_CONNEXION = _CONFIG["prevent_proxy_connexion"]
 SERVER_LINKS = _CONFIG["links"]
 SERVER_ID = _CONFIG["server_id"]
+_dgm = _CONFIG["default_gamemode"]
+default_gamemode = 0
+if _dgm == "survival":
+    default_gamemode = 0
+elif _dgm == "creative":
+    default_gamemode = 1
+elif _dgm == "adventure":
+    default_gamemode = 2
+elif _dgm == "spectator":
+    default_gamemode = 3
+else:
+    raise ConfigurationError(f"Unknown provided gamemode '{_dgm}' for entry 'default_gamemode'.")
 
 COMPATIBLE_OS = ["Windows", "Linux"]
 OS = platform.system()
@@ -714,6 +726,7 @@ class Client(object):
         self.encrypted = False
         self.authenticated = False
         self.configured = False
+        self.gamemode = default_gamemode
 
     def on_heartbeat(self):
         """Id of the packet: 0x00"""
@@ -1096,13 +1109,19 @@ class Client(object):
                 self.packet = Packet(self.connexion, "-INCOMING", packet=self.request)
                 
                 ...
-                if self.request.type == 1:
+                if self.packet.type == 1:
                   # query block debug info
                   if not(self.is_op):
                     # deny
                     ...
                     continue
                   ...
+                  
+                elif self.packet.type == 4:
+                    if self.is_op and self.op_level >= 2:
+                        ... # change gamemode
+                    else:
+                        ... # deny
 
                 # if self.request[0] == "\x05":
                 #    #setblock message
