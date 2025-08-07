@@ -752,6 +752,22 @@ class Client(object):
             if signed and (ord(b[0]) & 0x80):
                 num -= 2 ** (len(b) * 8)
             return num
+            
+    def _send_game_event_packet(self, event:int, value:float):
+        """Args:
+        event:
+          - 0: no respawn block
+          - 1: rain starts
+          - 2: rain ends
+          - 3: change gamemode
+          - 4: win game (end exit portal)
+          - 5: demo
+          - 6: arrow hit
+          - 7: rain level change
+          - ..."""
+          
+          resp = Packet(self.connexion, type=22, direction="-OUTGOING", args=(event, value))
+          resp.send()
 
     def load_properties(self):
         if ONLINE_MODE:
