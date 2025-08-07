@@ -766,8 +766,8 @@ class Client(object):
           - 7: rain level change
           - ..."""
           
-          resp = Packet(self.connexion, type=22, direction="-OUTGOING", args=(event, value))
-          resp.send()
+        resp = Packet(self.connexion, type=22, direction="-OUTGOING", args=(event, value))
+        resp.send()
 
     def load_properties(self):
         if ONLINE_MODE:
