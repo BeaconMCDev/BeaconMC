@@ -61,6 +61,9 @@ class OSNotCompatibleError(OSError):
 
 class ConfigurationError(Exception):
     pass
+    
+class ProtocolError(Exception):
+    pass
 
 print(r"""
       
@@ -753,6 +756,16 @@ class Client(object):
                 num -= 2 ** (len(b) * 8)
             return num
             
+    def _check_state(self, target:str):
+        """Raises a ProtocolError if the Client protocol state is not what expected"""
+        if self.protocol_state != target:
+            raise ProtocolError(f"Attemping to send a packet while in an incorrect protocol state ('{self.protocol_state}' instead of '{target}').")
+            
+    def _send_bundle_delimiter(self):
+        self._check_state("Play")
+        pckt = Packet(self.connexion, typep=0, direction="-OUTGOING", args=())
+        pckt.send()
+            
     def _send_game_event_packet(self, event:int, value:float):
         """Args:
         event:
@@ -765,9 +778,20 @@ class Client(object):
           - 6: arrow hit
           - 7: rain level change
           - ..."""
-          
-        resp = Packet(self.connexion, type=22, direction="-OUTGOING", args=(event, value))
+        
+        self._check_state("Play")
+        
+        resp = Packet(self.connexion, typep=22, direction="-OUTGOING", args=(event, value))
         resp.send()
+        
+    def _animate_entity(self, entity_id:int, animation:int):
+        self._check_state("Play")
+        pckt = Packet(self.connexion, direction="-OUTGOING", typep=2, args=(entity_id, animation))
+        pckt.send()
+        
+    def _spawn_entity(self, entity_type:str, id:int, uuid:str, location, data, velocity, is_npc=False):
+         self._check_state("Play")
+         ...
 
     def load_properties(self):
         if ONLINE_MODE:
