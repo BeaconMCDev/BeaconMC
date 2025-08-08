@@ -5,6 +5,7 @@
     "online_mode": true,
     "default_gamemode": "survival",
     "enforce_offline_profiles": true,
+    "packet_enforcement_level": 1,
     "lang": "en_us",
     "debug_mode": true, 
     "ip": "0.0.0.0", 
