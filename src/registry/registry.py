@@ -4,8 +4,10 @@ class Registry(object):
         self.name = name
         self.displayName = f"{namespace}:{name}"
         self._BASE_PTN = base_ptn
-        ...
+        self._BASE_NTP = return {v: k for k, v in base_ptn.items()}
         
-    def get_entity_name(id:int):
+    def get_entity_name(self, id:int):
         return self._BASE_PTN[id]
         
+    def get_entity_protocol_id(self, name:str):
+        return self._BASE_NTP[name]
