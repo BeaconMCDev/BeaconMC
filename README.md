@@ -2,7 +2,7 @@
 
 [![Website](https://img.shields.io/badge/Website-BeaconMC-blue)](https://beaconmcdev.github.io/BeaconMC)
 [![Discord](https://img.shields.io/discord/1159181236560986112?label=discord&logo=discord)](https://discord.gg/pxkT9dtuN8)
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.3-brightgreen)](#)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.8-brightgreen)](#)
 [![Development Status](https://img.shields.io/badge/Status-In%20Development-orange)](#)
 [![Update start.py](https://github.com/BeaconMCDev/BeaconMC/actions/workflows/build_start_py.yml/badge.svg)](https://github.com/BeaconMCDev/BeaconMC/actions/workflows/build_start_py.yml)
 
@@ -10,7 +10,7 @@ BeaconMC is a Minecraft server written in Python 3 that aims to simplify Minecra
 
 ## Project Details
 
-- **Compatible Minecraft Version:** 1.19.4
+- **Compatible Minecraft Version:** 1.21.8
 - **Development Status:** The project is currently in development.
 
 ## Get Started
