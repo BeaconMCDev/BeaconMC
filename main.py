@@ -39,6 +39,7 @@ from base64 import b64encode
 from libs import crash_gen
 import string
 import select
+import functools
 try:
     import nbtlib
 except ModuleNotFoundError:
@@ -190,6 +191,18 @@ class MCServer(object):
         self.list_clients = []
         self.list_worlds = []
         self.crypto_sys = Crypto(self)
+        
+    def EventHandler(event:str):
+        """A decorator to register plugins' event handlers methods"""
+        def decorator(func):
+            #TODO: register the eventhandler
+            ...
+            @functools.wraps(function)
+            def wrapper(self, *args, **kwargs):
+                if self.enabled:
+                    return func(self, *args, **kwargs)
+            return wrapper
+        return decorator       
         
     def is_op(self, uuid:str, username:str=None):
         """Checks if a user is an operator.
