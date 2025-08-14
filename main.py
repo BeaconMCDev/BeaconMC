@@ -195,8 +195,7 @@ class MCServer(object):
     def EventHandler(event:str):
         """A decorator to register plugins' event handlers methods"""
         def decorator(func):
-            #TODO: register the eventhandler
-            ...
+            func._mc_event = event
             @functools.wraps(function)
             def wrapper(self, *args, **kwargs):
                 if self.enabled:
