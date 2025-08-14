@@ -23,6 +23,8 @@ class Plugin(BeaconMCPlugin):
     # Don't touch, they are misc variables
     _loaded = False
     _disabled = False
+    
+    server = None
 
 
     def __init__(self, server):
@@ -39,5 +41,6 @@ class Plugin(BeaconMCPlugin):
     def onDisable(self):
         self.server.getConsole().log("GoodBye !", 0)
 
+    @server.EventHandler("playerJoinEvent")
     def onPlayerJoinEvent(self, player):
         self.server.post_to_chat(f"Welcome {player.username} !")
