@@ -1,4 +1,6 @@
 class BeaconMCPlugin(object):
+    def __str__(cls, server):
+        cls.server = server
     def __init__(self, server):
         self.server = server
         for name in dir(self):
