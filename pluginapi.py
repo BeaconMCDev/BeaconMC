@@ -37,11 +37,11 @@ class PluginLoader:
                     authors = authors[:2]
                     self.server.getConsole().log(f"Loading {pi.NAME} v{pi.VERSION} from {authors}", 0)
                 plugin_instance.onEnable()
-                plugin_instance.enabled = True
+                plugin_instance._enabled = True
                 self.plugins.append(plugin_instance)
             except Exception as e:
                 if hasattr(plugin_instance, 'disabled'):
-                    plugin_instance.disabled = True
+                    plugin_instance._enabled = False
                 else:
                     self.plugins.remove(plugin_instance)
                 self.server.getConsole().log("Plugin disabled due to issue when loading.", 2)
