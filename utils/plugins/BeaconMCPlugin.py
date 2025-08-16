@@ -5,12 +5,9 @@ class BeaconMCPlugin(object):
       
     def __init__(self, server):
         self.server = server
-        for name in dir(self):
-            method = getattr(self, name)
-            if hasattr(method, "_mc_event"):
-                # register
-                # self.server.register(method._mc_event, method)
-
+        self._loaded = False
+        self._enabled = False
+        
     def onEnable(self):
       pass
 
