@@ -8,3 +8,4 @@ class EventManager(object):
     def register(self, plugin, event, wrapper):
         event_list = self._events[event]
         event_list.append((plugin, wrapper))
+        self._events[event] = event_list
