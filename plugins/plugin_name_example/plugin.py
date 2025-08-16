@@ -21,8 +21,7 @@ class Plugin(BeaconMCPlugin):
     VERSION = "1.0"
     
     # Don't touch, they are misc variables
-    _loaded = False
-    _disabled = False
+    #_loaded = False
     
     server = None
 
@@ -31,6 +30,11 @@ class Plugin(BeaconMCPlugin):
         """Get the server instance from the loader.
         MUST BE WRITTEN"""
         super().__init__(server)
+        
+        # Register events
+        @server.EventHandler(self, "playerJoinEvent")
+        def onPlayerJoinEvent(self, player):
+            self.server.post_to_chat(f"Welcome {player.username} !")
 
     # Note : all the following events method are optinnal but you have to respect the arguments
     def onEnable(self):
@@ -40,7 +44,3 @@ class Plugin(BeaconMCPlugin):
 
     def onDisable(self):
         self.server.getConsole().log("GoodBye !", 0)
-
-    @server.EventHandler("playerJoinEvent")
-    def onPlayerJoinEvent(self, player):
-        self.server.post_to_chat(f"Welcome {player.username} !")
