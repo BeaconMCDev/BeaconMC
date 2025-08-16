@@ -21,6 +21,7 @@ import time as tm
 import random as rdm
 from typing import Literal
 from libs.cryptography_system.system import CryptoSystem as Crypto
+from src.events.manager import EventManager
 from cryptography.hazmat.primitives import serialization, hashes
 import threading as thread
 import os
@@ -191,17 +192,20 @@ class MCServer(object):
         self.list_clients = []
         self.list_worlds = []
         self.crypto_sys = Crypto(self)
-        
-    def EventHandler(event:str):
+        self._eventManager = EventManager(self)
+
+    def EventHandler(self, plugin, event:str):
         """A decorator to register plugins' event handlers methods"""
         def decorator(func):
             func._mc_event = event
-            @functools.wraps(function)
-            def wrapper(self, *args, **kwargs):
-                if self.enabled:
-                    return func(self, *args, **kwargs)
+            func._plugin = plugin
+            self._eventManager.register(plugin, event, func)
+            @functools.wraps(func)
+            def wrapper(plugin_self, *args, **kwargs):
+                if plugin_self._enabled:
+                    return func(plugin_self, *args, **kwargs)
             return wrapper
-        return decorator       
+        return decorator
         
     def is_op(self, uuid:str, username:str=None):
         """Checks if a user is an operator.
