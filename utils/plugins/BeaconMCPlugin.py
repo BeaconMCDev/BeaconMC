@@ -1,5 +1,5 @@
 class BeaconMCPlugin(object):
-    def __str__(cls, server):
+    def __new__(cls, server):
         cls.server = server
         return cls
       
