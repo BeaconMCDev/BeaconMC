@@ -156,4 +156,14 @@ class EntitiesRegistry():
     }
     
     _BASE_NTP = {v: k for k, v in _BASE_PTN.items()}
+    name = "entities"
+    namespace = "minecraft"
+    displayName = f"{namespace}:{name}"
     
+    @staticmethod
+    def get_entity_name(self, id:int):
+        return EntitiesRegistry_BASE_PTN[id]
+        
+    @staticmethod
+    def get_entity_protocol_id(self, name:str):
+        return EntitiesRegistry._BASE_NTP[name]
