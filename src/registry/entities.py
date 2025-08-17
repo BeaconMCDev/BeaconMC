@@ -1,6 +1,4 @@
-import registry.py as regist
-
-class EntitiesRegistry(regist.Registry):
+class EntitiesRegistry():
     
     # The base registry used to convert protocol ids to names and classes
     _BASE_PTN = {
@@ -157,6 +155,5 @@ class EntitiesRegistry(regist.Registry):
         150: "fishing_bobber"
     }
     
-    def __init__(self):
-        super().__init__("minecraft", "entities", self._BASE_PTN)
+    _BASE_NTP = {v: k for k, v in _BASE_PTN.items()}
     
