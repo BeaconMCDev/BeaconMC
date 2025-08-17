@@ -87,7 +87,7 @@ class EntitiesRegistry(regist.Registry):
         80: "mangrove_chest_boat",
         81: "marker", # DON'T SPAWN THIS ENTITY (serverside entity)
         82: "minecart",
-        83: "mooshroom,
+        83: "mooshroom",
         84: "mule",
         85: "oak_boat",
         86: "oak_chest_boat",
