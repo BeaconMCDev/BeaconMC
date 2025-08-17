@@ -3,6 +3,10 @@ class Event:
         self._eventType = event
         self._cancelled = False
         
+    @property
+    def cancelled(self):
+        return self._cancelled
+        
     @_cancelled.setter
     def cancelled(self, value):
         if not(value):
@@ -11,7 +15,3 @@ class Event:
         
     def cancel(self):
         self.cancelled = True
-        
-    @property
-    def cancelled(self):
-        return self._cancelled
