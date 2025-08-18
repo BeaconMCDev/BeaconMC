@@ -161,9 +161,9 @@ class EntitiesRegistry():
     displayName = f"{namespace}:{name}"
     
     @staticmethod
-    def get_entity_name(self, id:int):
-        return EntitiesRegistry_BASE_PTN[id]
+    def get_entity_name(id:int):
+        return EntitiesRegistry.BASE_PTN[id]
         
     @staticmethod
-    def get_entity_protocol_id(self, name:str):
+    def get_entity_protocol_id(name:str):
         return EntitiesRegistry._BASE_NTP[name]

@@ -1,8 +1,9 @@
 from ..registry.entities import EntityRegistry
 from ..location import Location
+from ..vector import Vector
 
 class Entity:
-    REGISTRY = EntityRegistry()
+    REGISTRY = EntityRegistry
     
     def __init__(self, namespace:str, name:str, id, uuid, location:Location=None):
         self.NAMESPACE = namespace
@@ -19,9 +20,16 @@ class Entity:
             raise ValueError("No location provided")
         return self._location
         
-    @_location.setter
+    @location.setter
     def location(self, value:Location):
         if not(isinstance(value, Location)):
             raise TypeError
         self._location = value
 
+    def move(self, vector:Vector):
+        if not(isinstance(vector, Vector)):
+            raise TypeError("Vector must be an instance of Vector")
+        if self._location is None:
+            raise ValueError("No location set for entity")
+        
+        self._location = self._location.move(vector)

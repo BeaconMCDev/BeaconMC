@@ -1,6 +1,6 @@
 class BlocksRegistry():
 
-    dico = {0: 'air',
+    _BASE_PTN = {0: 'air',
  1: 'stone',
  2: 'granite',
  3: 'polished_granite',
@@ -28202,11 +28202,20 @@ class BlocksRegistry():
  27944: 'potted_closed_eyeblossom',
  27945: 'firefly_bush'}
 
-    
-    _BASE_PTN = dico
-
     _BASE_NTP = {v: k for k, v in _BASE_PTN.items()}
     
     name = "blocks"
     namespace = "minecraft"
     displayName = f"{namespace}:{name}"
+
+    @staticmethod
+    def get_block_name(id:int):
+        return BlocksRegistry._BASE_PTN[id].split('[')[0]
+
+    @staticmethod
+    def get_block_state(id:int):
+        return BlocksRegistry._BASE_PTN[id]
+        
+    @staticmethod
+    def get_block_protocol_id(name:str):
+        return BlocksRegistry._BASE_NTP[name]
