@@ -1,37 +1,28 @@
+exit() # temp
 import os
 
-FILES = ["config.json", "ops.json", "pluginapi.py", "main.py", "eula.txt", "LICENSE.md", "banned-ips.json", 
-                "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
-                "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
-                "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 
-                "libs/cryptography_system/system.py"]
+IGNORED_FOLDERS = [".github", ".vscode", "LIBS_TO_REUSE_FOR_DEPLOYMENT", "worlds", "plugins"]
+IGNORED_FILES = ["start.py", "dev_notes.txt", ".gitignore"]
 
-files_content = {
-    "main.py": open("main.py").read(),
-    "pluginapi.py": open("pluginapi.py").read(),
-    "config.json": open("config.json").read(),
-    "ops.json": open("ops.json").read(),
-    "eula.txt": open("eula.txt").read(),
-    "LICENSE.md": open("LICENSE.md").read(),
-    "banned-ips.json": open("banned-ips.json").read(),
-    "banned-players.json": open("banned-players.json").read(),
-    "server-icon.png": open("server-icon.png", "rb").read(),  # Fichier binaire
-    "whitelist.json": open("whitelist.json").read(),
-    "SECURITY.md": open("SECURITY.md").read(),
-    "README.md": open("README.md").read(),
-    "requirements.txt": open("requirements.txt").read(),
-    "utils/plugins/BeaconMCPlugin.py": open("utils/plugins/BeaconMCPlugin.py").read(),
-    "utils/locale/en_us.json": open("utils/locale/en_us.json").read(),
-    "utils/locale/fr_fr.json": open("utils/locale/fr_fr.json").read(),
-    "utils/locale/es.json": open("utils/locale/es.json").read(),
-    "libs/crash_gen.py": open("libs/crash_gen.py").read(),
-    "libs/mojangapi.py": open("libs/mojangapi.py").read(),
-    "libs/cryptography_system/system.py": open("libs/cryptography_system/system.py").read()
-}
+files = []
+directories = []
+for root, dirs, filenames in os.walk(os.path.dirname(__file__)):
+    dirs[:] = [d for d in dirs if d not in IGNORED_FOLDERS]
+    directories = dirs
+    for filename in filenames:
+        if filename in IGNORED_FILES:
+            continue
+        files.append(os.path.join(root, filename))
+
+
+file_content = {}
+for file in files:
+    with open(file, "r") as f:
+        file_content[file] = f.read()
 
 dico = "{\n"
 
-for f in FILES:
+for f in files:
     # Utilisation de repr() pour échapper correctement les chaînes et éviter les erreurs avec les guillemets triples
     dico += f'    "{f}": {repr(files_content[f])}, \n'
 dico += "}\n"
@@ -47,12 +38,9 @@ VERSION = "Alpha-dev"
 dico = """ + dico + r"""
 
 # Check structure
-FILES_TO_CHECK = ["config.json", "ops.json", "pluginapi.py", "main.py", "eula.txt", "LICENSE.md", "banned-ips.json", 
-                "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
-                "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
-                "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 
-                "libs/cryptography_system/system.py"]
-FOLDERS_TO_CHECK = ["libs", "libs/cryptography_system", "crash_reports", "logs", "plugins", "utils", "worlds"]
+FILES_TO_CHECK = """ + files + """
+
+FOLDERS_TO_CHECK = """ + directories + """
 
 state = "_DEFAULT"
 missing_files = []
