@@ -207,7 +207,7 @@ class MCServer(object):
                         return func(plugin_self, *args, **kwargs)
                     except Exception as e:
                         plugin_self.server.getConsole().log(f"An error occured while running event method {func.__name__} from plugin {plugin.NAME}:\n{traceback.format_exc()}", 2)
-                         plugin_self._enabled = False
+                        plugin_self._enabled = False
             return wrapper
         return decorator
         
