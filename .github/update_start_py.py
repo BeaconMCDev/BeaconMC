@@ -1,122 +1,130 @@
-exit() # temp
+# .github/update_start_py.py
+from pathlib import Path
+from fnmatch import fnmatch
+import json
 import os
 
-IGNORED_FOLDERS = [".github", ".vscode", "LIBS_TO_REUSE_FOR_DEPLOYMENT", "worlds", "plugins"]
-IGNORED_FILES = ["start.py", "dev_notes.txt", ".gitignore"]
+IGNORED_DIR_NAMES = {
+    ".github", ".git", ".vscode", "__pycache__",
+    "LIBS_TO_REUSE_FOR_DEPLOYMENT", "worlds", "plugins", ".ignore_dev",
+}
+IGNORED_FILE_BASENAMES = {"start.py", "dev_notes.txt", ".gitignore"}
+IGNORED_FILE_GLOBS = {"*.pyc", "*.pyo", "*.log", "*.tmp", "*.zip", "*.tar*", "*.gz"}
+
+THIS_FILE = Path(__file__).resolve()
+REPO_ROOT = THIS_FILE.parents[1] if THIS_FILE.parent.name == ".github" else THIS_FILE.parent
 
 files = []
-directories = []
-for root, dirs, filenames in os.walk(os.path.dirname(__file__)):
-    dirs[:] = [d for d in dirs if d not in IGNORED_FOLDERS]
-    directories = dirs
-    for filename in filenames:
-        if filename in IGNORED_FILES:
+directories = set()
+
+for root, dirs, filenames in os.walk(REPO_ROOT):
+    dirs[:] = [d for d in dirs if d not in IGNORED_DIR_NAMES]
+
+    root_path = Path(root)
+
+    for d in dirs:
+        rel_dir = (root_path / d).relative_to(REPO_ROOT).as_posix()
+        if rel_dir != ".":
+            directories.add(rel_dir)
+
+    for name in filenames:
+        if name in IGNORED_FILE_BASENAMES:
             continue
-        files.append(os.path.join(root, filename))
+
+        rel = (root_path / name).relative_to(REPO_ROOT)
+        rel_posix = rel.as_posix()
+
+        if any(fnmatch(rel_posix, pat) for pat in IGNORED_FILE_GLOBS):
+            continue
+
+        if any(part in IGNORED_DIR_NAMES for part in rel.parts):
+            continue
+
+        files.append(rel_posix)
 
 
 file_content = {}
-for file in files:
-    with open(file, "r") as f:
-        file_content[file] = f.read()
+for rel_posix in files:
+    p = REPO_ROOT / rel_posix
+    try:
+        with p.open("r", encoding="utf-8-sig", errors="replace") as f:
+            file_content[rel_posix] = f.read()
+    except Exception as e:
+        continue
 
-dico = "{\n"
-
-for f in files:
-    # Utilisation de repr() pour échapper correctement les chaînes et éviter les erreurs avec les guillemets triples
-    dico += f'    "{f}": {repr(files_content[f])}, \n'
-dico += "}\n"
+dico_literal = "{\n" + "".join(
+    f'    "{path}": {repr(content)},\n' for path, content in file_content.items()
+) + "}\n"
 
 
-template = """# BeaconMC installation and boot file
+template = (
+    "# BeaconMC installation and boot file\n\n"
+    "# Import\nimport os\n\n"
+    "# DON'T TOUCH\nVERSION = \"Alpha-dev\"\n"
+    f"dico = {dico_literal!r}\n"
+    f"\n# Check structure\nFILES_TO_CHECK = {files!r}\n"
+    f"\nFOLDERS_TO_CHECK = {sorted(directories)!r}\n"
+    "\nstate = \"_DEFAULT\"\nmissing_files = []\nmissing_folders = []\n"
+    "i = 0\nj = 0\n\n"
+    "def install():\n"
+    "    for d in missing_folders:\n"
+    "        os.makedirs(d, exist_ok=True)\n"
+    "    for f in missing_files:\n"
+    "        with open(f, \"w\", encoding=\"utf-8\") as fobj:\n"
+    "            fobj.write(eval(dico)[f])\n"
+    "\nfor file in FILES_TO_CHECK:\n"
+    "    if not os.path.exists(file):\n"
+    "        if state == \"_DEFAULT\":\n"
+    "            state = \"_FILE_MISSING\"\n"
+    "        i += 1\n"
+    "        missing_files.append(file)\n"
+    "\nfor folder in FOLDERS_TO_CHECK:\n"
+    "    if not os.path.exists(folder):\n"
+    "        if state == \"_FILE_MISSING\":\n"
+    "            state = \"_FILE_AND_FOLDER_MISSING\"\n"
+    "        if state == \"_DEFAULT\":\n"
+    "            state = \"_FOLDER_MISSING\"\n"
+    "        j += 1\n"
+    "        missing_folders.append(folder)\n"
+    "\nif state == \"_FILE_MISSING\":\n"
+    "    print(\"---------------------------------\")\n"
+    "    print(\"WARNING : SOME FILES ARE MISSING !\")\n"
+    "    print(\"PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases\")\n"
+    "    print(\"---------------------------------\")\n"
+    "    print(f\"Missing files : {i} (list bellow)\")\n"
+    "    print(missing_files)\n"
+    "    print(\"---------------------------------\")\n"
+    "elif state == \"_FOLDER_MISSING\":\n"
+    "    print(\"WARNING : SOME FOLDERS ARE MISSING !\")\n"
+    "    print(\"PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases\")\n"
+    "    print(f\"Missing folders : {j} (list bellow)\")\n"
+    "    print(missing_folders)\n"
+    "elif state == \"_FILE_AND_FOLDER_MISSING\":\n"
+    "    print(\"WARNING : SOME FILES AND FOLDER ARE MISSING !\")\n"
+    "    print(\"PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases\")\n"
+    "    print(f\"Missing files : {i} (list bellow)\")\n"
+    "    print(missing_files)\n"
+    "    print(f\"Missing folders : {j} (list bellow)\")\n"
+    "    print(missing_folders)\n"
+    "\nif state != \"_DEFAULT\":\n"
+    "    resp = input(\"Do you want to make this operation automatically ? You will not need to restart this script once it will be done. (y/n)\\n-> \")\n"
+    "    if resp.lower() == \"y\":\n"
+    "        print(\"Installing...\")\n"
+    "        install()\n"
+    "        print(\"Done.\")\n"
+    "    else:\n"
+    "        print(\"Process is terminating.\")\n"
+    "        raise SystemExit(-1)\n"
+    "\n# Check requirements\n"
+    "list_rq = []\n"
+    "if os.path.exists(\"requirements.txt\"):\n"
+    "    with open(\"requirements.txt\", \"r\", encoding=\"utf-8\") as rf:\n"
+    "        list_rq = [ln.strip() for ln in rf if ln.strip()]\n"
+    "\n# start\nwith open(\"main.py\", \"r\", encoding=\"utf-8\") as f:\n"
+    "    code = f.read()\n"
+    "exec(compile(code, 'main.py', 'exec'), {\"__name__\": \"__start__\"})\n"
+)
 
-# Import
-import os
 
-# DON'T TOUCH
-VERSION = "Alpha-dev"
-dico = """ + dico + r"""
-
-# Check structure
-FILES_TO_CHECK = """ + files + """
-
-FOLDERS_TO_CHECK = """ + directories + """
-
-state = "_DEFAULT"
-missing_files = []
-missing_folders = []
-i = 0
-j = 0
-
-def install():
-    for d in missing_folders:
-        os.mkdir(d)
-    for f in missing_files:
-        with open(f, "w") as f:
-            f.write(dico[f])
-
-for file in FILES_TO_CHECK:
-    if not(os.path.exists(file)):
-        if state == "_DEFAULT":
-            state = "_FILE_MISSING" 
-        i += 1
-        missing_files.append(file)
-
-for folder in FOLDERS_TO_CHECK:
-    if not(os.path.exists(folder)):
-        if state == "_FILE_MISSING":
-            state = "_FILE_AND_FOLDER_MISSING"
-        if state == "_DEFAULT":
-            state = "_FOLDER_MISSING"
-        j += 1
-        missing_folders.append(folder)
-
-if state == "_FILE_MISSING":
-    print("---------------------------------")
-    print("WARNING : SOME FILES ARE MISSING !")
-    print("PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases")
-    print("---------------------------------")
-    print(f"Missing files : {i} (list bellow)")
-    print(missing_files)
-    print("---------------------------------")
-elif state == "_FOLDER_MISSING":
-    print("WARNING : SOME FOLDERS ARE MISSING !")
-    print("PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases")
-    print(f"Missing folders : {j} (list bellow)")
-    print(missing_folders)
-elif state == "_FILE_AND_FOLDER_MISSING":
-    print("WARNING : SOME FILES AND FOLDER ARE MISSING !")
-    print("PLEASE REDOWNLOAD THE SERVER via our GitHub page : https://github.com/BeaconMCDev/BeaconMC/releases")
-    print(f"Missing files : {i} (list bellow)")
-    print(missing_files)
-    print(f"Missing folders : {j} (list bellow)")
-    print(missing_folders)
-
-if not(state == "_DEFAULT"):
-    resp = input("Do you want to make this operation automatically ? You will not need to restart this script once it will be done. (y/n)\n\n-> ")
-    if resp.lower() == "y":
-        print("Installing...")
-        install()
-        print("Done.")
-    else:
-        print("Process is terminating.")
-        exit(-1)
-
-# Check requirements
-with open("requirements.txt", "r") as rf:
-    line = None
-    list_rq = []
-    while line != "":
-        line = rf.read()
-        if line != "":
-            list_rq.append(line)
-    ...
-
-# start
-with open ("main.py", "r") as f:
-    code = f.read()
-
-exec(compile(code, 'main.py', 'exec'), {"__name__":"__start__"})"""
-
-with open("start.py", "w") as f:
-    f.write(template)
+(REPO_ROOT / "start.py").write_text(template, encoding="utf-8")
+print(f"start.py generated in {REPO_ROOT}")
