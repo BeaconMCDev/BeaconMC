@@ -5,9 +5,10 @@ IGNORED_FOLDERS = [".github", ".vscode", "LIBS_TO_REUSE_FOR_DEPLOYMENT", "worlds
 IGNORED_FILES = ["start.py", "dev_notes.txt", ".gitignore"]
 
 files = []
+directories = []
 for root, dirs, filenames in os.walk(os.path.dirname(__file__)):
     dirs[:] = [d for d in dirs if d not in IGNORED_FOLDERS]
-            
+    directories = dirs
     for filename in filenames:
         if filename in IGNORED_FILES:
             continue
@@ -37,12 +38,9 @@ VERSION = "Alpha-dev"
 dico = """ + dico + r"""
 
 # Check structure
-FILES_TO_CHECK = ["config.json", "ops.json", "pluginapi.py", "main.py", "eula.txt", "LICENSE.md", "banned-ips.json", 
-                "banned-players.json", "server-icon.png", "whitelist.json", "SECURITY.md", 
-                "README.md", "requirements.txt", "utils/plugins/BeaconMCPlugin.py", "utils/locale/en_us.json", 
-                "utils/locale/fr_fr.json", "utils/locale/es.json", "libs/crash_gen.py", "libs/mojangapi.py", 
-                "libs/cryptography_system/system.py"]
-FOLDERS_TO_CHECK = ["libs", "libs/cryptography_system", "crash_reports", "logs", "plugins", "utils", "worlds"]
+FILES_TO_CHECK = """ + files + """
+
+FOLDERS_TO_CHECK = """ + directories + """
 
 state = "_DEFAULT"
 missing_files = []
