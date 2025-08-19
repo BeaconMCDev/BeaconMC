@@ -1,6 +1,10 @@
 import json
 import pprint
 
+class PoissonDAout(Exception):
+    pass
+
+raise PoissonDAout("Vous pensee vraiment que je vais push 22k+ fichiers ?")
 with open("blocks.json", "r") as f:
     data = json.load(f)
 
