@@ -24,5 +24,4 @@ class {''.join(word.capitalize() for word in n.split('_'))}(Block):
     with open(f"{n}.py", "w") as f:
         f.write(classdata)
 
-    break
 print("Opt effectuée")
