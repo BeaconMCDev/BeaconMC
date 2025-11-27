@@ -7,7 +7,7 @@ class Event:
     def cancelled(self):
         return self._cancelled
         
-    @_cancelled.setter
+    @cancelled.setter
     def cancelled(self, value):
         if not(value):
             raise ValueError("You can't uncancel an event.")
