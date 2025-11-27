@@ -564,6 +564,21 @@ class MCServer(object):
         else:
             raise TwoPlayerWithSameUsernameException(f"2 players with the same username {username} were found.")
 
+class Coordinate(object):
+    def __init__(self, world, x:float, y: float, z: float):
+        self.x, self.y, self.z = x, y, z
+        self.world = world
+
+class BlockPosition(Coordinate):
+    def __init__(self, world, x:int, y:int, z:int):
+        if not(isinstance(x, int) and isinstance(y, int) and isinstance(z, int)):
+            raise ValueError()
+        super().__init__(world, x, y, z)
+
+class EntityPosition(Coordinate):
+    def __init__(self, world, x:float, y:float, z:float, pitch:float, raw:float):
+        super().__init__(world, x, y, z)
+        self.pitch, self.raw = pitch, raw
 
 class PacketException(Exception):
     pass
@@ -1387,7 +1402,7 @@ class Client(object):
 
     def int_to_hex_escape(n):
         if n < 0:
-            raise ValueError("L'entier doit être positif.")
+            raise ValueError("The integer must be positive.")
 
         hex_string = n.to_bytes((n.bit_length() + 7) // 8, 'big').hex()
         escaped_string = ''.join(f'\\x{hex_string[i:i+2]}' for i in range(0, len(hex_string), 2))
