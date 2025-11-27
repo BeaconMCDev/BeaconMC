@@ -876,6 +876,229 @@ class Client(object):
         response.send()
         self.server.list_clients.append(self)
 
+    def _status_loop(self):
+        if self.packet.type == 0:
+            # Status request -> Status response (SLP)
+            self.SLP()
+            return 0
+        elif self.packet.type == 1:
+            pong_packet = self.packet
+            pong_packet.direction = "-OUTGOING"
+            pong_packet.send()
+            # payload = self.packet.args[0]
+            # self.ping_response(payload)
+            self.connected = False
+            return 1
+
+    def _handshake_loop(self):
+        if self.packet.type == 0:
+            if self.packet.args[-1] == 1:
+                # Switch protocol state to status
+                self.protocol_state = "Status"
+                self.server.getConsole().log(f"Switching to Status state for {self.info}", 3)
+                return 0
+
+            elif self.packet.args[-1] == 2:
+                # Switch protocol state to login
+                self.protocol_state = "Login"
+                self.protocol_version = Packet.unpack_varint(None, self.packet.args[0:2])
+                self.server.getConsole().log(f"Switching to login state for {self.info}", 3)
+                return 0
+
+            elif self.packet.args[-1] == 3:
+                # Switch protocol state to transfer
+                if PREVENT_PROXY_CONNEXION:
+                    self.connected = False
+                    self.server.getConsole().log(f"Disconnecting {self.info} : Unauthorised proxy connexion.", 3)
+                    return 1
+                self.protocol_state = "Transfer"
+                self.server.getConsole().log(f"Switching to transfer state for {self.info}", 3)
+                return 0
+            else:
+                self.connected = False
+                self.server.getConsole().log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
+                return 1
+            
+    def _login_loop(self):
+        if self.packet.type == 0:
+            if self.protocol_version != PROTOCOL_VERSION:
+                self.disconnect(f"Please try to connect using Minecraft {CLIENT_VERSION}")
+                return 1
+            unamelenth = self.packet.args[0]
+            i = 1
+            self.username = ""
+            while i <= unamelenth:
+                sb = self.packet.args[i:i+1]
+                self.username += sb.decode("utf-8")
+                i += 1
+
+            #i = 0
+            self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i:])
+
+
+            self.server.getConsole().log(f"UUID of {self.username} is {self.uuid}.", 0)
+            self.server.getConsole().log(f"{self.username} is logging in from {self.info}.", 0)
+            
+            op = self.server.is_op(self.uuid, self.username)
+                        
+            self.is_op = True if op != -1 else False
+            self.op_level = op if self.is_op else None
+
+            for player in self.server.list_clients:
+                if self.username == player.username or self.uuid == player.uuid:
+                    if i == 1:
+                        self.server.getConsole().log(f"{self.username} is already connected !", 1)
+                        if not(ONLINE_MODE) and ENFORCE_OFFLINE_PROFILES:
+                            if self.info == player.info:
+                                self.connected = False
+                                misc_d = False
+                                d_reason = tr.key("disconnect.username.conflict.offline.sameip")
+                            else:
+                                self.server.getConsole().log("Banning the player for security reason: the server is running offline mode.", 1)
+                                self.server.banip(ip=self.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
+                                self.server.banip(ip=player.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
+                                self.server.kick(player, tr.key("disconnect.username.conflict.offline.dif_ip"))
+                        else:
+                            self.connected = False
+                            misc_d = False
+                            d_reason = tr.key("disconnect.username.conflict.online")
+                        break
+                    else:
+                        i += 1
+
+            with open("banned-ips.json", "r") as f:
+                banedips = json.loads(f.read())
+                for bip in banedips:
+                    if bip["ip"] == self.info:
+                        self.connected = False
+                        misc_d = False
+                        reason = {bip['reason']}
+                        d_reason = tr.key("disconnect.ban.ip")
+                        self.server.getConsole().log(f"{self.username}'s IP is banned. Disconnecting...", 0)
+                        break
+            with open("banned-players.json", "r") as f:
+                banedacc = json.loads(f.read())
+                for bacc in banedacc:
+                    if bacc["username"] == self.info:
+                        self.connected = False
+                        misc_d = False
+                        reason = {bacc['reason']}
+                        d_reason = tr.key("disconnect.ban.account")
+                        self.server.getConsole().log(f"{self.username} is banned. Disconnecting...", 0)
+                        break
+                        
+
+            if len(self.server.list_clients) >= MAX_PLAYERS:
+
+                self.connected = False
+                misc_d = False
+                d_reason = tr.key("disconnect.full")
+                return 0
+            if whitelist:
+                with open ("whitelist.json", "r") as wf:
+                    data = json.loads(wf.read())
+                    o = 0
+                    for d in data:
+                        if d["uuid"] == self.uuid:
+                            o += 1
+                    if o != 1:
+                        self.connected = False
+
+                        d_reason = tr.key("disconnect.whitelist")
+                        misc_d = False
+
+                        if o > 1:
+                            self.server.getConsole().log("User is whitelisted more than 1 time !", 1)
+                        return 0
+            if ONLINE_MODE:
+                api_system = m_api.Accounts()
+                check_result = api_system.authenticate(self.username, self.uuid)
+                if check_result[0]:
+                    self.server.getConsole().log(f"successfully authenticated {self.username}.", 3)
+                    self.authenticated = True
+                    pass
+                else:
+                    self.server.getConsole().log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
+                    self.connected = False
+                    d_reason = tr.key("disconnect.login.failed")
+                    misc_d = False
+                    return 3
+                            
+                # temp
+                # self.load_properties()
+                # continue
+
+                # Encryption request
+                verify_token = bytearray()
+                for i in range(4):
+                    verify_token.append(rdm.randint(0, 255))
+                resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=(SERVER_ID, 
+                    bytearray(self.server.crypto_sys.__public_key__.public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)), 
+                    verify_token))
+                resp_pack.send()
+                return 0
+                            
+
+                # TODO Enable compression (would be optional) (in other "if" fork)
+                ...
+            else:
+                self.server.getConsole().log("WARNING! YOUR SERVER IS RUNNING OFFLINE MODE, SO CRACKED AND UNVERIFIED USERS CAN CONNECT. MOREOVER, IDENTITY THEFT IS POSSIBLE AND NOT DETECTABLE.", 1)
+                # load player properties
+                self.load_properties()
+                return 0
+
+        elif self.packet.type == 2:
+            self.shared_secret = b""
+            for i in range(self.packet.args[0] + 1):
+                if i == 0:
+                    continue
+                self.shared_secret += bytes(self.packet.args[i])
+                j = i
+            verify_token2_lenth = self.packet.args[j+1]
+            verify_token2 = b""
+
+            for i in range(verify_token2_lenth):
+                verify_token2 += bytes(self.packet.args[j + i + 1])
+
+            try:
+                self.shared_secret = self.server.crypto_sys.decode(self.shared_secret)
+            except Exception as e:
+                self.server.getConsole().log(f"Exception during encryption for {self.username} ({self.uuid}) !", 2)
+                self.server.getConsole().log(traceback.format_exc(e), 2)
+                self.disconnect("Encryption error. If the error is persistent, please report the bug to BeaconMC issue tracker.")
+
+            # decrypt token
+            if verify_token == self.server.crypto_sys.decode(verify_token2, self.shared_secret):
+                self.server.getConsole().log(f"Encryption check done successfully for {self.info}", 3)
+            else:
+                 self.server.getConsole().log("An exception occured with encryption, disconnecting...", 2)
+                 self.disconnect("Encryption error, try to restart your game !")
+                 return
+            self.encrypted = True
+            self.server.getConsole().log("Connexion encrypted successfully.", 3)
+
+            self.load_properties()
+            return 0
+
+        elif self.packet.type == 3 and (self.authenticated or not(ONLINE_MODE)):
+            self.server.getConsole().log("switching protocol state to Configuration.", 3)
+            self.protocol_state = "Configuration"
+                    
+        elif self.packet.type == 4 and self.encrypted and self.authenticated:
+            ...
+
+    def _configuration_loop(self):
+        if self.packet.type == 3:
+            self.protocol_state = "Play"
+            self.server.getConsole().log("Switching protocol state to play", 3)
+            return 2
+
+        elif self.packet.type == 4:
+            ...
+
+    def _play_loop(self):
+        ...
+
     def client_thread(self, id):
         """Per client thread"""
         self.id = id
@@ -920,224 +1143,36 @@ class Client(object):
                 self.server.getConsole().log(f"Protocol state : {self.protocol_state}", 3)
 
                 if self.protocol_state == "Handshaking":
-
-                    if self.packet.type == 0:
-                        if self.packet.args[-1] == 1:
-                            # Switch protocol state to status
-                            self.protocol_state = "Status"
-                            self.server.getConsole().log(f"Switching to Status state for {self.info}", 3)
-                            continue
-
-                        elif self.packet.args[-1] == 2:
-                            # Switch protocol state to login
-                            self.protocol_state = "Login"
-                            self.protocol_version = Packet.unpack_varint(None, self.packet.args[0:2])
-                            self.server.getConsole().log(f"Switching to login state for {self.info}", 3)
-                            continue
-
-                        elif self.packet.args[-1] == 3:
-                            # Switch protocol state to transfer
-                            if PREVENT_PROXY_CONNEXION:
-                                self.connected = False
-                                self.server.getConsole().log(f"Disconnecting {self.info} : Unauthorised proxy connexion.", 3)
-                                break
-                            self.protocol_state = "Transfer"
-                            self.server.getConsole().log(f"Switching to transfer state for {self.info}", 3)
-                            continue
-                        else:
-                            self.connected = False
-                            self.server.getConsole().log(f"Disconnecting {self.info} : protocol error (unknow next state {self.packet.args[-1]} in handshake)", 3)
-                            break
+                    r = self._handshake_loop()
+                    if r == 1:
+                        break
+                    elif r == 0:
+                        continue
 
                 elif self.protocol_state == "Status":
-                    if self.packet.type == 0:
-                        # Status request -> Status response (SLP)
-                        self.SLP()
-                        continue
-                    elif self.packet.type == 1:
-                        pong_packet = self.packet
-                        pong_packet.direction = "-OUTGOING"
-                        pong_packet.send()
-                        # payload = self.packet.args[0]
-                        # self.ping_response(payload)
-                        self.connected = False
+                    r = self._status_loop()
+                    if r == 1:
                         break
+                    elif r == 0:
+                        continue
 
                 elif self.protocol_state == "Login":
-                    if self.packet.type == 0:
-                        if self.protocol_version != PROTOCOL_VERSION:
-                            self.disconnect(f"Please try to connect using Minecraft {CLIENT_VERSION}")
-                            return
-                        unamelenth = self.packet.args[0]
-                        i = 1
-                        self.username = ""
-                        while i <= unamelenth:
-                            sb = self.packet.args[i:i+1]
-                            self.username += sb.decode("utf-8")
-                            i += 1
-
-                        #i = 0
-                        self.uuid = self.packet.unpack_uuid(uuid=self.packet.args[i:])
-
-
-                        self.server.getConsole().log(f"UUID of {self.username} is {self.uuid}.", 0)
-                        self.server.getConsole().log(f"{self.username} is logging in from {self.info}.", 0)
-                        
-                        op = self.server.is_op(self.uuid, self.username)
-                        
-                        self.is_op = True if op != -1 else False
-                        self.op_level = op if self.is_op else None
-
-                        for player in self.server.list_clients:
-                            if self.username == player.username or self.uuid == player.uuid:
-                                if i == 1:
-                                    self.server.getConsole().log(f"{self.username} is already connected !", 1)
-                                    if not(ONLINE_MODE) and ENFORCE_OFFLINE_PROFILES:
-                                        if self.info == player.info:
-                                            self.connected = False
-                                            misc_d = False
-                                            d_reason = tr.key("disconnect.username.conflict.offline.sameip")
-                                        else:
-                                            self.server.getConsole().log("Banning the player for security reason: the server is running offline mode.", 1)
-                                            self.server.banip(ip=self.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
-                                            self.server.banip(ip=player.info, reason=tr.key("disconnect.username.conflict.offline.dif_ip"))
-                                            self.server.kick(player, tr.key("disconnect.username.conflict.offline.dif_ip"))
-                                    else:
-                                        self.connected = False
-                                        misc_d = False
-                                        d_reason = tr.key("disconnect.username.conflict.online")
-                                    break
-                                else:
-                                    i += 1
-
-                        with open("banned-ips.json", "r") as f:
-                            banedips = json.loads(f.read())
-                            for bip in banedips:
-                                if bip["ip"] == self.info:
-                                    self.connected = False
-                                    misc_d = False
-                                    reason = {bip['reason']}
-                                    d_reason = tr.key("disconnect.ban.ip")
-                                    self.server.getConsole().log(f"{self.username}'s IP is banned. Disconnecting...", 0)
-                                    break
-                        with open("banned-players.json", "r") as f:
-                            banedacc = json.loads(f.read())
-                            for bacc in banedacc:
-                                if bacc["username"] == self.info:
-                                    self.connected = False
-                                    misc_d = False
-                                    reason = {bacc['reason']}
-                                    d_reason = tr.key("disconnect.ban.account")
-                                    self.server.getConsole().log(f"{self.username} is banned. Disconnecting...", 0)
-                                    break
-                        
-
-                        if len(self.server.list_clients) >= MAX_PLAYERS:
-
-                            self.connected = False
-                            misc_d = False
-                            d_reason = tr.key("disconnect.full")
-                            continue
-                        if whitelist:
-                            with open ("whitelist.json", "r") as wf:
-                                data = json.loads(wf.read())
-                                o = 0
-                                for d in data:
-                                    if d["uuid"] == self.uuid:
-                                        o += 1
-                                if o != 1:
-                                    self.connected = False
-
-                                    d_reason = tr.key("disconnect.whitelist")
-                                    misc_d = False
-
-                                    if o > 1:
-                                        self.server.getConsole().log("User is whitelisted more than 1 time !", 1)
-                                    continue
-                        if ONLINE_MODE:
-                            api_system = m_api.Accounts()
-                            check_result = api_system.authenticate(self.username, self.uuid)
-                            if check_result[0]:
-                                self.server.getConsole().log(f"successfully authenticated {self.username}.", 3)
-                                self.authenticated = True
-                                pass
-                            else:
-                                self.server.getConsole().log(f"Failed to authenticate {self.info} using uuid {self.uuid} and username {self.username}.", 1)
-                                self.connected = False
-                                d_reason = tr.key("disconnect.login.failed")
-                                misc_d = False
-                                break
-                            
-                            # temp
-                            # self.load_properties()
-                            # continue
-
-                            # Encryption request
-                            verify_token = bytearray()
-                            for i in range(4):
-                                verify_token.append(rdm.randint(0, 255))
-                            resp_pack = Packet(self.connexion, "-OUTGOING", typep=1, args=(SERVER_ID, 
-                                bytearray(self.server.crypto_sys.__public_key__.public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)), 
-                                verify_token))
-                            resp_pack.send()
-                            continue
-                            
-
-                            # TODO Enable compression (would be optional) (in other "if" fork)
-                            ...
-                        else:
-                            self.server.getConsole().log("WARNING! YOUR SERVER IS RUNNING OFFLINE MODE, SO CRACKED AND UNVERIFIED USERS CAN CONNECT. MOREOVER, IDENTITY THEFT IS POSSIBLE AND NOT DETECTABLE.", 1)
-                            # load player properties
-                            self.load_properties()
-                            continue
-
-                    elif self.packet.type == 2:
-                        self.shared_secret = b""
-                        for i in range(self.packet.args[0] + 1):
-                            if i == 0:
-                                continue
-                            self.shared_secret += bytes(self.packet.args[i])
-                            j = i
-                        verify_token2_lenth = self.packet.args[j+1]
-                        verify_token2 = b""
-
-                        for i in range(verify_token2_lenth):
-                            verify_token2 += bytes(self.packet.args[j + i + 1])
-
-                        try:
-                            self.shared_secret = self.server.crypto_sys.decode(self.shared_secret)
-                        except Exception as e:
-                            self.server.getConsole().log(f"Exception during encryption for {self.username} ({self.uuid}) !", 2)
-                            self.server.getConsole().log(traceback.format_exc(e), 2)
-                            self.disconnect("Encryption error. If the error is persistent, please report the bug to BeaconMC issue tracker.")
-
-                        # decrypt token
-                        if verify_token == self.server.crypto_sys.decode(verify_token2, self.shared_secret):
-                            self.server.getConsole().log(f"Encryption check done successfully for {self.info}", 3)
-                        else:
-                             self.server.getConsole().log("An exception occured with encryption, disconnecting...", 2)
-                             self.disconnect("Encryption error, try to restart your game !")
-                             return
-                        self.encrypted = True
-                        self.server.getConsole().log("Connexion encrypted successfully.", 3)
-
-                        self.load_properties()
+                    r = self._login_loop()
+                    if r == 0:
                         continue
-
-                    elif self.packet.type == 3 and (self.authenticated or not(ONLINE_MODE)):
-                        self.server.getConsole().log("switching protocol state to Configuration.", 3)
-                        self.protocol_state = "Configuration"
-                    
-                    elif self.packet.type == 4 and self.encrypted and self.authenticated:
-                        ...
+                    elif r == 2:
+                        break
+                    else:
+                        return
                 
                 elif self.protocol_state == "Configuration" and self.configured:
-                    if self.packet.type == 3:
-                        self.protocol_state = "Play"
-                        self.server.getConsole().log("Switching protocol state to play", 3)
+                    r = self._configuration_loop()
+                    if r == 0:
+                        continue
+                    elif r == 2:
                         break
-                    elif self.packet.type == 4:
-                        ...
+                    else:
+                        return
 
             ###############################################################################
 
